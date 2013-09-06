@@ -1,2 +1,4 @@
-dev
-===
+BEAN (Behavioral Animation Engine)
+==================================
+ 
+ 
