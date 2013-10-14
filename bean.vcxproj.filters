@@ -226,11 +226,11 @@
     <ClCompile Include="Release\moc_mainwindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Particles.cpp">
-      <Filter>Bean</Filter>
-    </ClCompile>
     <ClCompile Include="BeanViewer.cpp">
       <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="Particles.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -384,7 +384,7 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Particles.h">
-      <Filter>Bean</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

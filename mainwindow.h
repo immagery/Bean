@@ -18,7 +18,9 @@ public:
 	void setViewer();
 
 public slots:
-
+	void loadSolvers();
+	void toggleVerlet(bool);
+	void toggleSolvers(bool);
 
 
 protected:

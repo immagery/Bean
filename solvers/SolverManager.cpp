@@ -4,6 +4,7 @@
 SolverManager::SolverManager(void)
 {
 	hasVerlet = false;
+	oscillation = false;
 }
 
 
@@ -15,6 +16,8 @@ vector<Point3d> SolverManager::computeSolvers(int frame, int animationPeriod, co
 
 	vector<Point3d> finalPositions(skeletons[0]->joints.size());
 	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = Point3d(0,0,0);
+
+	if (!oscillation) return finalPositions;
 
 	for (int i = 0; i < solvers.size(); ++i) {
 		Solver* s = solvers[i];
@@ -41,7 +44,7 @@ vector<Point3d> SolverManager::computeVerlet(int frame, int animationPeriod, con
 
 	double fps = 1.0/animationPeriod*1000;
 	double currentTime = (double)frame/fps;
-	int numReps = 10;
+	int numReps = 20;
 	for (int k = 0; k < numReps-1; ++k) {
 		verlet->solve(currentTime + ((double)k / numReps)*animationPeriod/1000.0);
 	}

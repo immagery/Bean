@@ -13,6 +13,7 @@ public:
 	vector<Solver*> solvers;
 	SolverVerlet* verlet;
 	bool hasVerlet;
+	bool oscillation;
 
 	vector<Point3d> computeSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons);
 	vector<Point3d> computeVerlet(int frame, int animationPeriod, const vector<skeleton*>& skeletons);
