@@ -37,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->glCustomWidget->parent = this;
 	setViewer();
 	connectSignals();
+
+	connect(ui->setupSolvers, SIGNAL(clicked()), this, SLOT(loadSolvers()));
+	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
+	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool))); 
     
 }
 
@@ -48,6 +52,23 @@ void MainWindow::setViewer() {
     sizePolicy.setHeightForWidth(ui->glCustomWidget->sizePolicy().hasHeightForWidth());
     ui->glCustomWidget->setSizePolicy(sizePolicy);
 	ui->verticalLayout_4->addWidget(ui->glCustomWidget);
+}
+
+void MainWindow::loadSolvers() {
+    ((BeanViewer*)(ui->glCustomWidget))->loadSolvers();
+	ui->useVerlet->setCheckable(true);
+	ui->useVerlet->toggle();
+	ui->useSolvers->setCheckable(true);
+}
+
+void MainWindow::toggleVerlet(bool) {
+	bool b = ui->useVerlet->isChecked();
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->hasVerlet = b;
+}
+
+void MainWindow::toggleSolvers(bool) {
+	bool b = ui->useVerlet->isChecked();
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->oscillation = b;
 }
 
 
