@@ -598,26 +598,78 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Image>
     <Image Include="..\..\beanProject\adri\gui\icons\select_icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\beanProject\adri\gui\modelViewerResources.qrc">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);..\..\beanProject\adri\gui\icons\moveIcon.png;..\..\beanProject\adri\gui\icons\moveIcon_on.png;..\..\beanProject\adri\gui\icons\rotateIcon.png;..\..\beanProject\adri\gui\icons\rotateIcon_on.png;..\..\beanProject\adri\gui\icons\selectionIcon.png;..\..\beanProject\adri\gui\icons\selectionIcon_on.png;..\..\beanProject\adri\gui\icons\seleccion_obj_off.png;..\..\beanProject\adri\gui\icons\seleccion_obj_on.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_off.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_on.png;..\..\beanProject\adri\gui\icons\barra_color.jpg;..\..\beanProject\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Rcc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FullPath);..\..\beanProject\adri\gui\icons\moveIcon.png;..\..\beanProject\adri\gui\icons\moveIcon_on.png;..\..\beanProject\adri\gui\icons\rotateIcon.png;..\..\beanProject\adri\gui\icons\rotateIcon_on.png;..\..\beanProject\adri\gui\icons\selectionIcon.png;..\..\beanProject\adri\gui\icons\selectionIcon_on.png;..\..\beanProject\adri\gui\icons\seleccion_obj_off.png;..\..\beanProject\adri\gui\icons\seleccion_obj_on.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_off.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_on.png;..\..\beanProject\adri\gui\icons\barra_color.jpg;..\..\beanProject\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Rcc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);..\..\beanProject\adri\gui\icons\moveIcon.png;..\..\beanProject\adri\gui\icons\moveIcon_on.png;..\..\beanProject\adri\gui\icons\rotateIcon.png;..\..\beanProject\adri\gui\icons\rotateIcon_on.png;..\..\beanProject\adri\gui\icons\selectionIcon.png;..\..\beanProject\adri\gui\icons\selectionIcon_on.png;..\..\beanProject\adri\gui\icons\seleccion_obj_off.png;..\..\beanProject\adri\gui\icons\seleccion_obj_on.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_off.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_on.png;..\..\beanProject\adri\gui\icons\barra_color.jpg;..\..\beanProject\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Rcc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath);..\..\beanProject\adri\gui\icons\moveIcon.png;..\..\beanProject\adri\gui\icons\moveIcon_on.png;..\..\beanProject\adri\gui\icons\rotateIcon.png;..\..\beanProject\adri\gui\icons\rotateIcon_on.png;..\..\beanProject\adri\gui\icons\selectionIcon.png;..\..\beanProject\adri\gui\icons\selectionIcon_on.png;..\..\beanProject\adri\gui\icons\seleccion_obj_off.png;..\..\beanProject\adri\gui\icons\seleccion_obj_on.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_off.png;..\..\beanProject\adri\gui\icons\seleccion_subobj_on.png;..\..\beanProject\adri\gui\icons\barra_color.jpg;..\..\beanProject\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Rcc%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
-    </CustomBuild>
+    <Image Include="..\adri\gui\icons\barra_color.jpg">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\folder-icon.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\moveIcon.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\moveIcon_on.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\rotateIcon.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\rotateIcon_on.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_obj_off.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_obj_on.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_subobj_off.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_subobj_on.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\selectionIcon.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\adri\gui\icons\selectionIcon_on.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\adri\gui\mainwindow.ui">
@@ -638,6 +690,26 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
       <SubType>Designer</SubType>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\adri\gui\modelViewerResources.qrc">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);..\adri\gui\icons\moveIcon.png;..\adri\gui\icons\moveIcon_on.png;..\adri\gui\icons\rotateIcon.png;..\adri\gui\icons\rotateIcon_on.png;..\adri\gui\icons\selectionIcon.png;..\adri\gui\icons\selectionIcon_on.png;..\adri\gui\icons\seleccion_obj_off.png;..\adri\gui\icons\seleccion_obj_on.png;..\adri\gui\icons\seleccion_subobj_off.png;..\adri\gui\icons\seleccion_subobj_on.png;..\adri\gui\icons\barra_color.jpg;..\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Rcc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FullPath);..\adri\gui\icons\moveIcon.png;..\adri\gui\icons\moveIcon_on.png;..\adri\gui\icons\rotateIcon.png;..\adri\gui\icons\rotateIcon_on.png;..\adri\gui\icons\selectionIcon.png;..\adri\gui\icons\selectionIcon_on.png;..\adri\gui\icons\seleccion_obj_off.png;..\adri\gui\icons\seleccion_obj_on.png;..\adri\gui\icons\seleccion_subobj_off.png;..\adri\gui\icons\seleccion_subobj_on.png;..\adri\gui\icons\barra_color.jpg;..\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Rcc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);..\adri\gui\icons\moveIcon.png;..\adri\gui\icons\moveIcon_on.png;..\adri\gui\icons\rotateIcon.png;..\adri\gui\icons\rotateIcon_on.png;..\adri\gui\icons\selectionIcon.png;..\adri\gui\icons\selectionIcon_on.png;..\adri\gui\icons\seleccion_obj_off.png;..\adri\gui\icons\seleccion_obj_on.png;..\adri\gui\icons\seleccion_subobj_off.png;..\adri\gui\icons\seleccion_subobj_on.png;..\adri\gui\icons\barra_color.jpg;..\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Rcc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath);..\adri\gui\icons\moveIcon.png;..\adri\gui\icons\moveIcon_on.png;..\adri\gui\icons\rotateIcon.png;..\adri\gui\icons\rotateIcon_on.png;..\adri\gui\icons\selectionIcon.png;..\adri\gui\icons\selectionIcon_on.png;..\adri\gui\icons\seleccion_obj_off.png;..\adri\gui\icons\seleccion_obj_on.png;..\adri\gui\icons\seleccion_subobj_off.png;..\adri\gui\icons\seleccion_subobj_on.png;..\adri\gui\icons\barra_color.jpg;..\adri\gui\icons\folder-icon.png;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Rcc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

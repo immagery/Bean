@@ -187,9 +187,6 @@
     <ClCompile Include="..\adri\DataStructures\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_modelViewerResources.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="solvers\Solver.cpp">
       <Filter>Bean</Filter>
     </ClCompile>
@@ -231,6 +228,9 @@
     </ClCompile>
     <ClCompile Include="BeanViewer.cpp">
       <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_modelViewerResources.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -339,9 +339,6 @@
     <ClInclude Include="..\adri\utils\utilGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <CustomBuild Include="..\..\beanProject\adri\gui\modelViewerResources.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\adri\gui\adrimainwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -353,6 +350,9 @@
     </CustomBuild>
     <CustomBuild Include="BeanViewer.h">
       <Filter>Bean</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\adri\gui\modelViewerResources.qrc">
+      <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -434,6 +434,42 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\beanProject\adri\gui\icons\selectionIcon_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\moveIcon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\moveIcon_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\rotateIcon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\rotateIcon_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\selectionIcon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\selectionIcon_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_obj_off.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_obj_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_subobj_off.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\seleccion_subobj_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\barra_color.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\adri\gui\icons\folder-icon.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
