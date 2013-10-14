@@ -1,6 +1,7 @@
 #pragma once
 #include "Solver.h"
 #include "SolverChain.h"
+#include "SolverVerlet.h"
 #include "skeleton.h"
 #include <vector>
 
@@ -10,8 +11,11 @@ class SolverManager
 {
 public:
 	vector<Solver*> solvers;
+	SolverVerlet* verlet;
+	bool hasVerlet;
 
-	vector<Point3d> computeSolvers(int frame, const vector<skeleton*>& skeletons);
+	vector<Point3d> computeSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons);
+	vector<Point3d> computeVerlet(int frame, int animationPeriod, const vector<skeleton*>& skeletons);
 	void addSolver(Solver *s) { 
 		solvers.push_back(s);
 	}

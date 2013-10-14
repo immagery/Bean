@@ -24,16 +24,23 @@ vector<pair<int,Point3d> > SolverSinusoidal::solve(double time) {
 		double rot = atan(tanAngle);
 		rot = rot * 180 / 3.141592;
 
+		double rx, ry, rz;
+		chain[i].first->qrot.ToEulerAngles(rx,ry,rz);
+		rx = (rx*360)/(M_PI*2);
+		ry = (ry*360)/(M_PI*2);
+		rz = (rz*360)/(M_PI*2);
+
+
 		if (dimension == 0) {
-			//rot = rot - chain[i].first->rot.X();
+			rot = rot - rx;
 			result[i].second = Point3d(rot, 0, 0);
 		}
 		if (dimension == 1) {
-			//rot = rot - chain[i].first->rot.Y();
+			rot = rot - ry;
 			result[i].second = Point3d(0, rot, 0);
 		}
 		if (dimension == 2) {
-			//rot = rot - chain[i].first->rot.Z();
+			rot = rot - rz;
 			result[i].second = Point3d(0, 0, rot);
 		}
 	}

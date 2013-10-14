@@ -15,8 +15,8 @@ public:
 
 	double stiffness;
 	double g;
-
-	double xvalue;
+	double xvalue, yvalue, zvalue;
+	double velocityDamping;
 
 	Particles(void);
 	~Particles(void);
@@ -24,5 +24,7 @@ public:
 	void drawFunc();
 	void bake(int maxFrames, double deltaTimePerFrame);
 	void solve(double time);
+	void applyChange(Point3d deltaPos, double deltaTime, int i);
+	Point3d idealRestPosition(int i);
 };
 

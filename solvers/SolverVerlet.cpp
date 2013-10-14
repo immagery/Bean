@@ -5,7 +5,9 @@ SolverVerlet::SolverVerlet(void)
 {
 
 	stiffness = 1;
-	g = 9.8;
+	g = -9.8;
+	velocityDamping = 0.5;
+	lastTime = 0;
 }
 
 
@@ -26,6 +28,7 @@ void SolverVerlet::bake(int maxFrames, double deltaTimePerFrame) {
 	}
 }
 
+/*
 vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 	vector<pair<int,Point3d> > result(chain.size());
 	double deltaTime = (time - lastTime);
@@ -77,11 +80,87 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 	result[result.size()-1] = pair<int, Point3d> (chain[result.size()-1].second, Point3d(0,0,0));
 	return result;
 }
+*/
+
+vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
+
+	double deltaTime = time - lastTime;
+	double tsq = deltaTime * deltaTime;
+	lastTime = time;
+
+	// Get the new current positions
+
+	// Update points
+	for (int i = 1; i < currentPositions.size(); ++i) {
+		Point3d velocity = (currentPositions[i] - lastPositions[i]);
+		if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005) velocity = Point3d(0,0,0);
+		velocity *= velocityDamping;
+		Point3d acceleration = Point3d(0,g,0);	
+		Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
+		lastPositions[i] = currentPositions[i];
+		currentPositions[i] = nextPos;
+	}
+
+	// We love parameters
+	double ks, kd, stiff, ks2, kd2, stiff2;
+	ks = 5;		kd = 5;		stiff = 0.1;	// max: 0.5
+	ks2 = 0.5;	kd2 = 2;	stiff2 = 10;
+	int neighbourDistance = 10;
+
+	for (int k = 0; k < 100; ++k) {
+		for (int i = 0; i < currentPositions.size(); ++i) {
+			// Distance constraints
+			for (int j = i-neighbourDistance; j < i; ++j) {
+				if (j < 0) continue;
+				Point3d restDistance = (restPositions[i] - restPositions[j]);
+				Point3d currentDist = currentPositions[i] - currentPositions[j];
+				double diff = currentDist.Norm() - restDistance.Norm();
+
+				Point3d delta1 = currentDist / currentDist.Norm() * ks * diff;
+				Point3d delta2 = - delta1;
+				Point3d vel1 = (currentPositions[i] - lastPositions[i]);
+				Point3d vel2 = (currentPositions[j] - lastPositions[j]);
+				if (j == 0) vel2 = Point3d(0,0,0);
+				double v = (vel1 - vel2).dot(currentDist.normalized());
+				Point3d damp1 = currentDist / currentDist.Norm() * kd * v;
+				Point3d damp2 = - damp1;
+				currentPositions[i] -= (delta1+damp1)*stiff*deltaTime;
+				if (j > 0) currentPositions[j] -= (delta2+damp2)*stiff*deltaTime;
+			} 
+			// End of distance constraints
+
+			// "Ideal point" constraints, they try to maintain the angle
+			if (i > 0) {
+				Point3d idealPoint = idealRestPosition(i);
+				Point3d restDistance (0,0,0);
+				Point3d currentDist = currentPositions[i] - idealPoint;
+
+				if (currentDist.Norm() > 1) {
+					double diff = currentDist.Norm() - restDistance.Norm();
+					Point3d delta1 = currentDist / currentDist.Norm() * ks2 * diff;
+					Point3d vel1 = (currentPositions[i] - lastPositions[i]);
+					double v = (vel1).dot(currentDist.normalized());
+					Point3d damp1 = currentDist / currentDist.Norm() * kd2 * v;
+					currentPositions[i] -= (delta1+damp1)*stiff2*deltaTime;
+				}	
+			}
+		}
+	}
+
+	vector<pair<int,Point3d> > result(currentPositions.size());
+	for (int i = 0; i < currentPositions.size(); ++i) {
+		result[i] = pair<int, Point3d> (chain[i].second, currentPositions[i]);
+	}
+	return result;
+	//currentPositions[0] = Point3d(xvalue,0,0);
+}
+
 
 void SolverVerlet::setPositions() {
 	restPositions.resize(chain.size());
 	lastPositions.resize(chain.size());
 	currentPositions.resize(chain.size());
+	lastFramePositions.resize(chain.size());
 
 	lastTime = 0;
 	for (int i = 0; i < lastPositions.size(); ++i) {
@@ -89,4 +168,16 @@ void SolverVerlet::setPositions() {
 		printf("Initial pos of %dth joint: %f %f %f\n", i, pos.X(), pos.Y(), pos.Z());
 		lastPositions[i] = restPositions[i] = currentPositions[i] = pos;
 	}
+}
+
+Point3d SolverVerlet::idealRestPosition(int i) {
+	if (i == 0) assert(false);
+	return restPositions[i] - restPositions[i-1] + currentPositions[i-1];
+	
+	/*Point3d position = currentPositions[0];
+	for (int j = 0; j < i; ++j) {
+		Point3d deltaPos = restPositions[j+1] - restPositions[j];
+		position = position + deltaPos;
+	}
+	return position;*/
 }

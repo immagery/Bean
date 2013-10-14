@@ -9,6 +9,8 @@ class BeanViewer : public AdriViewer
 public:
     BeanViewer(QWidget * parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags flags = 0);
 
+protected:
+	virtual void draw();
 };
 
 #endif // BEANVIEWER_H

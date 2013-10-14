@@ -15,25 +15,11 @@ class MainWindow : public AdriMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+	void setViewer();
 
 public slots:
 
-    // Transform
-    void changeTransformRotateAmountX(int);
-    void changeTransformRotateAmountY(int);
-    void changeTransformRotateAmountZ(int);
-    void resetRotationValues();
 
-    // Animation
-    void addAnimationKeyframe();
-    void toggleAnimation();
-    void changeFrame(int);
-    void changeAnimSlider(int);
-	void saveAnimation();
-	void loadAnimation();
-
-	// Simulation
-	void toggleSimulation();
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
