@@ -21,6 +21,7 @@ public slots:
 	void loadSolvers();
 	void toggleVerlet(bool);
 	void toggleSolvers(bool);
+	void changeSpeedDampingSlider(int);
 
 
 protected:

@@ -94,14 +94,15 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 	for (int i = 1; i < currentPositions.size(); ++i) {
 		Point3d velocity = (currentPositions[i] - lastPositions[i]);
 
+		if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005) {
+			velocity = Point3d(0,0,0);
+		}
+
 		velocity *= velocityDamping;
 		Point3d acceleration = Point3d(0,g,0);	
 		Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
 
-		if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005) {
-			velocity = Point3d(0,0,0);
-			nextPos = restPositions[i];
-		}
+
 
 		lastPositions[i] = currentPositions[i];
 		currentPositions[i] = nextPos;

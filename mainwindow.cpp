@@ -41,7 +41,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->setupSolvers, SIGNAL(clicked()), this, SLOT(loadSolvers()));
 	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
 	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool))); 
+	connect(ui->velDamp, SIGNAL(valueChanged(int)), this, SLOT(changeSpeedDampingSlider(int)));
     
+}
+
+
+void MainWindow::changeSpeedDampingSlider(int) {
+	((BeanViewer*)ui->glCustomWidget)->solverManager->verlet->velocityDamping = ui->velDamp->value() / 100.0;
 }
 
 void MainWindow::setViewer() {
