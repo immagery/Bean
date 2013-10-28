@@ -22,6 +22,7 @@ public slots:
 	void toggleVerlet(bool);
 	void toggleSolvers(bool);
 	void changeSpeedDampingSlider(int);
+	void changeDividingFactorSlider(int);
 
 
 protected:

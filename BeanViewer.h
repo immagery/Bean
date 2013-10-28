@@ -6,6 +6,8 @@
 #include "solvers/SolverManager.h"
 #include "solvers/SolverSinusoidal.h"
 #include "solvers/SolverVerlet.h"
+#include "solvers/SolverStatic.h"
+#include "solvers/SolverLook.h"
 
 
 
@@ -17,6 +19,7 @@ public:
 	void loadSolvers();
 
 	SolverManager* solverManager;
+	Point3d pos;
 
 protected:
 	virtual void draw();

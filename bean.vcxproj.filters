@@ -232,6 +232,9 @@
     <ClCompile Include="Particles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="solvers\SolverLook.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\adri\gui\AdriViewer.h">
@@ -385,6 +388,9 @@
     </ClInclude>
     <ClInclude Include="Particles.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="solvers\SolverLook.h">
+      <Filter>Bean</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
