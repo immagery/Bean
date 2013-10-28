@@ -6,6 +6,7 @@ SolverVerlet::SolverVerlet(void)
 
 	stiffness = 1;
 	g = -9.8;
+	g = 0;
 	velocityDamping = 0.5;
 	lastTime = 0;
 }
@@ -82,7 +83,7 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 }
 */
 
-vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
+vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverVerlet*>& verlets, int skID) {
 
 	double deltaTime = time - lastTime;
 	double tsq = deltaTime * deltaTime;
@@ -112,10 +113,15 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 	double ks, kd, stiff, ks2, kd2, stiff2;
 	ks = 5;		kd = 5;		stiff = 0.1;	// max: 0.5
 	ks2 = 0.5;	kd2 = 2;	stiff2 = 10;
-	int neighbourDistance = 10;
+	int neighbourDistance = 3;
+	double colKS, colKD, colStiff;
+	colKS = 5;	colKD = 5;	colStiff = 1;
 
-	for (int k = 0; k < 100; ++k) {
+	for (int k = 0; k < 300; ++k) {
 		for (int i = 0; i < currentPositions.size(); ++i) {
+
+			if (i < 10) neighbourDistance = 10;
+			else neighbourDistance = 3;
 			// Distance constraints
 			for (int j = i-neighbourDistance; j < i; ++j) {
 				if (j < 0) continue;
@@ -137,7 +143,7 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 			// End of distance constraints
 
 			// "Ideal point" constraints, they try to maintain the angle
-			if (i > 0) {
+			/*if (i > 0) {
 				Point3d idealPoint = idealRestPosition(i);
 				Point3d restDistance (0,0,0);
 				Point3d currentDist = currentPositions[i] - idealPoint;
@@ -150,7 +156,39 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 					Point3d damp1 = currentDist / currentDist.Norm() * kd2 * v;
 					currentPositions[i] -= (delta1+damp1)*stiff2*deltaTime;
 				}	
+			}*/
+			// End of "ideal point" constraints
+
+			// Collision constraints
+			if (i == 0) continue;
+			for (int sk = 0; sk < verlets.size(); ++sk) {
+				if (sk == skID) continue;
+				SolverVerlet* v = verlets[sk];
+
+				Point3d velocity = (currentPositions[i] - lastPositions[i]);
+				if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005)
+					velocity = Point3d(0,0,0);
+					velocity *= velocityDamping;
+					Point3d acceleration = Point3d(0,g,0);	
+					Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
+					nextPos = currentPositions[i];
+
+				for (int j = 0; j < v->chain.size(); ++j) {
+					double distance = (nextPos - v->currentPositions[j]).Norm();
+					Point3d currentDist = (nextPos - v->currentPositions[j]);
+					if (distance < 30) {
+						double restDistance = 30;
+						double diff = distance - restDistance;
+						Point3d delta1 = currentDist / currentDist.Norm() * colKS * diff;
+						Point3d vel1 = (currentPositions[i] - lastPositions[i]);
+						double v = (vel1).dot(currentDist.normalized());
+						Point3d damp1 = currentDist / currentDist.Norm() * colKD * v;
+						Point3d damp2 = - damp1;
+						currentPositions[i] -= (delta1+damp1)*colStiff*deltaTime;
+					}
+				}
 			}
+			// End of collision constraints
 		}
 	}
 
@@ -162,12 +200,10 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 	//currentPositions[0] = Point3d(xvalue,0,0);
 }
 
-
 void SolverVerlet::setPositions() {
 	restPositions.resize(chain.size());
 	lastPositions.resize(chain.size());
 	currentPositions.resize(chain.size());
-	lastFramePositions.resize(chain.size());
 
 	lastTime = 0;
 	for (int i = 0; i < lastPositions.size(); ++i) {
@@ -179,12 +215,13 @@ void SolverVerlet::setPositions() {
 
 Point3d SolverVerlet::idealRestPosition(int i) {
 	if (i == 0) assert(false);
-	return restPositions[i] - restPositions[i-1] + currentPositions[i-1];
+	//return restPositions[i] - restPositions[i-1] + currentPositions[i-1];
 	
-	/*Point3d position = currentPositions[0];
-	for (int j = 0; j < i; ++j) {
+	int depth = 1;
+	Point3d position = currentPositions[i-depth];
+	for (int j = i-depth; j < i; ++j) {
 		Point3d deltaPos = restPositions[j+1] - restPositions[j];
 		position = position + deltaPos;
 	}
-	return position;*/
+	return position;
 }

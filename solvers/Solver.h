@@ -10,7 +10,7 @@ public:
 	Solver(void);
 	~Solver(void);
 
-	virtual vector<pair<int,Point3d> > solve(double time) = 0;
+	virtual vector<pair<int,Quaternion<double> > > solve(double time) = 0;
 
 };
 

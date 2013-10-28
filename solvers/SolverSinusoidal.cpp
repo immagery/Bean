@@ -1,4 +1,5 @@
 #include "SolverSinusoidal.h"
+#include "AdriViewer.h"
 
 
 SolverSinusoidal::SolverSinusoidal(void)
@@ -11,40 +12,72 @@ SolverSinusoidal::SolverSinusoidal(double a, double f, double ph) {
 	phase = ph;
 }
 
-vector<pair<int,Point3d> > SolverSinusoidal::solve(double time) {
-	vector<pair<int,Point3d> > result(chain.size());
-	for (int i = 0; i < chain.size()-1; ++i) {
-		result[i].first = chain[i].second;
-		//Point3d pos = chain[i].first->rot;
-		double newPos = amplitude * sin(freq*time - i + phase);
-		Point3d dist = distances[i];
-		double d = dist.Norm();
-		d = 1;
-		double tanAngle = newPos / d;	// cateto contiguo = 1
-		double rot = atan(tanAngle);
-		rot = rot * 180 / 3.141592;
+vector<pair<int,Quaternion<double> > > SolverSinusoidal::solve(double time) {
+	vector<pair<int,Quaternion<double> > > result;
 
-		double rx, ry, rz;
-		chain[i].first->qrot.ToEulerAngles(rx,ry,rz);
-		rx = (rx*360)/(M_PI*2);
-		ry = (ry*360)/(M_PI*2);
-		rz = (rz*360)/(M_PI*2);
-
-
-		if (dimension == 0) {
-			rot = rot - rx;
-			result[i].second = Point3d(rot, 0, 0);
-		}
-		if (dimension == 1) {
-			rot = rot - ry;
-			result[i].second = Point3d(0, rot, 0);
-		}
-		if (dimension == 2) {
-			rot = rot - rz;
-			result[i].second = Point3d(0, 0, rot);
-		}
+	vector<Point3d> positions(chain.size());
+	/*vector<Point3d> currentPositions(chain.size());
+	for (int i = 0; i < positions.size(); ++i) {
+		positions[i] = currentPositions[i] = restPositions[i];
+		if (i == 0) continue;
+		double inc = amplitude * sin(freq * time - i + phase);
+		if (dimension == 0) positions[i] += Point3d(inc,0,0);
+		else if (dimension == 1) positions[i] += Point3d(0,inc,0);
+		else if (dimension == 2) positions[i] += Point3d(0,0,inc);
 	}
-	result[result.size()-1].second = Point3d(0,0,0);
+
+	glColor3f(1,0,0);
+	glBegin(GL_LINES);
+	for (int i = 0; i < positions.size() - 1; ++i) {
+		glVertex3d(positions[i].X(), positions[i].Y(), positions[i].Z());
+		glVertex3d(positions[i+1].X(), positions[i+1].Y(), positions[i+1].Z());
+	}
+	glEnd();*/
+
+	/*Point3d increment(0,0,0);
+	for (int i = 0; i < chain.size()-1; ++i) {
+		Point3d v1 = chain[i+1].first->getWorldPosition() + increment - positions[i];
+		Point3d v2 = positions[i+1] - positions[i];
+		v1.Normalize();
+		v2.Normalize();
+		if ((v1-v2).Norm() < 0.0001)
+			continue;
+		vcg::Quaternion<double> q;
+		q.FromAxis(acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), v1^v2);
+		q.Normalize();
+		chain[i].first->addRotation(q);
+		chain[i].first->computeWorldPos();
+		//result.push_back(pair<int, Quaternion<double> > (chain[i].second, q));
+		//if (result.size() == 1) return result;
+	}
+	return result;*/
+
+	for (int i = 0; i < chain.size()-1; ++i) {
+		double inc = amplitude * sin(freq*time - (i+1) + phase);
+		Point3d oldPos = chain[i+1].first->getWorldPosition();
+		Point3d nextPos;
+		
+		if (dimension == 0) nextPos = oldPos + Point3d(inc,0,0);
+		else if (dimension == 1) nextPos = oldPos + Point3d(0,inc,0);
+		else if (dimension == 2) nextPos = oldPos + Point3d(0,0,inc);
+
+		Point3d v1 = oldPos - chain[i].first->getWorldPosition();
+		Point3d v2 = nextPos - chain[i].first->getWorldPosition();
+		//Point3d v12 = oldPos - currentPos;
+		//Point3d v22 = nextPos - currentPos;
+		//currentPos = nextPos;
+
+		v1.Normalize();
+		v2.Normalize();
+		if ((v1-v2).Norm() < 0.0001) { 
+			continue;
+		}
+		vcg::Quaternion<double> q;
+		q.FromAxis(acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), v1^v2);
+		q.Normalize();
+		double rx, ry, rz;	q.ToEulerAngles(rx,ry,rz);
+		result.push_back(pair<int, Quaternion<double> > (chain[i].second, q));
+	}
 	return result;
 }
 

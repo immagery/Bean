@@ -15,6 +15,6 @@ public:
 		chain.push_back(pair<joint*, int> (j, index));
 		if (chain.size() > 1) distances.push_back(chain.back().first->worldPosition - chain[chain.size()-2].first->worldPosition);
 	}
-	virtual vector<pair<int,Point3d> > solve(double time) = 0;
+	virtual vector<pair<int,Quaternion<double> > > solve(double time) = 0;
 };
 

@@ -1,14 +1,15 @@
 #pragma once
 #include "solverchain.h"
-class SolverStatic :
+
+class SolverLook :
 	public SolverChain
 {
 public:
-	vector<Quaternion<double> > staticAngles;
+	Point3d lookVector;
+	Point3d lookPoint;
 
-	SolverStatic(void);
-	~SolverStatic(void);
-	void setStatic();
+	SolverLook(void);
+	~SolverLook(void);
 	vector<pair<int,Quaternion<double> > > solve(double time);
 };
 

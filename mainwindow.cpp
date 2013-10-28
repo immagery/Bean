@@ -42,12 +42,17 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
 	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool))); 
 	connect(ui->velDamp, SIGNAL(valueChanged(int)), this, SLOT(changeSpeedDampingSlider(int)));
+	connect(ui->divFactorSlider, SIGNAL(valueChanged(int)), this, SLOT(changeDividingFactorSlider(int)));
     
 }
 
 
 void MainWindow::changeSpeedDampingSlider(int) {
-	((BeanViewer*)ui->glCustomWidget)->solverManager->verlet->velocityDamping = ui->velDamp->value() / 100.0;
+	//((BeanViewer*)ui->glCustomWidget)->solverManager->verlet->velocityDamping = ui->velDamp->value() / 100.0;
+}
+
+void MainWindow::changeDividingFactorSlider(int) {
+	((BeanViewer*)ui->glCustomWidget)->solverManager->dividingBaseFactor = ui->divFactorSlider->value();
 }
 
 void MainWindow::setViewer() {
@@ -62,6 +67,7 @@ void MainWindow::setViewer() {
 
 void MainWindow::loadSolvers() {
     ((BeanViewer*)(ui->glCustomWidget))->loadSolvers();
+	ui->setupSolvers->setEnabled(false);
 	ui->useVerlet->setCheckable(true);
 	ui->useVerlet->toggle();
 	ui->useSolvers->setCheckable(true);
@@ -69,12 +75,12 @@ void MainWindow::loadSolvers() {
 
 void MainWindow::toggleVerlet(bool) {
 	bool b = ui->useVerlet->isChecked();
-	((BeanViewer*)(ui->glCustomWidget))->solverManager->hasVerlet = b;
+	//((BeanViewer*)(ui->glCustomWidget))->solverManager->hasVerlet = b;
 }
 
 void MainWindow::toggleSolvers(bool) {
 	bool b = ui->useVerlet->isChecked();
-	((BeanViewer*)(ui->glCustomWidget))->solverManager->oscillation = b;
+	//((BeanViewer*)(ui->glCustomWidget))->solverManager->oscillation = b;
 }
 
 
