@@ -89,26 +89,6 @@ vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverV
 	double tsq = deltaTime * deltaTime;
 	lastTime = time;
 
-	// Get the new current positions
-
-	// Update points
-	for (int i = 1; i < currentPositions.size(); ++i) {
-		Point3d velocity = (currentPositions[i] - lastPositions[i]);
-
-		if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005) {
-			velocity = Point3d(0,0,0);
-		}
-
-		velocity *= velocityDamping;
-		Point3d acceleration = Point3d(0,g,0);	
-		Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
-
-
-
-		lastPositions[i] = currentPositions[i];
-		currentPositions[i] = nextPos;
-	}
-
 	// We love parameters
 	double ks, kd, stiff, ks2, kd2, stiff2;
 	ks = 5;		kd = 5;		stiff = 0.1;	// max: 0.5
@@ -161,23 +141,23 @@ vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverV
 
 			// Collision constraints
 			if (i == 0) continue;
-			for (int sk = 0; sk < verlets.size(); ++sk) {
-				if (sk == skID) continue;
+			for (int sk = skID+1; sk < verlets.size(); ++sk) {
 				SolverVerlet* v = verlets[sk];
 
 				Point3d velocity = (currentPositions[i] - lastPositions[i]);
 				if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005)
-					velocity = Point3d(0,0,0);
-					velocity *= velocityDamping;
-					Point3d acceleration = Point3d(0,g,0);	
-					Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
-					nextPos = currentPositions[i];
+				velocity = Point3d(0,0,0);
+				velocity *= velocityDamping;
+				Point3d acceleration = Point3d(0,g,0);	
+				Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
+				nextPos = currentPositions[i];
 
 				for (int j = 0; j < v->chain.size(); ++j) {
+					if (sk == skID && i == j) continue;
 					double distance = (nextPos - v->currentPositions[j]).Norm();
 					Point3d currentDist = (nextPos - v->currentPositions[j]);
-					if (distance < 30) {
-						double restDistance = 30;
+					if (distance < 50) {
+						double restDistance = 50;
 						double diff = distance - restDistance;
 						Point3d delta1 = currentDist / currentDist.Norm() * colKS * diff;
 						Point3d vel1 = (currentPositions[i] - lastPositions[i]);
@@ -192,7 +172,26 @@ vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverV
 		}
 	}
 
-	vector<pair<int,Point3d> > result(currentPositions.size());
+	// Update points
+	for (int i = 1; i < currentPositions.size(); ++i) {
+		Point3d velocity = (currentPositions[i] - lastPositions[i]);
+
+		if (velocity.Norm() < 1) { // && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.05) {
+			velocity = Point3d(0,0,0);
+			currentPositions[i] = lastPositions[i];
+			continue;
+		}
+		//else printf("Velocity norm: %f\n", velocity.Norm());
+
+		velocity *= velocityDamping;
+		Point3d acceleration = Point3d(0,g,0);	
+		Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
+
+		lastPositions[i] = currentPositions[i];
+		currentPositions[i] = nextPos;
+	}
+
+	vector<pair<int, Point3d> > result(currentPositions.size());
 	for (int i = 0; i < currentPositions.size(); ++i) {
 		result[i] = pair<int, Point3d> (chain[i].second, currentPositions[i]);
 	}

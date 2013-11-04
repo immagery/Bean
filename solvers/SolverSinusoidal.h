@@ -8,15 +8,18 @@ public:
 	double freq;
 	double phase;
 	int dimension;		// 0=X, 1=Y, 2=Z
-	vector<Point3d> restPositions;
+	vector<Eigen::Vector3d> restPositions;
 
 	SolverSinusoidal(void);
 	SolverSinusoidal(double a, double f, double ph);
 	~SolverSinusoidal(void);
-	vector<pair<int,Quaternion<double> > > solve (double time);
+	vector<pair<int,Eigen::Quaternion<double> > > solve (double time);
 	void setPositions() { 
-		restPositions = vector<Point3d> (chain.size());
-		for (int i = 0; i < chain.size(); ++i) restPositions[i] = chain[i].first->getWorldPosition();
+		restPositions = vector<Eigen::Vector3d> (chain.size());
+		for (int i = 0; i < chain.size(); ++i) {
+			vcg::Point3d p = chain[i].first->getWorldPosition();
+			restPositions[i] = Eigen::Vector3d(p.X(), p.Y(), p.Z());
+		}
 	}
 };
 

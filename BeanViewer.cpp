@@ -156,17 +156,75 @@ void BeanViewer::draw() {
 					s->joints[i]->addRotation(orientInverse * rots[i] * orientInverse.Inverse());
 			}
 
-			Point3d v1 = s->joints[2]->getWorldPosition() - s->joints[1]->getWorldPosition();
+
+
+			/*Eigen::Quaternion<double> qq(45,1,0,0);
+			qq.setFromTwoVectors(Eigen::Vector3d(0,0,1), Eigen::Vector3d(0,1,0));
+			Eigen::Vector3d v(0,0,-1);
+			Eigen::Vector3d rotV = qq._transformVector(v);
+			//Eigen::Vector4d rotV2 = qq*v*qq.inverse();
+			bool b;*/
+
+			/*s->joints[0]->computeWorldPos();
+			int jo = 10;
+			Eigen::Vector4f currentPosE (s->joints[jo]->getWorldPosition().X(), s->joints[jo]->getWorldPosition().Y(),
+										s->joints[jo]->getWorldPosition().Z(), 1);
+			Eigen::Vector4f nextPosE (s->joints[jo+1]->getWorldPosition().X(), s->joints[jo+1]->getWorldPosition().Y(),
+										s->joints[jo+1]->getWorldPosition().Z(), 1);
+			Eigen::Vector4f nextVerletE = currentPosE + Eigen::Vector4f(0,500,0,0);
+			Eigen::Vector4f v1 (1,0,0,1);
+			Eigen::Vector4f v2 (0,1,0,1);
+			//Eigen::Vector4f v1f = s->joints[jo]->W * v1 - s->joints[jo]->W * Eigen::Vector4f(0,0,0,1);
+			//Eigen::Vector4f v2f = s->joints[jo]->W * v2 - s->joints[jo]->W * Eigen::Vector4f(0,0,0,1);
+			Eigen::Vector4f v1f = s->joints[jo]->W * nextPosE - s->joints[jo]->W * currentPosE;
+			Eigen::Vector4f v2f = s->joints[jo]->W * nextVerletE - s->joints[jo]->W * currentPosE;
+			v1f.normalize();	v2f.normalize();
+			printf("Global vectors:\n");
+			printf("v1: %f %f %f \nv2: %f %f %f\n", v1.x(), v1.y(), v1.z(), v2.x(), v2.y(), v2.z());
+			printf("Local vectors:\n");
+			printf("v1: %f %f %f \nv2: %f %f %f\n", v1f.x(), v1f.y(), v1f.z(), v2f.x(), v2f.y(), v2f.z());
+
+			Point3d vv1 (v1f.x(), v1f.y(), v1f.z());
+			Point3d vv2 (v2f.x(), v2f.y(), v2f.z());
+
+			Quaternion<double> q;	q.FromAxis(acos(vv1.dot(vv2) / (vv1.Norm() * vv2.Norm())), vv2^vv1);
+			q.Normalize();
+			double rx, ry, rz;	q.ToEulerAngles(rx,ry,rz);
+			rx *= 180/M_PI;	ry *= 180/M_PI;	rz *= 180/M_PI;
+			printf("Rotation: %f %f %f\n", rx, ry, rz);
+			s->joints[jo]->addRotation(rx,ry,rz);*/
+			
+			
+
+			//printf("Vector (%f, %f, %f, %f) global is equal to (%f, %f, %f, %f) in local space for joint %d\n",
+					//rot.x(), rot.y(), rot.z(), rot.w(), rot2.x(), rot2.y(), rot2.z(), rot2.w(), jo);
+
+			//s->joints[jo]->addRotation(rot2.x(), rot2.y(), rot2.z());
+			//s->joints[0]->dirtyFlag = true;
+
+			/*Matrix33d mat;	s->joints[0]->qOrient.ToMatrix(mat);
+			Point3d rot(1,0,0);	
+			rot = mat * rot;
+			s->joints[1]->addRotation(rot.X(), rot.Y(), rot.Z());
+			s->joints[0]->dirtyFlag = true;*/
+
+
+			/*Point3d v1 = s->joints[2]->getWorldPosition() - s->joints[1]->getWorldPosition();
 			s->joints[1]->pos;
 			Point3d v2 (0,100,0);
 			vcg::Quaternion<double> q;
 			q.FromAxis(acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), v1^v2);
 			q.Normalize();
 			s->joints[1]->addRotation(orientInverse * q * orientInverse.Inverse());
-			s->joints[0]->dirtyFlag = true;
+			s->joints[0]->dirtyFlag = true;*/
+
+			/*Eigen::Vector4f v = s->joints[3]->W.transpose().inverse() * Eigen::Vector4f(0,0,1,1);
+			Eigen::Vector4f v1 = s->joints[3]->W.inverse() * Eigen::Vector4f(0,0,1,1);
+			Eigen::Vector4f v2 = s->joints[3]->world.transpose().inverse() * Eigen::Vector4f(0,0,1,1);
+			Eigen::Vector4f v3 = s->joints[3]->world.inverse() * Eigen::Vector4f(0,0,1,1);*/
 			
 
-			//solverManager->computeVerlet(frame, this->animationPeriod(), escena->skeletons, sk);
+			solverManager->computeVerlet(frame, this->animationPeriod(), escena->skeletons, sk);
 
 		}
 

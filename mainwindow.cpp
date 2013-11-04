@@ -188,10 +188,14 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
         ui->infoData->setText("Blend shading mode");
         break;
     case Qt::Key_9:
-        ShadingModeChange(3);
-        ui->shadingModeSelection->setCurrentIndex(3);
-        ui->infoData->setText("Lines shading mode");
+        //ShadingModeChange(3);
+        //ui->shadingModeSelection->setCurrentIndex(3);
+        //ui->infoData->setText("Lines shading mode");
+		((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors = !((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors;
+		break;
         break;
+	case Qt::Key_C:
+		
     default:
         break;
     }

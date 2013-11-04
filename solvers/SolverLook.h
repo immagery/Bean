@@ -10,6 +10,6 @@ public:
 
 	SolverLook(void);
 	~SolverLook(void);
-	vector<pair<int,Quaternion<double> > > solve(double time);
+	vector<pair<int,Eigen::Quaternion<double> > > solve(double time);
 };
 

@@ -14,6 +14,8 @@ public:
 	map<int, vector<Solver*> > solvers;
 	map<int, vector<Solver*> > postSolvers;
 	vector<SolverVerlet*> verlets;
+
+	bool dumpVectors;
 	
 	vector<bool> verletEnabled;
 	vector<bool> solversEnabled;

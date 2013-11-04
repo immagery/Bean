@@ -17,7 +17,7 @@ public:
 	SolverVerlet(void);
 	~SolverVerlet(void);
 	vector<pair<int,Point3d > > solveVerlet(double time, vector<SolverVerlet*>& verlets, int skID);
-	vector<pair<int,Quaternion<double> > > solve(double time) { return  vector<pair<int,Quaternion<double> > >(0);}
+	vector<pair<int,Eigen::Quaternion<double> > > solve(double time) { return  vector<pair<int,Eigen::Quaternion<double> > >(0);}
 	void setPositions();
 	//void solve(int frame, double animationPeriod, vector<skeleton*> skeletons, int skID);
 	void bake(int maxFrames, double deltaTimePerFrame);

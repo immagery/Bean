@@ -19,7 +19,6 @@ public:
 	void loadSolvers();
 
 	SolverManager* solverManager;
-	Point3d pos;
 
 protected:
 	virtual void draw();

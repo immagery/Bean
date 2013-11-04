@@ -12,13 +12,16 @@ SolverStatic::~SolverStatic(void)
 
 void SolverStatic::setStatic() {
 	staticAngles.resize(chain.size());
-	for (int i = 0; i < chain.size(); ++i) staticAngles[i] = chain[i].first->qrot;
+	for (int i = 0; i < chain.size(); ++i) {
+		vcg::Quaternion<double> q = chain[i].first->qrot;
+		staticAngles[i] = Eigen::Quaternion<double>(q.W(), q.X(), q.Y(), q.Z());
+	}
 }
 
-vector<pair<int,Quaternion<double> > > SolverStatic::solve(double time) {
-	vector<pair<int,Quaternion<double> > > result(chain.size());
+vector<pair<int,Eigen::Quaternion<double> > > SolverStatic::solve(double time) {
+	vector<pair<int,Eigen::Quaternion<double> > > result(chain.size());
 	for (int i = 0; i < result.size(); ++i) 
-		result[i] = pair<int,Quaternion<double> > (chain[i].second, Quaternion<double>(1,0,0,0));
+		result[i] = pair<int,Eigen::Quaternion<double> > (chain[i].second, Eigen::Quaternion<double>(1,0,0,0));
 	return result;
 
 	/*for (int i = 0; i < chain.size(); ++i) {

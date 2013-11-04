@@ -12,10 +12,10 @@ SolverSinusoidal::SolverSinusoidal(double a, double f, double ph) {
 	phase = ph;
 }
 
-vector<pair<int,Quaternion<double> > > SolverSinusoidal::solve(double time) {
-	vector<pair<int,Quaternion<double> > > result;
+vector<pair<int,Eigen::Quaternion<double> > > SolverSinusoidal::solve(double time) {
+	vector<pair<int,Eigen::Quaternion<double> > > result;
 
-	vector<Point3d> positions(chain.size());
+	vector<vcg::Point3d> positions(chain.size());
 	/*vector<Point3d> currentPositions(chain.size());
 	for (int i = 0; i < positions.size(); ++i) {
 		positions[i] = currentPositions[i] = restPositions[i];
@@ -54,15 +54,15 @@ vector<pair<int,Quaternion<double> > > SolverSinusoidal::solve(double time) {
 
 	for (int i = 0; i < chain.size()-1; ++i) {
 		double inc = amplitude * sin(freq*time - (i+1) + phase);
-		Point3d oldPos = chain[i+1].first->getWorldPosition();
-		Point3d nextPos;
+		vcg::Point3d oldPos = chain[i+1].first->getWorldPosition();
+		vcg::Point3d nextPos;
 		
-		if (dimension == 0) nextPos = oldPos + Point3d(inc,0,0);
-		else if (dimension == 1) nextPos = oldPos + Point3d(0,inc,0);
-		else if (dimension == 2) nextPos = oldPos + Point3d(0,0,inc);
+		if (dimension == 0) nextPos = oldPos + vcg::Point3d(inc,0,0);
+		else if (dimension == 1) nextPos = oldPos + vcg::Point3d(0,inc,0);
+		else if (dimension == 2) nextPos = oldPos + vcg::Point3d(0,0,inc);
 
-		Point3d v1 = oldPos - chain[i].first->getWorldPosition();
-		Point3d v2 = nextPos - chain[i].first->getWorldPosition();
+		vcg::Point3d v1 = oldPos - chain[i].first->getWorldPosition();
+		vcg::Point3d v2 = nextPos - chain[i].first->getWorldPosition();
 		//Point3d v12 = oldPos - currentPos;
 		//Point3d v22 = nextPos - currentPos;
 		//currentPos = nextPos;
@@ -72,11 +72,12 @@ vector<pair<int,Quaternion<double> > > SolverSinusoidal::solve(double time) {
 		if ((v1-v2).Norm() < 0.0001) { 
 			continue;
 		}
-		vcg::Quaternion<double> q;
-		q.FromAxis(acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), v1^v2);
-		q.Normalize();
-		double rx, ry, rz;	q.ToEulerAngles(rx,ry,rz);
-		result.push_back(pair<int, Quaternion<double> > (chain[i].second, q));
+		Eigen::Quaternion<double> q (acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), (v1^v2).X(), (v1^v2).Y(), (v1^v2).Z());
+		q.normalize();
+		//q.FromAxis(acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), v1^v2);
+		//q.Normalize();
+		//double rx, ry, rz;	q.ToEulerAngles(rx,ry,rz);
+		result.push_back(pair<int, Eigen::Quaternion<double> > (chain[i].second, q));
 	}
 	return result;
 }

@@ -7,15 +7,16 @@ SolverLook::SolverLook() {
 
 }
 
-vector<pair<int,Quaternion<double> > > SolverLook::solve(double time) {
-	vector<pair<int,Quaternion<double> > > result(chain.size());
+vector<pair<int,Eigen::Quaternion<double> > > SolverLook::solve(double time) {
+	vector<pair<int,Eigen::Quaternion<double> > > result(chain.size());
 	for (int i = 0; i < result.size(); ++i) 
-		result[i] = pair<int,Quaternion<double> > (chain[i].second, Quaternion<double>(1,0,0,0));
+		result[i] = pair<int,Eigen::Quaternion<double> > (chain[i].second, Eigen::Quaternion<double>(1,0,0,0));
 
+	/*
 	for (int i = 0; i < chain.size(); ++i) {
 		Point3d targetVector = (lookPoint - chain[i].first->getWorldPosition()).normalized();
 		Quaternion<double> qt = chain[i].first->qrot; 
-		Eigen::Quaterniond qq(qt.W(), qt.X(), qt.Y(), qt.Z());
+		Eigen::Quaternion<double> qq(qt.W(), qt.X(), qt.Y(), qt.Z());
 		qq.normalize();
 		//Eigen::Vector3d vv1 = qq._transformVector(Eigen::Vector3d(lookVector.X(), lookVector.Y(), lookVector.Z()));
 		Eigen::Vector4f vv1 = chain[i].first->W * Eigen::Vector4f(lookVector.X(), lookVector.Y(), lookVector.Z(), 1);
@@ -71,6 +72,7 @@ vector<pair<int,Quaternion<double> > > SolverLook::solve(double time) {
 		//result[i] = pair<int, Point3d> (chain[i].second, Point3d(-ry,-rz,-rx));
 		result[i] = pair<int, Quaternion<double> > (chain[i].second, q);
 	}
+	*/
 
 	return result;
 }
