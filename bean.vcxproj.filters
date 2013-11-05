@@ -184,9 +184,6 @@
     <ClCompile Include="..\adri\DataStructures\Skinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\adri\DataStructures\Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="solvers\Solver.cpp">
       <Filter>Bean</Filter>
     </ClCompile>

@@ -22,9 +22,9 @@ public:
 
 	double dividingBaseFactor;
 
-	vector<Quaternion<double> > computeSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk);
-	vector<Quaternion<double> > computeVerlet(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk);
-	vector<Quaternion<double> > computePostSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk);
+	vector<vcg::Quaternion<double> > computeSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk);
+	vector<vcg::Quaternion<double> > computeVerlet(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk);
+	vector<vcg::Quaternion<double> > computePostSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk);
 
 	void addSkeleton(int id) { 
 		solvers[id] = vector<Solver*>();

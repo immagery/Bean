@@ -265,7 +265,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\adri\DataStructures\Skinning.cpp" />
-    <ClCompile Include="..\adri\DataStructures\Transform.cpp" />
     <ClCompile Include="..\adri\gui\adrimainwindow.cpp" />
     <ClCompile Include="..\adri\gui\AdriViewer.cpp" />
     <ClCompile Include="..\adri\DataStructures\Animation.cpp" />
