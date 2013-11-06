@@ -9,8 +9,6 @@
 #include "solvers/SolverStatic.h"
 #include "solvers/SolverLook.h"
 
-
-
 class BeanViewer : public AdriViewer
 {
         Q_OBJECT
@@ -19,6 +17,7 @@ public:
 	void loadSolvers();
 
 	SolverManager* solverManager;
+	Particles* particles;
 
 protected:
 	virtual void draw();

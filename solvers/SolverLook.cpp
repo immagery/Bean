@@ -1,6 +1,5 @@
 #include "SolverLook.h"
 #include "AdriViewer.h"
-#include "Eigen\Dense"
 
 
 SolverLook::SolverLook() {

@@ -395,6 +395,9 @@
     <ClInclude Include="solvers\SolverLook.h">
       <Filter>Bean</Filter>
     </ClInclude>
+    <ClInclude Include="Box3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\beanProject\adri\gui\icons\allIcons.png">

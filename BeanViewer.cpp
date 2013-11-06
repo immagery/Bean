@@ -1,10 +1,12 @@
 #include "BeanViewer.h"
+#include "util.h"
 
 BeanViewer::BeanViewer(QWidget * parent, const QGLWidget * shareWidget,
                    Qt::WindowFlags flags ) : AdriViewer(parent, shareWidget, flags) {
 	initScene();
 	ReBuildScene();
 	solverManager = new SolverManager();
+	particles = new Particles();
 }
 
 void BeanViewer::loadSolvers() {
@@ -125,8 +127,6 @@ void BeanViewer::loadSolvers() {
 		s->joints[0]->computeWorldPos();
 	}
 
-	sin0->setPositions();
-	sin1->setPositions();
 	verlet->setPositions();
 	verlet2->setPositions();
 	solverManager->verlets[0] = verlet;
@@ -134,22 +134,29 @@ void BeanViewer::loadSolvers() {
 	solverManager->addSolver(sin0,0);
 	solverManager->addSolver(sin1,1);
 	solverManager->addSolver(sin0,2);
-	solverManager->addSolver(sin1,3);
-	
+	solverManager->addSolver(sin1,3);	
 }
 
 void BeanViewer::draw() {
 
-	if (frame > 20) {
+	double fps = 1.0/this->animationPeriod()*1000;
+	double currentTime = (double)frame/fps;
+	int numReps = 1;
+	for (int k = 0; k < numReps; ++k) particles->solve(currentTime + ((double)k / numReps)*this->animationPeriod()/1000.0);
+	++frame;
+	particles->drawFunc();
+	return;
+	//escena->skinner->computeDeformationsWithSW(escena->skeletons);
 
-	}
+	for (int sk = 0; sk < escena->skeletons.size(); ++sk)
+		escena->skeletons[sk]->joints[0]->computeWorldPos();
 
 	if (escena->skeletons.size() > 0 && aniManager.simulationEnabled) {
 
 		for (int sk = 0; sk < escena->skeletons.size(); ++sk) {
 			skeleton* s = escena->skeletons[sk];
 			s->joints[0]->computeWorldPos();
-			vector<vcg::Quaternion<double> > rots = solverManager->computeSolvers(frame * 10, this->animationPeriod(), escena->skeletons, sk);
+			vector<Eigen::Quaternion<double> > rots = solverManager->computeSolvers(frame * 10, this->animationPeriod(), escena->skeletons, sk);
 			//vcg::Quaternion<double> orientInverse = s->joints[0]->qOrient.inverse();
 			for (int i = 0; i < s->joints.size(); ++i) {
 				//if (rots[i] != vcg::Quaternion<double>(1,0,0,0))

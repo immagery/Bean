@@ -20,10 +20,10 @@ SolverManager::~SolverManager(void)
 {
 }
 
-vector<vcg::Quaternion<double> > SolverManager::computeSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
+vector<Eigen::Quaternion<double> > SolverManager::computeSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
 
-	vector<vcg::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
-	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = vcg::Quaternion<double>(1,0,0,0);
+	vector<Eigen::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
+	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = Eigen::Quaternion<double>(1,0,0,0);
 
 	if (sk < solversEnabled.size() && !solversEnabled[sk]) return finalPositions;
 
@@ -32,7 +32,7 @@ vector<vcg::Quaternion<double> > SolverManager::computeSolvers(int frame, int an
 		vector<pair<int, Eigen::Quaternion<double> > > solverPos = s->solve(frame/24.0);
 		for (int j = 0; j < solverPos.size(); ++j) {
 			int id = solverPos[j].first;
-			vcg::Quaternion<double> q(solverPos[j].second.w(),
+			Eigen::Quaternion<double> q(solverPos[j].second.w(),
 								solverPos[j].second.x(),
 								solverPos[j].second.y(),
 								solverPos[j].second.z());
@@ -43,17 +43,17 @@ vector<vcg::Quaternion<double> > SolverManager::computeSolvers(int frame, int an
 	return finalPositions;
 }
 
-vector<vcg::Quaternion<double> > SolverManager::computePostSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
+vector<Eigen::Quaternion<double> > SolverManager::computePostSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
 
-	vector<vcg::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
-	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = vcg::Quaternion<double>(1,0,0,0);
+	vector<Eigen::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
+	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = Eigen::Quaternion<double>(1,0,0,0);
 
 	for (int i = 0; i < postSolvers[sk].size(); ++i) {
 		Solver* s = postSolvers[sk][i];
 		vector<pair<int, Eigen::Quaternion<double> > > solverPos = s->solve(frame/24.0);
 		for (int j = 0; j < solverPos.size(); ++j) {
 			int id = solverPos[j].first;
-			vcg::Quaternion<double> q(solverPos[j].second.w(),
+			Eigen::Quaternion<double> q(solverPos[j].second.w(),
 								solverPos[j].second.x(),
 								solverPos[j].second.y(),
 								solverPos[j].second.z());
@@ -65,10 +65,10 @@ vector<vcg::Quaternion<double> > SolverManager::computePostSolvers(int frame, in
 }
 
 
-vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
+vector<Eigen::Quaternion<double> > SolverManager::computeVerlet(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
 
-	vector<vcg::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
-	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = vcg::Quaternion<double>(1,0,0,0);
+	vector<Eigen::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
+	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = Eigen::Quaternion<double>(1,0,0,0);
 
 	if (sk >= verletEnabled.size() || !verletEnabled[sk]) return finalPositions;
 	SolverVerlet* verlet = verlets[sk];
@@ -322,7 +322,7 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 	Point3d v1 = skeletons[sk]->joints[positions[positions.size()-1].first+1]->getWorldPosition() -
 						verlets[sk]->chain[positions[positions.size()-1].first].first->getWorldPosition();
 	v1.Normalize();	v2.Normalize();
-	vcg::Quaternion<double> q;
+	Eigen::Quaternion<double> q;
 	q.FromAxis(acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), v1^v2);
 	q.Normalize();
 	double rx, ry, rz;	q.ToEulerAngles(rx,ry,rz);

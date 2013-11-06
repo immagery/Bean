@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	ui->setupUi(this);
 	ui->verticalLayout_4->removeWidget(ui->glCustomWidget);
+	delete ui->glCustomWidget;
 	ui->glCustomWidget = new BeanViewer(ui->frame);
 	ui->glCustomWidget->parent = this;
 	setViewer();

@@ -5,8 +5,8 @@ class SolverLook :
 	public SolverChain
 {
 public:
-	Point3d lookVector;
-	Point3d lookPoint;
+	Eigen::Vector3d lookVector;
+	Eigen::Vector3d lookPoint;
 
 	SolverLook(void);
 	~SolverLook(void);

@@ -12,7 +12,7 @@ public:
 	double g;
 	double velocityDamping;
 
-	Point3d positionAfterLast;
+	Eigen::Vector3d positionAfterLast;
 
 	SolverVerlet(void);
 	~SolverVerlet(void);
