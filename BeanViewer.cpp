@@ -150,10 +150,10 @@ void BeanViewer::draw() {
 			skeleton* s = escena->skeletons[sk];
 			s->joints[0]->computeWorldPos();
 			vector<vcg::Quaternion<double> > rots = solverManager->computeSolvers(frame * 10, this->animationPeriod(), escena->skeletons, sk);
-			vcg::Quaternion<double> orientInverse = s->joints[0]->qOrient.Inverse();
+			//vcg::Quaternion<double> orientInverse = s->joints[0]->qOrient.inverse();
 			for (int i = 0; i < s->joints.size(); ++i) {
-				if (rots[i] != vcg::Quaternion<double>(1,0,0,0))
-					s->joints[i]->addRotation(orientInverse * rots[i] * orientInverse.Inverse());
+				//if (rots[i] != vcg::Quaternion<double>(1,0,0,0))
+					//s->joints[i]->addRotation(orientInverse * rots[i] * orientInverse.Inverse());
 			}
 
 

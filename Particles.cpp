@@ -42,15 +42,15 @@ void Particles::drawFunc(int frame) {
 	glPointSize(8);
 	glBegin(GL_POINTS);
 	for (int i = 0; i < graph->nodes.size(); ++i) {
-		glVertex3d(pos[i].X(), pos[i].Y(), pos[i].Z());
+		glVertex3d(pos[i].x(), pos[i].y(), pos[i].z());
 	}
 	glEnd();
 	glColor3f(0, 1, 0);
 	glBegin(GL_LINES);
 	for (int i = 0; i < graph->nodes.size(); ++i) {
 		if (i < graph->nodes.size()-1) {
-			glVertex3d(pos[i].X(), pos[i].Y(), pos[i].Z());
-			glVertex3d(pos[i+1].X(), pos[i+1].Y(), pos[i+1].Z());
+			glVertex3d(pos[i].x(), pos[i].y(), pos[i].z());
+			glVertex3d(pos[i+1].x(), pos[i+1].y(), pos[i+1].z());
 		}
 		/*for (int j = 0; j < graph->nodes[i]->connections.size(); ++j) {
 			glVertex3d(pos[i].X(), pos[i].Y(), pos[i].Z());
@@ -66,15 +66,15 @@ void Particles::drawFunc() {
 	glPointSize(8);
 	glBegin(GL_POINTS);
 	for (int i = 0; i < graph->nodes.size(); ++i) {
-		glVertex3d(pos[i].X(), pos[i].Y(), pos[i].Z());
+		glVertex3d(pos[i].x(), pos[i].y(), pos[i].z());
 	}
 	glEnd();
 	glColor3f(0, 1, 0);
 	glBegin(GL_LINES);
 	for (int i = 0; i < graph->nodes.size(); ++i) {
 		if (i < graph->nodes.size()-1) {
-			glVertex3d(pos[i].X(), pos[i].Y(), pos[i].Z());
-			glVertex3d(pos[i+1].X(), pos[i+1].Y(), pos[i+1].Z());
+			glVertex3d(pos[i].x(), pos[i].y(), pos[i].z());
+			glVertex3d(pos[i+1].x(), pos[i+1].y(), pos[i+1].z());
 		}
 	}
 	glEnd();
@@ -105,7 +105,7 @@ void Particles::solve(double time) {
 	// Update points
 	for (int i = 1; i < currentPositions.size(); ++i) {
 		Eigen::Vector3d velocity = (currentPositions[i] - lastPositions[i]);
-		if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005) velocity = Eigen::Vector3d(0,0,0);
+		if (velocity.norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).norm() <= 0.00005) velocity = Eigen::Vector3d(0,0,0);
 		velocity *= velocityDamping;
 		Eigen::Vector3d acceleration = Eigen::Vector3d(0,g,0);	
 		Eigen::Vector3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
@@ -131,15 +131,15 @@ void Particles::solve(double time) {
 				if (j < 0) continue;
 				Eigen::Vector3d restDistance = (restPositions[i] - restPositions[j]);
 				Eigen::Vector3d currentDist = currentPositions[i] - currentPositions[j];
-				double diff = currentDist.Norm() - restDistance.Norm();
+				double diff = currentDist.norm() - restDistance.norm();
 
-				Eigen::Vector3d delta1 = currentDist / currentDist.Norm() * ks * diff;
+				Eigen::Vector3d delta1 = currentDist / currentDist.norm() * ks * diff;
 				Eigen::Vector3d delta2 = - delta1;
 				Eigen::Vector3d vel1 = (currentPositions[i] - lastPositions[i]);
 				Eigen::Vector3d vel2 = (currentPositions[j] - lastPositions[j]);
 				if (j == 0) vel2 = Eigen::Vector3d(0,0,0);
 				double v = (vel1 - vel2).dot(currentDist.normalized());
-				Eigen::Vector3d damp1 = currentDist / currentDist.Norm() * kd * v;
+				Eigen::Vector3d damp1 = currentDist / currentDist.norm() * kd * v;
 				Eigen::Vector3d damp2 = - damp1;
 				currentPositions[i] -= (delta1+damp1)*stiff*deltaTime;
 				if (j > 0) currentPositions[j] -= (delta2+damp2)*stiff*deltaTime;
@@ -152,12 +152,12 @@ void Particles::solve(double time) {
 				Eigen::Vector3d restDistance (0,0,0);
 				Eigen::Vector3d currentDist = currentPositions[i] - idealPoint;
 
-				if (currentDist.Norm() > 0.05) {
-					double diff = currentDist.Norm() - restDistance.Norm();
-					Eigen::Vector3d delta1 = currentDist / currentDist.Norm() * ks2 * diff;
+				if (currentDist.norm() > 0.05) {
+					double diff = currentDist.norm() - restDistance.norm();
+					Eigen::Vector3d delta1 = currentDist / currentDist.norm() * ks2 * diff;
 					Eigen::Vector3d vel1 = (currentPositions[i] - lastPositions[i]);
 					double v = (vel1).dot(currentDist.normalized());
-					Eigen::Vector3d damp1 = currentDist / currentDist.Norm() * kd2 * v;
+					Eigen::Vector3d damp1 = currentDist / currentDist.norm() * kd2 * v;
 					currentPositions[i] -= (delta1+damp1)*stiff2*deltaTime;
 				}	
 			}
@@ -192,13 +192,13 @@ void Particles::solve(double time) {
 					if (j < 0) continue;
 					Eigen::Vector3d restDistance = (restPositions[i] - restPositions[j]);
 					Eigen::Vector3d currentDist = currentPositions[i] - currentPositions[j];
-					double diff = currentDist.Norm() - restDistance.Norm();
-					Eigen::Vector3d delta1 = currentDist / currentDist.Norm() * ks * diff;
+					double diff = currentDist.norm() - restDistance.norm();
+					Eigen::Vector3d delta1 = currentDist / currentDist.norm() * ks * diff;
 					Eigen::Vector3d delta2 = - delta1;
 					Eigen::Vector3d vel1 = (currentPositions[i] - lastPositions[i]);
 					Eigen::Vector3d vel2 = (currentPositions[j] - lastPositions[j]);
 					double v = (vel2 - vel1).dot(currentDist.normalized());
-					Eigen::Vector3d damp1 = currentDist / currentDist.Norm() * kd * v;
+					Eigen::Vector3d damp1 = currentDist / currentDist.norm() * kd * v;
 					Eigen::Vector3d damp2 = - damp1;
 					currentPositions[i] -= (delta1+damp1)*stiffness*deltaTime;
 					//applyChange(-(delta1+damp1), deltaTime, i);
@@ -213,7 +213,7 @@ void Particles::solve(double time) {
 					if (i > 0) v1 = currentPositions[i] - currentPositions[i-1];
 					Eigen::Vector3d v2 = currentPositions[i+1] - currentPositions[i];
 					double dotProd = v1.dot(v2);
-					double norms = (v1.Norm() * v2.Norm());
+					double norms = (v1.norm() * v2.norm());
 					double cosPhi = dotProd / norms;
 					if (cosPhi > 1) cosPhi = 1;
 					if (cosPhi < -1) cosPhi = -1;
@@ -225,7 +225,7 @@ void Particles::solve(double time) {
 					if (i > 0) v1 = restPositions[i] - restPositions[i-1];
 					v2 = restPositions[i+1] - restPositions[i];
 					dotProd = v1.dot(v2);
-					cosPhi = dotProd / (v1.Norm() * v2.Norm());
+					cosPhi = dotProd / (v1.norm() * v2.norm());
 					if (cosPhi > 1) cosPhi = 1;
 					if (cosPhi < -1) cosPhi = -1;
 					double restAngle = acos(cosPhi);
@@ -241,13 +241,13 @@ void Particles::solve(double time) {
 						Eigen::Vector3d restDistance(0,0,0);
 						Eigen::Vector3d idealPoint = (restPositions[i+1] - restPositions[i]) + currentPositions[i];
 						Eigen::Vector3d currentDist = idealPoint - currentPositions[i+1];
-						double diff = currentDist.Norm() - restDistance.Norm();
-						Eigen::Vector3d delta1 = currentDist / currentDist.Norm() * angleks * diff;
+						double diff = currentDist.norm() - restDistance.norm();
+						Eigen::Vector3d delta1 = currentDist / currentDist.norm() * angleks * diff;
 						Eigen::Vector3d delta2 = - delta1;
 						Eigen::Vector3d vel1 = (currentPositions[i+1] - lastPositions[i+1]);
 						Eigen::Vector3d vel2(0,0,0);
 						double v = (vel2 - vel1).dot(currentDist.normalized());
-						Eigen::Vector3d damp1 = currentDist / currentDist.Norm() * angleDamping * v;
+						Eigen::Vector3d damp1 = currentDist / currentDist.norm() * angleDamping * v;
 						Eigen::Vector3d damp2 = - damp1;
 						//applyChange((delta1+damp1)*ratio, deltaTime, i+1);
 						currentPositions[i+1] += (delta1+damp1)*deltaTime;
@@ -270,14 +270,14 @@ void Particles::solve(double time) {
 
 			if (i > 0) {
 				Eigen::Vector3d idealPoint = (restPositions[i] - restPositions[i-1]) + currentPositions[i-1];
-				if ((nextPos - idealPoint).Norm() > (currentPositions[i] - idealPoint).Norm()) {
+				if ((nextPos - idealPoint).norm() > (currentPositions[i] - idealPoint).norm()) {
 					nextPos = currentPositions[i] + velocity*0.9 + Eigen::Vector3d(0,g,0) * tsq;
-					if (velocity.Norm() < 2) velocity = Eigen::Vector3d(0,0,0);
+					if (velocity.norm() < 2) velocity = Eigen::Vector3d(0,0,0);
 				}
 
 			}
 
-			//if ((nextPos - currentPositions[i]).Norm() >
+			//if ((nextPos - currentPositions[i]).norm() >
 			lastPositions[i] = currentPositions[i];
 			currentPositions[i] = nextPos;
 		}
@@ -301,11 +301,11 @@ void Particles::bake(int maxFrames, double deltaTimePerFrame) {
 					if (j < 0 || j >= currentPositions.size() || j == i) continue;
 					Eigen::Vector3d restDistance = restPositions[i] - restPositions[j];
 					Eigen::Vector3d currentDist = currentPositions[i] - currentPositions[j];
-					double diff = (restDistance.Norm() - currentDist.Norm()) / restDistance.Norm();
+					double diff = (restDistance.norm() - currentDist.norm()) / restDistance.norm();
 					double scalarP1 = 0.5;		
 					double scalarP2 = 0.5;		// masses are 1
-					diff = currentDist.Norm() - restDistance.Norm();
-					Eigen::Vector3d delta1 = -(currentDist / restDistance.Norm()) * (scalarP1 * diff);
+					diff = currentDist.norm() - restDistance.norm();
+					Eigen::Vector3d delta1 = -(currentDist / restDistance.norm()) * (scalarP1 * diff);
 					Eigen::Vector3d delta2 = -delta1;
 					//currentPositions[i] -= currentDist * scalarP1 * diff * deltaTimePerFrame;
 					//currentPositions[j] += currentDist * scalarP2 * diff * deltaTimePerFrame;
@@ -350,11 +350,11 @@ void Particles::bake(int maxFrames, double deltaTimePerFrame) {
 					/*if (j < 0 || j >= currentPositions.size() || j == i) continue;
 					Eigen::Vector3d restDistance = restPositions[i] - restPositions[j];
 					Eigen::Vector3d currentDist = currentPositions[i] - currentPositions[j];
-					double diff = (restDistance.Norm() - currentDist.Norm()) / restDistance.Norm();
+					double diff = (restDistance.norm() - currentDist.norm()) / restDistance.norm();
 					double scalarP1 = 0.1;		
 					double scalarP2 = 0.1;		// masses are 1
-					diff = currentDist.Norm() - restDistance.Norm();
-					Eigen::Vector3d delta1 = -(currentDist / restDistance.Norm()) * (scalarP1 * diff);
+					diff = currentDist.norm() - restDistance.norm();
+					Eigen::Vector3d delta1 = -(currentDist / restDistance.norm()) * (scalarP1 * diff);
 					Eigen::Vector3d delta2 = -delta1;
 					currentPositions[i] += delta1 * deltaTime;
 					currentPositions[j] += delta2 * deltaTime;
@@ -370,6 +370,6 @@ void Particles::bake(int maxFrames, double deltaTimePerFrame) {
 						deltaPos *= angleDamping;
 						//deltaPos *= ratio;
 						//deltaPos *= -v;
-						deltaPos /= deltaPos.Norm();
+						deltaPos /= deltaPos.norm();
 
 						currentPositions[i+1] += deltaPos * deltaTime;*/

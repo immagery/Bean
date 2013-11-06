@@ -54,25 +54,26 @@ vector<pair<int,Eigen::Quaternion<double> > > SolverSinusoidal::solve(double tim
 
 	for (int i = 0; i < chain.size()-1; ++i) {
 		double inc = amplitude * sin(freq*time - (i+1) + phase);
-		vcg::Point3d oldPos = chain[i+1].first->getWorldPosition();
-		vcg::Point3d nextPos;
+		Eigen::Vector3d oldPos = chain[i+1].first->getWorldPosition();
+		Eigen::Vector3d nextPos;
 		
-		if (dimension == 0) nextPos = oldPos + vcg::Point3d(inc,0,0);
-		else if (dimension == 1) nextPos = oldPos + vcg::Point3d(0,inc,0);
-		else if (dimension == 2) nextPos = oldPos + vcg::Point3d(0,0,inc);
+		if (dimension == 0) nextPos = oldPos + Eigen::Vector3d(inc,0,0);
+		else if (dimension == 1) nextPos = oldPos + Eigen::Vector3d(0,inc,0);
+		else if (dimension == 2) nextPos = oldPos + Eigen::Vector3d(0,0,inc);
 
-		vcg::Point3d v1 = oldPos - chain[i].first->getWorldPosition();
-		vcg::Point3d v2 = nextPos - chain[i].first->getWorldPosition();
+		Eigen::Vector3d v1 = oldPos - chain[i].first->getWorldPosition();
+		Eigen::Vector3d v2 = nextPos - chain[i].first->getWorldPosition();
 		//Point3d v12 = oldPos - currentPos;
 		//Point3d v22 = nextPos - currentPos;
 		//currentPos = nextPos;
 
-		v1.Normalize();
-		v2.Normalize();
-		if ((v1-v2).Norm() < 0.0001) { 
+		v1.normalize();
+		v2.normalize();
+		if ((v1-v2).norm() < 0.0001) { 
 			continue;
 		}
-		Eigen::Quaternion<double> q (acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), (v1^v2).X(), (v1^v2).Y(), (v1^v2).Z());
+		Eigen::Quaternion<double> q;
+		q.setFromTwoVectors(v1,v2);
 		q.normalize();
 		//q.FromAxis(acos(v1.dot(v2) / (v1.Norm() * v2.Norm())), v1^v2);
 		//q.Normalize();

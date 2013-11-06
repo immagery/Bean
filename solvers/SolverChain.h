@@ -7,7 +7,7 @@
 class SolverChain : public Solver {
 public:
 	vector<pair<joint*, int> > chain;
-	vector<Point3d> distances;
+	vector<Eigen::Vector3d> distances;
 
 	SolverChain(void);
 	~SolverChain(void);

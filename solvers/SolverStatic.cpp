@@ -13,8 +13,7 @@ SolverStatic::~SolverStatic(void)
 void SolverStatic::setStatic() {
 	staticAngles.resize(chain.size());
 	for (int i = 0; i < chain.size(); ++i) {
-		vcg::Quaternion<double> q = chain[i].first->qrot;
-		staticAngles[i] = Eigen::Quaternion<double>(q.W(), q.X(), q.Y(), q.Z());
+		staticAngles[i] = chain[i].first->qrot;
 	}
 }
 

@@ -22,7 +22,7 @@ void SolverVerlet::bake(int maxFrames, double deltaTimePerFrame) {
 
 	for (int frame = 0; frame < bakedPositions.size(); ++frame) {
 
-		bakedPositions[frame] = (vector<Point3d> (currentPositions.size()));
+		bakedPositions[frame] = (vector<Eigen::Vector3d> (currentPositions.size()));
 
 
 
@@ -30,20 +30,20 @@ void SolverVerlet::bake(int maxFrames, double deltaTimePerFrame) {
 }
 
 /*
-vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
-	vector<pair<int,Point3d> > result(chain.size());
+vector<pair<int,Eigen::Vector3d> > SolverVerlet::solve(double time) {
+	vector<pair<int,Eigen::Vector3d> > result(chain.size());
 	double deltaTime = (time - lastTime);
 
 	// First, solve constraints (distances between links) ( should be repeated k times )
 	for (int i = 0; i < restPositions.size()-1; ++i) {
-		Point3d restDistance = restPositions[i+1] - restPositions[i];
-		Point3d currentDist = currentPositions[i+1] - currentPositions[i];
-		double rd = restDistance.Norm();
-		double cd = currentDist.Norm();
+		Eigen::Vector3d restDistance = restPositions[i+1] - restPositions[i];
+		Eigen::Vector3d currentDist = currentPositions[i+1] - currentPositions[i];
+		double rd = restDistance.norm();
+		double cd = currentDist.norm();
 		double diff = (rd - cd) / rd;
 		double scalarP1 = 0.5 * stiffness;
 		double scalarP2 = stiffness - scalarP1;
-		Point3d currentI = currentDist * scalarP1 * diff;
+		Eigen::Vector3d currentI = currentDist * scalarP1 * diff;
 		currentPositions[i] -= currentDist * scalarP1 * diff * deltaTime;
 		currentPositions[i+1] += currentDist * scalarP2 * diff * deltaTime;
 	}
@@ -52,8 +52,8 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 
 	// Then update physics of each point
 	for (int i = 0; i < chain.size(); ++i) {
-		Point3d velocity = currentPositions[i] - lastPositions[i];						// velocity = inertia
-		Point3d nextPos = currentPositions[i] + velocity + Point3d(0,-g,0) * tsq;		// apply gravity
+		Eigen::Vector3d velocity = currentPositions[i] - lastPositions[i];						// velocity = inertia
+		Eigen::Vector3d nextPos = currentPositions[i] + velocity + Eigen::Vector3d(0,-g,0) * tsq;		// apply gravity
 
 		if (i > 0) {
 			printf("Current pos of 2nd joint: %f %f %f\n", nextPos.X(), nextPos.Y(), nextPos.Z());
@@ -67,8 +67,8 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 			double angleY = atan(tanY);
 			double angleZ = atan(tanZ);
 
-			result[i-1] = pair<int, Point3d> (chain[i-1].second, Point3d(angleX, angleY, angleZ));
-			Point3d finalRot = result[i-1].second * 180 / 3.141592;
+			result[i-1] = pair<int, Eigen::Vector3d> (chain[i-1].second, Eigen::Vector3d(angleX, angleY, angleZ));
+			Eigen::Vector3d finalRot = result[i-1].second * 180 / 3.141592;
 			//result[i-1].second = finalRot - chain[i-1].first->rot;
 		}
 
@@ -78,12 +78,12 @@ vector<pair<int,Point3d> > SolverVerlet::solve(double time) {
 	}
 
 	lastTime = time;
-	result[result.size()-1] = pair<int, Point3d> (chain[result.size()-1].second, Point3d(0,0,0));
+	result[result.size()-1] = pair<int, Eigen::Vector3d> (chain[result.size()-1].second, Eigen::Vector3d(0,0,0));
 	return result;
 }
 */
 
-vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverVerlet*>& verlets, int skID) {
+vector<pair<int,Eigen::Vector3d> > SolverVerlet::solveVerlet(double time, vector<SolverVerlet*>& verlets, int skID) {
 
 	double deltaTime = time - lastTime;
 	double tsq = deltaTime * deltaTime;
@@ -105,18 +105,18 @@ vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverV
 			// Distance constraints
 			for (int j = i-neighbourDistance; j < i; ++j) {
 				if (j < 0) continue;
-				Point3d restDistance = (restPositions[i] - restPositions[j]);
-				Point3d currentDist = currentPositions[i] - currentPositions[j];
-				double diff = currentDist.Norm() - restDistance.Norm();
+				Eigen::Vector3d restDistance = (restPositions[i] - restPositions[j]);
+				Eigen::Vector3d currentDist = currentPositions[i] - currentPositions[j];
+				double diff = currentDist.norm() - restDistance.norm();
 
-				Point3d delta1 = currentDist / currentDist.Norm() * ks * diff;
-				Point3d delta2 = - delta1;
-				Point3d vel1 = (currentPositions[i] - lastPositions[i]);
-				Point3d vel2 = (currentPositions[j] - lastPositions[j]);
-				if (j == 0) vel2 = Point3d(0,0,0);
+				Eigen::Vector3d delta1 = currentDist / currentDist.norm() * ks * diff;
+				Eigen::Vector3d delta2 = - delta1;
+				Eigen::Vector3d vel1 = (currentPositions[i] - lastPositions[i]);
+				Eigen::Vector3d vel2 = (currentPositions[j] - lastPositions[j]);
+				if (j == 0) vel2 = Eigen::Vector3d(0,0,0);
 				double v = (vel1 - vel2).dot(currentDist.normalized());
-				Point3d damp1 = currentDist / currentDist.Norm() * kd * v;
-				Point3d damp2 = - damp1;
+				Eigen::Vector3d damp1 = currentDist / currentDist.norm() * kd * v;
+				Eigen::Vector3d damp2 = - damp1;
 				currentPositions[i] -= (delta1+damp1)*stiff*deltaTime;
 				if (j > 0) currentPositions[j] -= (delta2+damp2)*stiff*deltaTime;
 			} 
@@ -124,16 +124,16 @@ vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverV
 
 			// "Ideal point" constraints, they try to maintain the angle
 			/*if (i > 0) {
-				Point3d idealPoint = idealRestPosition(i);
-				Point3d restDistance (0,0,0);
-				Point3d currentDist = currentPositions[i] - idealPoint;
+				Eigen::Vector3d idealPoint = idealRestPosition(i);
+				Eigen::Vector3d restDistance (0,0,0);
+				Eigen::Vector3d currentDist = currentPositions[i] - idealPoint;
 
-				if (currentDist.Norm() > 1) {
-					double diff = currentDist.Norm() - restDistance.Norm();
-					Point3d delta1 = currentDist / currentDist.Norm() * ks2 * diff;
-					Point3d vel1 = (currentPositions[i] - lastPositions[i]);
+				if (currentDist.norm() > 1) {
+					double diff = currentDist.norm() - restDistance.norm();
+					Eigen::Vector3d delta1 = currentDist / currentDist.norm() * ks2 * diff;
+					Eigen::Vector3d vel1 = (currentPositions[i] - lastPositions[i]);
 					double v = (vel1).dot(currentDist.normalized());
-					Point3d damp1 = currentDist / currentDist.Norm() * kd2 * v;
+					Eigen::Vector3d damp1 = currentDist / currentDist.norm() * kd2 * v;
 					currentPositions[i] -= (delta1+damp1)*stiff2*deltaTime;
 				}	
 			}*/
@@ -144,26 +144,26 @@ vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverV
 			for (int sk = skID+1; sk < verlets.size(); ++sk) {
 				SolverVerlet* v = verlets[sk];
 
-				Point3d velocity = (currentPositions[i] - lastPositions[i]);
-				if (velocity.Norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.00005)
-				velocity = Point3d(0,0,0);
+				Eigen::Vector3d velocity = (currentPositions[i] - lastPositions[i]);
+				if (velocity.norm() < 0.001 && (currentPositions[i] - idealRestPosition(i)).norm() <= 0.00005)
+				velocity = Eigen::Vector3d(0,0,0);
 				velocity *= velocityDamping;
-				Point3d acceleration = Point3d(0,g,0);	
-				Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
+				Eigen::Vector3d acceleration = Eigen::Vector3d(0,g,0);	
+				Eigen::Vector3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
 				nextPos = currentPositions[i];
 
 				for (int j = 0; j < v->chain.size(); ++j) {
 					if (sk == skID && i == j) continue;
-					double distance = (nextPos - v->currentPositions[j]).Norm();
-					Point3d currentDist = (nextPos - v->currentPositions[j]);
+					double distance = (nextPos - v->currentPositions[j]).norm();
+					Eigen::Vector3d currentDist = (nextPos - v->currentPositions[j]);
 					if (distance < 50) {
 						double restDistance = 50;
 						double diff = distance - restDistance;
-						Point3d delta1 = currentDist / currentDist.Norm() * colKS * diff;
-						Point3d vel1 = (currentPositions[i] - lastPositions[i]);
+						Eigen::Vector3d delta1 = currentDist / currentDist.norm() * colKS * diff;
+						Eigen::Vector3d vel1 = (currentPositions[i] - lastPositions[i]);
 						double v = (vel1).dot(currentDist.normalized());
-						Point3d damp1 = currentDist / currentDist.Norm() * colKD * v;
-						Point3d damp2 = - damp1;
+						Eigen::Vector3d damp1 = currentDist / currentDist.norm() * colKD * v;
+						Eigen::Vector3d damp2 = - damp1;
 						currentPositions[i] -= (delta1+damp1)*colStiff*deltaTime;
 					}
 				}
@@ -174,29 +174,29 @@ vector<pair<int,Point3d> > SolverVerlet::solveVerlet(double time, vector<SolverV
 
 	// Update points
 	for (int i = 1; i < currentPositions.size(); ++i) {
-		Point3d velocity = (currentPositions[i] - lastPositions[i]);
+		Eigen::Vector3d velocity = (currentPositions[i] - lastPositions[i]);
 
-		if (velocity.Norm() < 1) { // && (currentPositions[i] - idealRestPosition(i)).Norm() <= 0.05) {
-			velocity = Point3d(0,0,0);
+		if (velocity.norm() < 1) { // && (currentPositions[i] - idealRestPosition(i)).norm() <= 0.05) {
+			velocity = Eigen::Vector3d(0,0,0);
 			currentPositions[i] = lastPositions[i];
 			continue;
 		}
-		//else printf("Velocity norm: %f\n", velocity.Norm());
+		//else printf("Velocity norm: %f\n", velocity.norm());
 
 		velocity *= velocityDamping;
-		Point3d acceleration = Point3d(0,g,0);	
-		Point3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
+		Eigen::Vector3d acceleration = Eigen::Vector3d(0,g,0);	
+		Eigen::Vector3d nextPos = currentPositions[i] + velocity + acceleration * tsq * 0.5;
 
 		lastPositions[i] = currentPositions[i];
 		currentPositions[i] = nextPos;
 	}
 
-	vector<pair<int, Point3d> > result(currentPositions.size());
+	vector<pair<int, Eigen::Vector3d> > result(currentPositions.size());
 	for (int i = 0; i < currentPositions.size(); ++i) {
-		result[i] = pair<int, Point3d> (chain[i].second, currentPositions[i]);
+		result[i] = pair<int, Eigen::Vector3d> (chain[i].second, currentPositions[i]);
 	}
 	return result;
-	//currentPositions[0] = Point3d(xvalue,0,0);
+	//currentPositions[0] = Eigen::Vector3d(xvalue,0,0);
 }
 
 void SolverVerlet::setPositions() {
@@ -206,20 +206,20 @@ void SolverVerlet::setPositions() {
 
 	lastTime = 0;
 	for (int i = 0; i < lastPositions.size(); ++i) {
-		Point3d pos = chain[i].first->worldPosition;
-		printf("Initial pos of %dth joint: %f %f %f\n", i, pos.X(), pos.Y(), pos.Z());
+		Eigen::Vector3d pos = chain[i].first->worldPosition;
+		printf("Initial pos of %dth joint: %f %f %f\n", i, pos.x(), pos.y(), pos.z());
 		lastPositions[i] = restPositions[i] = currentPositions[i] = pos;
 	}
 }
 
-Point3d SolverVerlet::idealRestPosition(int i) {
+Eigen::Vector3d SolverVerlet::idealRestPosition(int i) {
 	if (i == 0) assert(false);
 	//return restPositions[i] - restPositions[i-1] + currentPositions[i-1];
 	
 	int depth = 1;
-	Point3d position = currentPositions[i-depth];
+	Eigen::Vector3d position = currentPositions[i-depth];
 	for (int j = i-depth; j < i; ++j) {
-		Point3d deltaPos = restPositions[j+1] - restPositions[j];
+		Eigen::Vector3d deltaPos = restPositions[j+1] - restPositions[j];
 		position = position + deltaPos;
 	}
 	return position;

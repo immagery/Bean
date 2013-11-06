@@ -78,21 +78,21 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 	glColor3f(0,1,0);
 	glBegin(GL_POINTS);
 	for (int i = 0; i < verlet->currentPositions.size(); ++i)
-		glVertex3d(verlet->currentPositions[i].X(), verlet->currentPositions[i].Y(), verlet->currentPositions[i].Z());
+		glVertex3d(verlet->currentPositions[i].x(), verlet->currentPositions[i].y(), verlet->currentPositions[i].z());
 	glEnd();
 
 	// Draw collisions
 	for (int i = 0; i < verlet->currentPositions.size(); ++i) {
 		glColor3f(0,1,0);
-		Point3d position = verlet->currentPositions[i];
+		Eigen::Vector3d position = verlet->currentPositions[i];
 		bool found = false;
 		for (int v = 0; v < skeletons.size(); ++v) {
 			if (v == sk) continue;
 			if (found) break;
 			SolverVerlet* sv = verlets[v];
 			for (int j = 0; j < sv->currentPositions.size(); ++j) {
-				Point3d position2 = sv->currentPositions[j];
-				if ((position - position2).Norm() < 30) {
+				Eigen::Vector3d position2 = sv->currentPositions[j];
+				if ((position - position2).norm() < 30) {
 					glColor3f(1,0,0);
 					found = true;
 					break;
@@ -101,7 +101,7 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 		}
 
 		glPushMatrix();
-		glTranslated(position.X(), position.Y(), position.Z());
+		glTranslated(position.x(), position.y(), position.z());
 		GLUquadricObj *quadric;
 		quadric = gluNewQuadric();
 		gluQuadricDrawStyle(quadric, GLU_LINE );
@@ -112,17 +112,17 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 	glColor3f(1,0,0);
 	glBegin(GL_LINES);
 	for (int i = 0; i < verlet->currentPositions.size()-1; ++i) {
-		glVertex3d(verlet->currentPositions[i].X(), verlet->currentPositions[i].Y(), verlet->currentPositions[i].Z());
-		glVertex3d(verlet->currentPositions[i+1].X(), verlet->currentPositions[i+1].Y(), verlet->currentPositions[i+1].Z());
+		glVertex3d(verlet->currentPositions[i].x(), verlet->currentPositions[i].y(), verlet->currentPositions[i].z());
+		glVertex3d(verlet->currentPositions[i+1].x(), verlet->currentPositions[i+1].y(), verlet->currentPositions[i+1].z());
 	}
 	glEnd();
 
 
-	vector<Point3d> lastFramePositions = verlets[sk]->currentPositions;
+	vector<Eigen::Vector3d> lastFramePositions = verlets[sk]->currentPositions;
 
 	verlets[sk]->chain[0].first->computeWorldPos();
 
-	if (verlets[sk]->chain[0].first->getWorldPosition().Y() > 1) {
+	if (verlets[sk]->chain[0].first->getWorldPosition().y() > 1) {
 		bool b = false;
 	}
 
@@ -142,14 +142,14 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 	for (int k = 0; k < numReps-1; ++k) {
 		verlets[sk]->solveVerlet(currentTime + ((double)k / numReps)*animationPeriod/1000.0, verlets, sk);
 	}
-	vector<pair<int,Point3d> > positions = verlets[sk]->solveVerlet(currentTime + ((double)(numReps-1) / numReps)*animationPeriod/1000.0, verlets, sk);
+	vector<pair<int,Eigen::Vector3d> > positions = verlets[sk]->solveVerlet(currentTime + ((double)(numReps-1) / numReps)*animationPeriod/1000.0, verlets, sk);
 
 	// Check if some position has changed
 	bool positionsChanged = false;
 	for (int i = 0; i < positions.size(); ++i) {
-		Point3d lfp = lastFramePositions[i];
-		Point3d ver = positions[i].second;
-		if ((lastFramePositions[i] - positions[i].second).Norm() > 1) {
+		Eigen::Vector3d lfp = lastFramePositions[i];
+		Eigen::Vector3d ver = positions[i].second;
+		if ((lastFramePositions[i] - positions[i].second).norm() > 1) {
 			positionsChanged = true;
 		}
 	}
@@ -167,16 +167,16 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 
 		int currentID = positions[i].first;
 
-		Point3d worldDiff = verlets[sk]->chain[i+1].first->getWorldPosition() - verlets[sk]->chain[i].first->getWorldPosition();
+		Eigen::Vector3d worldDiff = verlets[sk]->chain[i+1].first->getWorldPosition() - verlets[sk]->chain[i].first->getWorldPosition();
 		//worldDiff = verlets[sk]->chain[i+1].first->getWorldPosition() - positions[i].second;
-		Point3d v1 = (lastFramePositions[i+1] - positions[i].second);
+		Eigen::Vector3d v1 = (lastFramePositions[i+1] - positions[i].second);
 		v1 = worldDiff;
-		Point3d v2 = positions[i+1].second - positions[i].second;
+		Eigen::Vector3d v2 = positions[i+1].second - positions[i].second;
 		v2 = positions[i+1].second - verlets[sk]->chain[i].first->getWorldPosition();
 
-		Point3d currentPos = verlets[sk]->chain[i].first->getWorldPosition();
-		Point3d nextPos = verlets[sk]->chain[i+1].first->getWorldPosition();
-		Point3d nextVerlet = positions[i+1].second;
+		Eigen::Vector3d currentPos = verlets[sk]->chain[i].first->getWorldPosition();
+		Eigen::Vector3d nextPos = verlets[sk]->chain[i+1].first->getWorldPosition();
+		Eigen::Vector3d nextVerlet = positions[i+1].second;
 
 		v1 = nextPos - currentPos;
 		v2 = nextVerlet - currentPos;
@@ -184,18 +184,18 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 		glDisable(GL_LIGHTING);
 		glColor3f(1,0,0);
 		glBegin(GL_LINES);
-		glVertex3f(currentPos.X(), currentPos.Y(), currentPos.Z());
-		glVertex3f(nextPos.X(), nextPos.Y(), nextPos.Z());
+		glVertex3f(currentPos.x(), currentPos.y(), currentPos.z());
+		glVertex3f(nextPos.x(), nextPos.y(), nextPos.z());
 		glEnd();
 		glColor3f(0,1,0);
 		glBegin(GL_LINES);
-		glVertex3f(currentPos.X(), currentPos.Y(), currentPos.Z());
-		glVertex3f(nextVerlet.X(), nextVerlet.Y(), nextVerlet.Z());
+		glVertex3f(currentPos.x(), currentPos.y(), currentPos.z());
+		glVertex3f(nextVerlet.x(), nextVerlet.y(), nextVerlet.z());
 		glEnd();
 		glEnable(GL_LIGHTING);
 
 
-		Point3d v1f, v2f;
+		
 		
 		
 		/*if (!positionsChanged) {
@@ -214,12 +214,12 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 			v2 = nextVerlet - currentWorld;
 		} */
 
-		v1.Normalize();
-		v2.Normalize();
+		v1.normalize();
+		v2.normalize();
 
-		Eigen::Vector4f nextPosE (nextPos.X(), nextPos.Y(), nextPos.Z(), 1);
-		Eigen::Vector4f nextVerletE (nextVerlet.X(), nextVerlet.Y(), nextVerlet.Z(), 1);
-		Eigen::Vector4f currentPosE (currentPos.X(), currentPos.Y(), currentPos.Z(), 1);
+		Eigen::Vector4f nextPosE (nextPos.x(), nextPos.y(), nextPos.z(), 1);
+		Eigen::Vector4f nextVerletE (nextVerlet.x(), nextVerlet.y(), nextVerlet.z(), 1);
+		Eigen::Vector4f currentPosE (currentPos.x(), currentPos.y(), currentPos.z(), 1);
 		Eigen::Matrix4f W = verlets[sk]->chain[positions[i].first].first->W.transpose();
 		Eigen::Vector4f v11 = W * nextPosE - W * currentPosE;
 		Eigen::Vector4f v12 = W * nextVerletE - W * currentPosE;
@@ -228,30 +228,31 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 		//Eigen::Quaternion<double> qq;
 		//qq.setFromTwoVectors(v11, v12);
 
-		vcg::Quaternion<double> q;
+		Eigen::Quaternion<double> q;
+		Eigen::Vector3d v1f, v2f;
 		//Eigen::Vector4f v11 = verlets[sk]->chain[positions[i].first].first->world.inverse() * Eigen::Vector4f(v1.X(), v1.Y(), v1.Z(), 1);
 		//Eigen::Vector4f v12 = verlets[sk]->chain[positions[i].first].first->world.inverse() * Eigen::Vector4f(v2.X(), v2.Y(), v2.Z(), 1);
-		v1f = Point3d(v11.x(), v11.y(), v11.z());
-		v2f = Point3d(v12.x(), v12.y(), v12.z());
+		v1f = Eigen::Vector3d(v11.x(), v11.y(), v11.z());
+		v2f = Eigen::Vector3d(v12.x(), v12.y(), v12.z());
 
-		v1f.Normalize();
-		v2f.Normalize();
+		v1f.normalize();
+		v2f.normalize();
 
-		bool vectorsTooSimilar = (v1f-v2f).Norm() < 0.005;
-		bool aVectorIsZero = (v1f.Norm() < 0.0005 || v2f.Norm() < 0.0005);
-		bool rotationTooHigh = acos(v1f.dot(v2f) / (v1f.Norm() * v2f.Norm())) * 180 / M_PI > 90;
+		bool vectorsTooSimilar = (v1f-v2f).norm() < 0.005;
+		bool aVectorIsZero = (v1f.norm() < 0.0005 || v2f.norm() < 0.0005);
+		bool rotationTooHigh = acos(v1f.dot(v2f) / (v1f.norm() * v2f.norm())) * 180 / M_PI > 90;
 		rotationTooHigh = false;
 
 		//v1f.Normalize();
 		//v2f.Normalize();
-		q.FromAxis(acos(v1f.dot(v2f) / (v1f.Norm() * v2f.Norm())), v1f^v2f);
+		q.setFromTwoVectors(v1f,v2f);
 		//Eigen::Vector4f v = verlets[sk]->chain[positions[i].first].first->W.inverse() * Eigen::Vector4f(q.X(), q.Y(), q.Z(), 1);
 		//Eigen::Vector4f v0 = verlets[sk]->chain[positions[i].first].first->W.inverse() * Eigen::Vector4f(0,0,0,1);
 		/*v0 = v - v0;
 		q.X() = v0.x();
 		q.Y() = v0.y();
 		q.Z() = v0.z();*/
-		q.Normalize();
+		q.normalize();
 
 		/*if (dumpVectors || !dumpVectors) {
 			if ( i <= 10) {
@@ -274,10 +275,10 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 			}
 		}*/
 
-		double rx, ry, rz;	q.ToEulerAngles(rx,ry,rz);
+		/*double rx, ry, rz;	q.ToEulerAngles(rx,ry,rz);
 		rx = (rx *360)/(M_PI*2);
 		ry = (ry *360)/(M_PI*2);
-		rz = (rz *360)/(M_PI*2);
+		rz = (rz *360)/(M_PI*2);*/
 
 		double dividingFactor = dividingBaseFactor+i;
 		//rx /= 2;	ry /= 2;	rz /= 2;
@@ -300,14 +301,14 @@ vector<vcg::Quaternion<double> > SolverManager::computeVerlet(int frame, int ani
 			//verlets[sk]->chain[positions[i].first].first->addRotation(orientInverse * q * orientInverse.Inverse());
 			//verlets[sk]->chain[positions[i].first].first->addRotation(q);
 			//Point3d rot (rx, ry, rz);
-			Eigen::Vector4f rot(rx, ry, rz, 1);
+			//Eigen::Vector4f rot(rx, ry, rz, 1);
 			//rot = verlets[sk]->chain[positions[i].first].first->W * rot;
 			//rot = verlets[sk]->chain[positions[i].first].first->world.inverse() * rot;
 			//Matrix33d mat;	verlets[sk]->chain[0].first->qOrient.ToMatrix(mat);
 			//rot = mat * rot;
 			//printf("Node %d rot: %f %f %f\n", i, rot.x(), rot.y(), rot.z());
-			verlets[sk]->chain[positions[i].first].first->addRotation(rot.x(), rot.y(), rot.z());
-			//verlets[sk]->chain[positions[i].first].first->addRotation(q);
+			//verlets[sk]->chain[positions[i].first].first->addRotation(rot.x(), rot.y(), rot.z());
+			verlets[sk]->chain[positions[i].first].first->addRotation(q);
 
 			verlets[sk]->chain[0].first->computeWorldPos();
 		}
