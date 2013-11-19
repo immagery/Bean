@@ -19,6 +19,7 @@ public:
 	SolverManager* solverManager;
 	Particles* particles;
 
+
 protected:
 	virtual void draw();
 };

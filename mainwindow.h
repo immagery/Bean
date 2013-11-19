@@ -17,13 +17,20 @@ public:
     ~MainWindow();
 	void setViewer();
 
+	int lastX, lastY, lastZ;
+	int lastLX, lastLY, lastLZ;
+
 public slots:
 	void loadSolvers();
 	void toggleVerlet(bool);
 	void toggleSolvers(bool);
-	void changeSpeedDampingSlider(int);
-	void changeDividingFactorSlider(int);
-
+	void changeVerletStiffness(int);
+	void changeVerletX(int);
+    void changeVerletY(int);
+    void changeVerletZ(int);
+	void changeLookX(int);
+	void changeLookY(int);
+	void changeLookZ(int);
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);

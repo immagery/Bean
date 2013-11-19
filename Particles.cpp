@@ -13,7 +13,7 @@ Particles::Particles(void)
 	stiffness = 1;
 	g = -50;
 	xvalue = yvalue = zvalue = 0;
-	velocityDamping = 0.8;
+	velocityDamping = 1;
 
 	graph->nodes.resize(n);
 	for (int i = 0; i < n; ++i) {
@@ -123,7 +123,7 @@ void Particles::solve(double time) {
 	double ks, kd, stiff, ks2, kd2, stiff2;
 	ks = 5;		kd = 5;		stiff = 0.5;	// max: 0.5
 	//ks2 = 5;	kd2 = 20;	stiff2 = 0.1;	// max: 1
-	ks2 = 0.5;	kd2 = 2;	stiff2 = 10;
+	ks2 = 5;	kd2 = 2;	stiff2 = 10;
 	for (int k = 0; k < 100; ++k) {
 		for (int i = 0; i < currentPositions.size(); ++i) {
 			// Distance constraints

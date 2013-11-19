@@ -1,35 +1,33 @@
 #include "SolverSinusoidal.h"
 #include "AdriViewer.h"
 
-vector<pair<int,Eigen::Quaternion<double> > > SolverSinusoidal::solve(double time) {
-	vector<pair<int,Eigen::Quaternion<double> > > result;
-	vector<Eigen::Vector3d> originalPositions(chain.size());
+vector<pair<int,Eigen::Vector3d > > SolverSinusoidal::solve(double time) {
+	vector<pair<int,Eigen::Vector3d > > result;
 	vector<Eigen::Vector3d> nextPositions(chain.size());
 
 	// Fill vectors with pre and post positions
-	for (int i = 1; i < nextPositions.size(); ++i) {
-		double inc = amplitude * sin(freq*time - (i+1) + phase);
-		Eigen::Vector3d oldPos = chain[i+1].first->getWorldPosition();
+	for (int i = 0; i < nextPositions.size(); ++i) {
+		double mAmp = amplitude * ((longitude - i) / longitude);
+		//mAmp = amplitude;
+		mAmp = amplitude * (i / longitude);
+		double inc = (mAmp * sin(freq*time - i/longitude)) - (mAmp * sin(freq*lastTime - i/longitude))    ;
+
+		Eigen::Vector3d oldPos = restPositions[i];
 		Eigen::Vector3d nextPos;
-		
-		if (dimension == 0)			nextPos = oldPos + Eigen::Vector3d(inc,0,0);
-		else if (dimension == 1)	nextPos = oldPos + Eigen::Vector3d(0,inc,0);
-		else if (dimension == 2)	nextPos = oldPos + Eigen::Vector3d(0,0,inc);
 
-		nextPositions[i] = nextPos;
-		originalPositions[i] = oldPos;
+		if (dimension == 0)			nextPos = Vector3d(inc,0,0);
+		else if (dimension == 1)	nextPos = Vector3d(0,inc,0);
+		else if (dimension == 2)	nextPos = Vector3d(0,0,inc);
+
+		result.push_back(pair<int, Eigen::Vector3d>(chain[i].first, nextPos));
 	}
 
-	for (int i = 1; i < chain.size(); ++i) {
-
-		Eigen::Vector3d v1 = originalPositions[i+1] - originalPositions[i];
-		Eigen::Vector3d v2 = nextPositions[i+1] - originalPositions[i];
-
-		// Check for bad cases? TODO
-
-		Eigen::Quaternion<double> q;
-		q.setFromTwoVectors(v1,v2);
-		result.push_back(pair<int, Eigen::Quaternion<double> > (chain[i].second, q));
-	}
+	lastTime = time;
 	return result;
+}
+
+void SolverSinusoidal::setPositions() {
+	restPositions = vector<Eigen::Vector3d> (chain.size());
+	for (int i = 0; i < restPositions.size(); ++i)
+		restPositions[i] = chain[i].second;
 }

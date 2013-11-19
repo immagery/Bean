@@ -3,18 +3,19 @@
 #include "Solver.h"
 #include <vector>
 
+using namespace std;
+using namespace Eigen;
+
 // A SolverChain works on a set of bones
 class SolverChain : public Solver {
 public:
-	vector<pair<joint*, int> > chain;
-	vector<Eigen::Vector3d> distances;
+	vector<pair<int, Vector3d> > chain;
 
 	SolverChain(void);
 	~SolverChain(void);
-	void addJoint (joint* j, int index) { 
-		chain.push_back(pair<joint*, int> (j, index));
-		if (chain.size() > 1) distances.push_back(chain.back().first->worldPosition - chain[chain.size()-2].first->worldPosition);
+	void addJoint (int index, Eigen::Vector3d pos) { 
+		chain.push_back(pair<int, Vector3d> (index, pos));
 	}
-	virtual vector<pair<int,Eigen::Quaternion<double> > > solve(double time) = 0;
+	virtual vector<pair<int,Eigen::Vector3d > > solve(double time) = 0;
 };
 

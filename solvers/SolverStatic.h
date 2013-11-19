@@ -4,11 +4,11 @@ class SolverStatic :
 	public SolverChain
 {
 public:
-	vector<Eigen::Quaternion<double> > staticAngles;
+	vector<Eigen::Vector3d > staticPositions;
 
 	SolverStatic(void);
 	~SolverStatic(void);
 	void setStatic();
-	vector<pair<int,Eigen::Quaternion<double> > > solve(double time);
+	vector<pair<int,Eigen::Vector3d > > solve(double time);
 };
 

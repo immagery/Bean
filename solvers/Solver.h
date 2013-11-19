@@ -10,7 +10,6 @@ public:
 	Solver(void);
 	~Solver(void);
 
-	virtual vector<pair<int,Eigen::Quaternion<double> > > solve(double time) = 0;
-
+	virtual vector<pair<int,Eigen::Vector3d > > solve(double time) = 0;
 };
 

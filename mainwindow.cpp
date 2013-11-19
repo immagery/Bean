@@ -42,18 +42,27 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->setupSolvers, SIGNAL(clicked()), this, SLOT(loadSolvers()));
 	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
 	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool))); 
-	connect(ui->velDamp, SIGNAL(valueChanged(int)), this, SLOT(changeSpeedDampingSlider(int)));
-	connect(ui->divFactorSlider, SIGNAL(valueChanged(int)), this, SLOT(changeDividingFactorSlider(int)));
+	connect(ui->verletStiffness, SIGNAL(valueChanged(int)), this, SLOT(changeVerletStiffness(int)));
+
+	connect(ui->verletX, SIGNAL(valueChanged(int)), this, SLOT(changeVerletX(int)));
+    connect(ui->verletY, SIGNAL(valueChanged(int)), this, SLOT(changeVerletY(int)));
+    connect(ui->verletZ, SIGNAL(valueChanged(int)), this, SLOT(changeVerletZ(int)));
+
+	connect(ui->lookX, SIGNAL(valueChanged(int)), this, SLOT(changeLookX(int)));
+    connect(ui->lookY, SIGNAL(valueChanged(int)), this, SLOT(changeLookY(int)));
+    connect(ui->lookZ, SIGNAL(valueChanged(int)), this, SLOT(changeLookZ(int)));
+
+	lastX = lastY = lastZ = 0;
+	lastLX = lastLY = lastLZ = 0;
     
 }
 
 
-void MainWindow::changeSpeedDampingSlider(int) {
+void MainWindow::changeVerletStiffness(int) {
 	//((BeanViewer*)ui->glCustomWidget)->solverManager->verlet->velocityDamping = ui->velDamp->value() / 100.0;
-}
-
-void MainWindow::changeDividingFactorSlider(int) {
-	((BeanViewer*)ui->glCustomWidget)->solverManager->dividingBaseFactor = ui->divFactorSlider->value();
+	for (int i = 0; i < ui->glCustomWidget->escena->skeletons.size(); ++i) {
+		((BeanViewer*)ui->glCustomWidget)->solverManager->verlets[i]->stiffness = ui->verletStiffness->value() / 10000.0;
+	}
 }
 
 void MainWindow::setViewer() {
@@ -82,6 +91,66 @@ void MainWindow::toggleVerlet(bool) {
 void MainWindow::toggleSolvers(bool) {
 	bool b = ui->useVerlet->isChecked();
 	//((BeanViewer*)(ui->glCustomWidget))->solverManager->oscillation = b;
+}
+
+void MainWindow::changeVerletX(int) {
+	int increment = ui->verletX->value() - lastX;
+	lastX = ui->verletX->value();
+	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[sk]->positions[i].x() += increment;
+		}
+	}
+}
+
+void MainWindow::changeVerletY(int) {
+	int increment = ui->verletY->value() - lastY;
+	lastY = ui->verletY->value();
+	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[sk]->positions[i].y() += increment;
+		}
+	}
+}
+
+void MainWindow::changeVerletZ(int) {
+	int increment = ui->verletZ->value() - lastZ;
+	lastZ = ui->verletZ->value();
+	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[sk]->positions[i].z() += increment;
+		}
+	}
+}
+
+void MainWindow::changeLookX(int) {
+	int increment = ui->lookX->value() - lastLX;
+	lastLX = ui->lookX->value();
+	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(increment/10.0,0,0);
+		}
+	}
+}
+
+void MainWindow::changeLookY(int) {
+	int increment = ui->lookY->value() - lastLY;
+	lastLY = ui->lookY->value();
+	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(0,increment/10.0,0);
+		}
+	}
+}
+
+void MainWindow::changeLookZ(int) {
+	int increment = ui->lookZ->value() - lastLZ;
+	lastLZ = ui->lookZ->value();
+	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(0,0,increment/10.0);
+		}
+	}
 }
 
 

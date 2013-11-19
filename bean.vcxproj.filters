@@ -398,6 +398,9 @@
     <ClInclude Include="Box3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Chain.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\beanProject\adri\gui\icons\allIcons.png">
