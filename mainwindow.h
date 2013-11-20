@@ -24,6 +24,7 @@ public slots:
 	void loadSolvers();
 	void toggleVerlet(bool);
 	void toggleSolvers(bool);
+	/*TODO: interface_merge
 	void changeVerletStiffness(int);
 	void changeVerletX(int);
     void changeVerletY(int);
@@ -31,7 +32,7 @@ public slots:
 	void changeLookX(int);
 	void changeLookY(int);
 	void changeLookZ(int);
-
+	*/
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
 };

@@ -41,7 +41,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->setupSolvers, SIGNAL(clicked()), this, SLOT(loadSolvers()));
 	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
-	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool))); 
+	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool)));
+
+	/* TODO: se habrá chafado al fusionar la interficie... ya se ve que la interficie cuesta
 	connect(ui->verletStiffness, SIGNAL(valueChanged(int)), this, SLOT(changeVerletStiffness(int)));
 
 	connect(ui->verletX, SIGNAL(valueChanged(int)), this, SLOT(changeVerletX(int)));
@@ -51,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->lookX, SIGNAL(valueChanged(int)), this, SLOT(changeLookX(int)));
     connect(ui->lookY, SIGNAL(valueChanged(int)), this, SLOT(changeLookY(int)));
     connect(ui->lookZ, SIGNAL(valueChanged(int)), this, SLOT(changeLookZ(int)));
+	*/
 
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
@@ -58,12 +61,14 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 
+/* TODO: interface_merge
 void MainWindow::changeVerletStiffness(int) {
 	//((BeanViewer*)ui->glCustomWidget)->solverManager->verlet->velocityDamping = ui->velDamp->value() / 100.0;
 	for (int i = 0; i < ui->glCustomWidget->escena->skeletons.size(); ++i) {
 		((BeanViewer*)ui->glCustomWidget)->solverManager->verlets[i]->stiffness = ui->verletStiffness->value() / 10000.0;
 	}
 }
+*/
 
 void MainWindow::setViewer() {
     ui->glCustomWidget->setObjectName(QStringLiteral("glCustomWidget"));
@@ -93,6 +98,7 @@ void MainWindow::toggleSolvers(bool) {
 	//((BeanViewer*)(ui->glCustomWidget))->solverManager->oscillation = b;
 }
 
+/* TODO: se debe haber eliminado de la interficie.
 void MainWindow::changeVerletX(int) {
 	int increment = ui->verletX->value() - lastX;
 	lastX = ui->verletX->value();
@@ -152,7 +158,7 @@ void MainWindow::changeLookZ(int) {
 		}
 	}
 }
-
+*/
 
 MainWindow::~MainWindow()
 {

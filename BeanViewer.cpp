@@ -90,6 +90,8 @@ void BeanViewer::draw() {
 	}
 
 	// Call parent function
-	escena->skinner->computeDeformations(escena->skeletons);
+	if(escena->rig->enableDeformation)
+		escena->rig->skin->computeDeformations(escena->skeletons);
+
 	AdriViewer::draw();
 }

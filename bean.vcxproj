@@ -264,6 +264,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\adri\DataStructures\rig.cpp" />
     <ClCompile Include="..\adri\DataStructures\Skinning.cpp" />
     <ClCompile Include="..\adri\gui\adrimainwindow.cpp" />
     <ClCompile Include="..\adri\gui\AdriViewer.cpp" />
@@ -370,6 +371,7 @@
     <ClCompile Include="solvers\SolverVerlet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\adri\DataStructures\Rig.h" />
     <ClInclude Include="..\adri\DataStructures\Skinning.h" />
     <ClInclude Include="..\adri\DataStructures\Transform.h" />
     <CustomBuild Include="..\adri\gui\adrimainwindow.h">

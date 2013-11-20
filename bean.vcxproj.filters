@@ -235,6 +235,9 @@
     <ClCompile Include="solvers\SolverLook.cpp">
       <Filter>Bean</Filter>
     </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\rig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\adri\gui\AdriViewer.h">
@@ -400,6 +403,9 @@
     </ClInclude>
     <ClInclude Include="Chain.h">
       <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\Rig.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
