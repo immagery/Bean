@@ -43,17 +43,14 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
 	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool)));
 
-	/* TODO: se habrá chafado al fusionar la interficie... ya se ve que la interficie cuesta
+	//TODO: se habrá chafado al fusionar la interficie... ya se ve que la interficie cuesta
 	connect(ui->verletStiffness, SIGNAL(valueChanged(int)), this, SLOT(changeVerletStiffness(int)));
 
-	connect(ui->verletX, SIGNAL(valueChanged(int)), this, SLOT(changeVerletX(int)));
-    connect(ui->verletY, SIGNAL(valueChanged(int)), this, SLOT(changeVerletY(int)));
-    connect(ui->verletZ, SIGNAL(valueChanged(int)), this, SLOT(changeVerletZ(int)));
+	connect(ui->gravitySlider, SIGNAL(valueChanged(int)), this, SLOT(changeVerletGravity(int)));
 
 	connect(ui->lookX, SIGNAL(valueChanged(int)), this, SLOT(changeLookX(int)));
     connect(ui->lookY, SIGNAL(valueChanged(int)), this, SLOT(changeLookY(int)));
     connect(ui->lookZ, SIGNAL(valueChanged(int)), this, SLOT(changeLookZ(int)));
-	*/
 
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
@@ -61,14 +58,15 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 
-/* TODO: interface_merge
 void MainWindow::changeVerletStiffness(int) {
-	//((BeanViewer*)ui->glCustomWidget)->solverManager->verlet->velocityDamping = ui->velDamp->value() / 100.0;
 	for (int i = 0; i < ui->glCustomWidget->escena->skeletons.size(); ++i) {
-		((BeanViewer*)ui->glCustomWidget)->solverManager->verlets[i]->stiffness = ui->verletStiffness->value() / 10000.0;
+		//((BeanViewer*)ui->glCustomWidget)->solverManager->verlets[i]->stiffness = ui->verletStiffness->value() / 10000.0;
 	}
 }
-*/
+
+void MainWindow::changeVerletGravity(int) {
+	((BeanViewer*)ui->glCustomWidget)->solverManager->solverData->gravity = ui->gravitySlider->value();
+}
 
 void MainWindow::setViewer() {
     ui->glCustomWidget->setObjectName(QStringLiteral("glCustomWidget"));
@@ -98,67 +96,94 @@ void MainWindow::toggleSolvers(bool) {
 	//((BeanViewer*)(ui->glCustomWidget))->solverManager->oscillation = b;
 }
 
-/* TODO: se debe haber eliminado de la interficie.
-void MainWindow::changeVerletX(int) {
-	int increment = ui->verletX->value() - lastX;
-	lastX = ui->verletX->value();
-	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
-		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[sk]->positions[i].x() += increment;
-		}
-	}
-}
-
-void MainWindow::changeVerletY(int) {
-	int increment = ui->verletY->value() - lastY;
-	lastY = ui->verletY->value();
-	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
-		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[sk]->positions[i].y() += increment;
-		}
-	}
-}
-
-void MainWindow::changeVerletZ(int) {
-	int increment = ui->verletZ->value() - lastZ;
-	lastZ = ui->verletZ->value();
-	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
-		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[sk]->positions[i].z() += increment;
-		}
-	}
-}
-
 void MainWindow::changeLookX(int) {
 	int increment = ui->lookX->value() - lastLX;
 	lastLX = ui->lookX->value();
-	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(increment/10.0,0,0);
 		}
-	}
+	}*/
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(increment/10.0, 0, 0);
 }
 
 void MainWindow::changeLookY(int) {
 	int increment = ui->lookY->value() - lastLY;
 	lastLY = ui->lookY->value();
-	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(0,increment/10.0,0);
 		}
-	}
+	}*/
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(0,increment/10.0, 0);
 }
 
 void MainWindow::changeLookZ(int) {
 	int increment = ui->lookZ->value() - lastLZ;
 	lastLZ = ui->lookZ->value();
-	for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
+	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(0,0,increment/10.0);
 		}
-	}
+	}*/
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(0,0,increment/10.0);
 }
-*/
+
+void MainWindow::changeTransformRotateAmountX(int) {
+	rotationX =  ((float)ui->dialX->value()/10.0);	
+
+	Quaterniond newRot = fromEulerAngles(rotationX, rotationY, rotationZ);
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseRotation = newRot;
+
+    QString msg = QString::number((rotationX));
+    ui->rotationEditX->setText(msg);
+}
+    
+void MainWindow::changeTransformRotateAmountY(int) {
+	rotationY =  ((float)ui->dialY->value()/10.0);	
+
+	Quaterniond newRot = fromEulerAngles(rotationX, rotationY, rotationZ);
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseRotation = newRot;
+
+    QString msg = QString::number((rotationY));
+    ui->rotationEditY->setText(msg);
+}
+    
+void MainWindow::changeTransformRotateAmountZ(int) {
+	rotationZ =  ((float)ui->dialZ->value()/10.0);
+
+	Quaterniond newRot = fromEulerAngles(rotationX, rotationY, rotationZ);
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseRotation = newRot;
+
+    QString msg = QString::number((rotationZ));
+    ui->rotationEditZ->setText(msg);
+}
+
+void MainWindow::changeTransformTranslateAmountX(int) 
+{
+
+        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.x() = ui->translationAmountX->value();
+    QString msg = QString::number(ui->translationAmountX->value());
+	ui->translationEditX->setText(msg);
+
+}
+
+void MainWindow::changeTransformTranslateAmountY(int) 
+{
+
+        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.y() = ui->translationAmountY->value();
+
+    QString msg = QString::number(ui->translationAmountY->value());
+    ui->translationEditY->setText(msg);
+}
+
+void MainWindow::changeTransformTranslateAmountZ(int) {
+  
+        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.z() = ui->translationAmountZ->value();
+
+    QString msg = QString::number(ui->translationAmountZ->value());
+    ui->translationEditZ->setText(msg);
+}
 
 MainWindow::~MainWindow()
 {
@@ -267,8 +292,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
         //ShadingModeChange(3);
         //ui->shadingModeSelection->setCurrentIndex(3);
         //ui->infoData->setText("Lines shading mode");
-		((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors = !((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors;
-		break;
+		//((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors = !((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors;
         break;
 	case Qt::Key_C:
 		

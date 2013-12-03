@@ -184,19 +184,7 @@
     <ClCompile Include="..\adri\DataStructures\Skinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="solvers\Solver.cpp">
-      <Filter>Bean</Filter>
-    </ClCompile>
-    <ClCompile Include="solvers\SolverChain.cpp">
-      <Filter>Bean</Filter>
-    </ClCompile>
     <ClCompile Include="solvers\SolverManager.cpp">
-      <Filter>Bean</Filter>
-    </ClCompile>
-    <ClCompile Include="solvers\SolverSinusoidal.cpp">
-      <Filter>Bean</Filter>
-    </ClCompile>
-    <ClCompile Include="solvers\SolverStatic.cpp">
       <Filter>Bean</Filter>
     </ClCompile>
     <ClCompile Include="solvers\SolverVerlet.cpp">
@@ -228,12 +216,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_modelViewerResources.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="solvers\SolverLook.cpp">
-      <Filter>Bean</Filter>
-    </ClCompile>
-    <ClCompile Include="solvers\SolverLook.cpp">
-      <Filter>Bean</Filter>
     </ClCompile>
     <ClCompile Include="..\adri\DataStructures\rig.cpp">
       <Filter>Source Files</Filter>
@@ -371,16 +353,10 @@
     <ClInclude Include="solvers\Solver.h">
       <Filter>Bean</Filter>
     </ClInclude>
-    <ClInclude Include="solvers\SolverChain.h">
-      <Filter>Bean</Filter>
-    </ClInclude>
     <ClInclude Include="solvers\SolverManager.h">
       <Filter>Bean</Filter>
     </ClInclude>
     <ClInclude Include="solvers\SolverSinusoidal.h">
-      <Filter>Bean</Filter>
-    </ClInclude>
-    <ClInclude Include="solvers\SolverStatic.h">
       <Filter>Bean</Filter>
     </ClInclude>
     <ClInclude Include="solvers\SolverVerlet.h">
@@ -406,6 +382,15 @@
     </ClInclude>
     <ClInclude Include="..\adri\DataStructures\Rig.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="solvers\SolverInit.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="solvers\SolverDir.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="solvers\SolverData.h">
+      <Filter>Bean</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -493,5 +478,10 @@
     <Image Include="..\adri\gui\icons\folder-icon.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="solvers\AllSolvers">
+      <Filter>Bean</Filter>
+    </None>
   </ItemGroup>
 </Project>

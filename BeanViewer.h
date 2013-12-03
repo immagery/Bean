@@ -2,12 +2,15 @@
 #define BEANVIEWER_H
 
 #include "AdriViewer.h"
+#include <QtOpenGL/QGLWidget>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMouseEvent>
+#include <QGLViewer/qglviewer.h>
+
+#include "QGLViewer/constraint.h"
 
 #include "solvers/SolverManager.h"
-#include "solvers/SolverSinusoidal.h"
-#include "solvers/SolverVerlet.h"
-#include "solvers/SolverStatic.h"
-#include "solvers/SolverLook.h"
+#include "solvers/AllSolvers"
 
 class BeanViewer : public AdriViewer
 {
@@ -15,9 +18,9 @@ class BeanViewer : public AdriViewer
 public:
     BeanViewer(QWidget * parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags flags = 0);
 	void loadSolvers();
+	virtual void readScene(string fileName, string name, string path);
 
 	SolverManager* solverManager;
-	Particles* particles;
 
 
 protected:

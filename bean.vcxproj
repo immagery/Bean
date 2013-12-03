@@ -362,12 +362,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="solvers\Solver.cpp" />
-    <ClCompile Include="solvers\SolverChain.cpp" />
-    <ClCompile Include="solvers\SolverLook.cpp" />
     <ClCompile Include="solvers\SolverManager.cpp" />
-    <ClCompile Include="solvers\SolverSinusoidal.cpp" />
-    <ClCompile Include="solvers\SolverStatic.cpp" />
     <ClCompile Include="solvers\SolverVerlet.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -415,11 +410,12 @@
     </CustomBuild>
     <ClInclude Include="Particles.h" />
     <ClInclude Include="solvers\Solver.h" />
-    <ClInclude Include="solvers\SolverChain.h" />
+    <ClInclude Include="solvers\SolverData.h" />
+    <ClInclude Include="solvers\SolverDir.h" />
+    <ClInclude Include="solvers\SolverInit.h" />
     <ClInclude Include="solvers\SolverLook.h" />
     <ClInclude Include="solvers\SolverManager.h" />
     <ClInclude Include="solvers\SolverSinusoidal.h" />
-    <ClInclude Include="solvers\SolverStatic.h" />
     <ClInclude Include="solvers\SolverVerlet.h" />
     <CustomBuild Include="..\adri\gui\AdriViewer.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG "-I.\..\adri" "-I.\..\adri\gui" "-I.\..\adri\DataStructures" "-I.\..\adri\render" "-I.\..\adri\utils" "-I.\..\include" "-I.\..\thirdparty\vcglib" "-I.\..\thirdparty\libQGLViewer-2.4.0" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include\QtWidgets" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include\QtGui" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include\QtCore" "-I.\release" "-I." "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\mkspecs\win32-msvc2012" "-I.\GeneratedFiles"</Command>
@@ -716,6 +712,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="solvers\AllSolvers" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

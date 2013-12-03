@@ -6,14 +6,12 @@
 SolverManager::SolverManager(void)
 {
 	solvers = map<int, vector<Solver*> > ();
-	postSolvers = map<int, vector<Solver*> > ();
-	verlets = vector<SolverVerlet*> ();
 
 	verletEnabled = vector<bool>();
 	solversEnabled = vector<bool>();
 	dividingBaseFactor = 10;
 
-	dumpVectors = false;
+	solverData = new SolverData();
 }
 
 
@@ -21,155 +19,6 @@ SolverManager::~SolverManager(void)
 {
 }
 
-vector<Eigen::Quaternion<double> > SolverManager::solve(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
-	vector<Eigen::Quaterniond> result(skeletons[sk]->joints.size(), Quaterniond(1,0,0,0));
-	vector<bool> updated (skeletons[sk]->joints.size(), false);
-
-
-	skeleton* s = skeletons[sk];
-
-	double fps = 1.0/animationPeriod*1000;
-	double currentTime = (double)frame/fps;
-
-	// READ CURRENT STATE
-	Quaterniond neckQuaternion = s->joints[19]->rotation;
-	verlets[sk]->lookVector = neckQuaternion._transformVector(verlets[sk]->lookVectorResting);
-	// END OF READ CURRENT STATE
-
-
-	/*vector<Solver*> preSolvers = solvers[sk];
-	for (int i = 0; i < preSolvers.size(); ++i) {
-		vector<pair<int,Eigen::Vector3d > > positions = preSolvers[i]->solve(currentTime);
-		for (int j = 0; j < positions.size()-1; ++j) {
-			idealChains[sk]->positions[positions[j].first] += positions[j].second;
-			if (j == positions.size()-2) idealChains[sk]->positions[positions[j+1].first] += positions[j].second;
-		}
-	}*/
-
-	// Draw stuff
-	for (int i = 0; i <  currentChains[sk]->positions.size(); ++i) {
-		glColor3f(0,1,0);
-		Eigen::Vector3d position = idealChains[sk]->positions[i];
-		glPushMatrix();
-		glTranslated(position.x(), position.y(), position.z());
-		GLUquadricObj *quadric;
-		quadric = gluNewQuadric();
-		gluQuadricDrawStyle(quadric, GLU_LINE );
-		gluSphere(quadric,2,8,8);
-		glPopMatrix();
-
-		glColor3f(1,0,0);
-		position = currentChains[sk]->positions[i];
-		glPushMatrix();
-		glTranslated(position.x(), position.y(), position.z());
-		quadric = gluNewQuadric();
-		gluQuadricDrawStyle(quadric, GLU_LINE );
-		gluSphere(quadric,2,8,8);
-		glPopMatrix();
-	}
-
-	glColor3f(1,0,1);
-	glPushMatrix();
-	glTranslated(verlets[sk]->lookPoint.x(), verlets[sk]->lookPoint.y(), verlets[sk]->lookPoint.z());
-	GLUquadricObj *quadric;
-	quadric = gluNewQuadric();
-	gluQuadricDrawStyle(quadric, GLU_LINE );
-	gluSphere(quadric,3,8,8);
-	glPopMatrix();
-
-	int n = currentChains[sk]->positions.size();
-	glColor3f(1,1,0);
-	glBegin(GL_LINES);
-	Vector3d p = currentChains[sk]->positions[n-2];
-	p = p + verlets[sk]->lookVector*3;
-	glVertex3d(currentChains[sk]->positions[n-2].x(), currentChains[sk]->positions[n-2].y(), currentChains[sk]->positions[n-2].z());
-	glVertex3d(p.x(), p.y(), p.z());
-	glEnd();
-	glColor3f(1,0,1);
-	glBegin(GL_LINES);
-	glVertex3d(currentChains[sk]->positions[n-2].x(), currentChains[sk]->positions[n-2].y(), currentChains[sk]->positions[n-2].z());
-	glVertex3d(verlets[sk]->lookPoint.x(), verlets[sk]->lookPoint.y(), verlets[sk]->lookPoint.z());
-	glEnd();
-
-
-	// End of drawing
-
-	// Set verlet's ideal positions
-	for (int i = 0; i < verlets[sk]->idealPositions.size(); ++i)
-		verlets[sk]->idealPositions[i] = idealChains[sk]->positions[i];
-
-	// Verlet integration
-	for (int i = 0; i < verlets[sk]->currentPositions.size(); ++i)
-		verlets[sk]->currentPositions[i] = verlets[sk]->lastPositions[i] = currentChains[sk]->positions[i];
-
-	int numReps = 10;
-	vector<pair<int,Eigen::Vector3d > > positions; 
-	for (int k = 0; k < numReps; ++k)
-		positions = verlets[sk]->solveVerlet(currentTime + ((double)k / numReps)*animationPeriod/1000.0, verlets, sk);
-	for (int j = 0; j < positions.size(); ++j) {
-		currentChains[sk]->positions[positions[j].first] = positions[j].second;
-		updated[positions[j].first] = true;
-	}
-	// end of verlet integration
-
-	// Move skeleton to match the chain
-	Vector3d translation = currentChains[sk]->positions[0] - skeletons[sk]->joints[0]->getWorldPosition();
-	skeletons[sk]->joints[0]->addTranslation(translation.x(), translation.y(), translation.z());
-
-
-	//for (int i = 0; i < currentChains[sk]->positions.size()-1; ++i) {
-	for (int i = 1; i < currentChains[sk]->positions.size(); ++i) {
-		skeletons[sk]->joints[0]->computeWorldPos();
-
-		joint* father = s->joints[i]->father;
-
-		Vector3d fatherPosition = father->getWorldPosition();
-		Vector3d currentVector = s->joints[i]->getWorldPosition() - fatherPosition;
-		Vector3d desiredVector = currentChains[sk]->positions[i] - fatherPosition;
-
-		printf("Joint %d:\n", i);
-
-		Quaterniond fatherRotInverse = father->rotation.inverse();
-		Quaterniond fatherRot = father->rotation;
-
-		printf("v1: %f %f %f\n", currentVector.x(), currentVector.y(), currentVector.z());
-		printf("v2: %f %f %f\n", desiredVector.x(), desiredVector.y(), desiredVector.z());
-
-		printf("	Initial father qrot: %f %f %f %f\n", father->qrot.x(), father->qrot.y(), father->qrot.z(), father->qrot.w());
-
-		// --- Method 1
-		Eigen::Vector3d v1 = fatherRotInverse._transformVector(currentVector);
-		Eigen::Vector3d v2 = fatherRotInverse._transformVector(desiredVector);
-		Vector3d v12 = father->qrot.inverse()._transformVector(currentVector);
-		Quaternion<double> q;	q.setFromTwoVectors(v1,v2);
-
-		printf("	Deltaq: %f %f %f %f\n", q.x(), q.y(), q.z(), q.w());
-
-		Vector3d f1 = father->qrot._transformVector(currentVector);
-
-		father->addRotation(q);
-
-		Vector3d f2 = father->qrot._transformVector(currentVector);
-
-		printf("	Father qrot 1: %f %f %f %f\n", father->qrot.x(), father->qrot.y(), father->qrot.z(), father->qrot.w());
-
-		// --- Method 2
-		Vector3d w = father->rRotation._transformVector(s->joints[i]->pos);
-		w = father->rotation.inverse()._transformVector(w);
-		q.setFromTwoVectors(w, v2);
-
-		s->joints[0]->computeWorldPos();
-
-		printf("	Father qrot 2: %f %f %f %f\n\n", q.x(), q.y(), q.z(), q.w());
-
-		Vector3d r = father->rotation._transformVector(s->joints[i]->pos);
-		printf("	Result vector: %f %f %f\n", r.x(), r.y(), r.z());
-	}
-
-	s->joints[0]->computeWorldPos();
-
-	return result;
-}
 
 
 /*
