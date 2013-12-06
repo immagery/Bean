@@ -21,7 +21,7 @@ BeanViewer::BeanViewer(QWidget * parent, const QGLWidget * shareWidget,
 	initScene();
 	ReBuildScene();
 	solverManager = new SolverManager();
-	particles = new Particles();
+	drawLookLocators = false;
 }
 
 void BeanViewer::loadSolvers() {
@@ -33,33 +33,46 @@ void BeanViewer::loadSolvers() {
 	verlet->index1 = 0;	verlet->index2 = 19;
 	verlet->fps = 1000.0 / animationPeriod();
 	verlet->data = solverManager->solverData;
+	verlet->posS = 0.5;
 
-	verlet2->index1 = 18;	verlet2->index2 = 19;
+
+	verlet2->index1 = 19;	verlet2->index2 = 19;
 	verlet2->fps = 1000.0 / animationPeriod();
 	verlet2->data = solverManager->solverData;
 	verlet2->hasGravity = false;
 
 	solverManager->solverData->fps = 1000.0 / this->animationPeriod();
 
+	int snakesPerRow = 5;
 	
 	for (int sk = 0; sk < escena->skeletons.size(); ++sk) {
 
 		skeleton* s = escena->skeletons[sk];
 		int n = s->joints.size();
-		Vector3d translation = Vector3d((sk % 3) * 75, 0, -200 + (sk / 3)*100) - s->joints[0]->getWorldPosition();
+
+		int row = sk / snakesPerRow;
+		int col = sk % snakesPerRow;
+
+		double x = (col - 2) * 50;
+		double z = row * -75;
+
+		Vector3d translation = Vector3d(x,0,z) - s->joints[0]->getWorldPosition();
 		s->joints[0]->addTranslation(translation.x(), translation.y(), translation.z());
 		s->joints[0]->addRotation(0,0,90);
-		if (sk % 3 == 0) s->joints[0]->addRotation(20,0,0);
-		if (sk % 3 == 2) s->joints[0]->addRotation(-20,0,0);
-		if (sk / 3 == 0) s->joints[0]->addRotation(0,0,20);
-		if (sk / 3 == 2) s->joints[0]->addRotation(0,0,-20);
+		s->joints[0]->addRotation ((2 - col) * 10, 0, 0);
+		s->joints[0]->addRotation (0, 0, row*10);
+
+		//if (sk % 3 == 0) s->joints[0]->addRotation(10,0,0);
+		//if (sk % 3 == 2) s->joints[0]->addRotation(-10,0,0);
+		//if (sk / 3 == 0) s->joints[0]->addRotation(0,0,20);
+		//if (sk / 3 == 2) s->joints[0]->addRotation(0,0,-20);
 		s->joints[0]->computeWorldPos();
 		solverManager->addSkeleton(sk, s);
 
 		// Create solvers to test
 		SolverInit *init = new SolverInit();
 		SolverDir *dir = new SolverDir();
-		SolverSinusoidal *sin = new SolverSinusoidal(10,4,rand()%10);	sin->dimension = 0;		sin->longitude = 10;
+		SolverSinusoidal *sin = new SolverSinusoidal(8 + rand()%10,2 + rand()%5,rand()%10);	sin->dimension = 0;		sin->longitude = 10;
 		SolverLook *look = new SolverLook();
 
 		solverManager->addSolver(init, sk);
@@ -69,19 +82,17 @@ void BeanViewer::loadSolvers() {
 		solverManager->addSolver(look, sk);
 		solverManager->addSolver(verlet2, sk);
 
-		verlet->addSkeleton(s);
-		verlet2->addSkeleton(s);
+		solverManager->brains[sk]->look = look;
 
 		// Init solver
 		init->jt = s->joints[0];
-		//init->restTranslation = s->joints[0]->translation;
+		init->index1 = 0;	init->index2 = 18;
+		init->setPositions(s);
 		init->data = solverManager->solverData;
-		for (int i = 0; i <= s->joints.size()-6; ++i) {
-			init->initPositions.push_back(s->joints[i]->pos);
-			init->initQORIENTS.push_back(s->joints[i]->qOrient);
-			init->initQROTS.push_back(s->joints[i]->qrot);
-		}
 		init->initialTranslation = s->joints[0]->translation;
+
+		verlet->addSkeleton(s, init->initialChain());
+		verlet2->addSkeleton(s, init->initialChain());
 
 		// Dir solver
 		dir->data = solverManager->solverData;
@@ -96,29 +107,72 @@ void BeanViewer::loadSolvers() {
 		// Look solver
 		look->index1 = 18;	look->index2 = 19;
 		look->qrot = s->joints[18]->rotation;
-		look->qrot.setFromTwoVectors(s->joints[19]->translation - s->joints[18]->translation, Vector3d(0,1,0)).inverse();
-		look->restLookVector = s->joints[18]->rotation.inverse()._transformVector(Vector3d(0,1,0));
+		Vector3d v2 = s->joints[4]->translation - s->joints[3]->translation;
+		look->qrot.setFromTwoVectors(s->joints[19]->translation - s->joints[18]->translation, v2).inverse();
+		look->restLookVector = s->joints[18]->rotation.inverse()._transformVector(v2);
 		look->data = solverManager->solverData;
 		solverManager->solverData->neck = look->qrot;
 		solverManager->solverData->lookPoint = Vector3d(0,480,400);
+		solverManager->brains[sk]->lookPoint = s->joints[0]->translation;
+		solverManager->brains[sk]->lookPoint += Vector3d(0, 480, 400);
+
 
 	}
 
+		int nodeSize = verlet->currentPositions[0].size();
 		int sn = verlet->positioningStrengths.size();
-		for (int i = 0; i < verlet->positioningStrengths.size(); ++i) {
-			verlet->positioningStrengths[i] = (1 - ((double)i / (verlet->positioningStrengths.size() + 1))) * 1;
+		int rigids = sn / 4;
+		Vector3d base = verlet->currentPositions[0][0];
+		double length = (verlet->currentPositions[0][nodeSize-1] - base).norm();
+		double B = 0.25;	double C = 0.85;
+		double vB = 1;		double vC = 0.25;
+		for (int i = 0; i < sn; ++i) {
+			double p = (verlet->currentPositions[0][i] - base).norm() / length;
+			if (p <= B) verlet->positioningStrengths[i] = 1;
+			else if (p <= C) verlet->positioningStrengths[i] = vB + ((p - B)/(C - B))*(vC-vB);
+			else verlet->positioningStrengths[i] = vC;
 		}
-		verlet->positioningStrengths[0] *= 2;
+		
+
+		/*verlet->positioningStrengths[0] *= 2;
 		verlet->positioningStrengths[1] *= 1.5;
 		verlet->positioningStrengths[2] *= 1.2;
 		verlet->positioningStrengths[3] *= 1.15;
 		verlet->positioningStrengths[4] *= 1.07;
 		verlet->positioningStrengths[5] *= 1.03;
-		verlet->positioningStrengths[6] *= 1.01;
+		verlet->positioningStrengths[6] *= 1.01;*/
 		//verlet->positioningStrengths[1] = verlet->positioningStrengths[2] = 1;
-		verlet2->positioningStrengths[0] = 3;
-		verlet2->positioningStrengths[1] = 3;
+		verlet2->positioningStrengths[0] = 0;
+		//verlet2->positioningStrengths[1] = 3;
 
+}
+
+void drawPointLocator(Eigen::Vector3d pt, float size, bool spot)
+{
+    glDisable(GL_LIGHTING);
+    if(spot)
+    {
+        glColor3f((GLfloat)0.5, (GLfloat)0.1, (GLfloat)0.1);
+        size = size*2;
+    }
+    else
+    {
+        glColor3f((GLfloat)0.1, (GLfloat)0.4, (GLfloat)0.1);
+    }
+
+    glBegin(GL_LINES);
+    // queda reconstruir el cubo y ver si se pinta bien y se ha calculado correctamente.
+    glVertex3f(pt.x()+size, pt.y(), pt.z());
+    glVertex3f(pt.x()-size, pt.y(), pt.z());
+
+    glVertex3f(pt.x(), pt.y()+size, pt.z());
+    glVertex3f(pt.x(), pt.y()-size, pt.z());
+
+    glVertex3f(pt.x(), pt.y(), pt.z()+size);
+    glVertex3f(pt.x(), pt.y(), pt.z()-size);
+
+    glEnd();
+    glEnable(GL_LIGHTING);
 }
 
 void BeanViewer::draw() {
@@ -127,10 +181,23 @@ void BeanViewer::draw() {
 		solverManager->newFrame(frame);
 		for (int sk = 0; sk < escena->skeletons.size(); ++sk) {
 			solverManager->update(sk, escena->skeletons[sk]);
+
+			if (drawLookLocators) {
+				Vector3d p1 = escena->skeletons[sk]->joints[18]->translation;
+				Vector3d p2 = solverManager->brains[sk]->look->lookPoint;
+				glDisable(GL_LIGHTING);
+				glColor3f(0.5, 0.1, 0.1);
+				glBegin(GL_LINES);
+				glVertex3d(p1.x(), p1.y(), p1.z());
+				glVertex3d(p2.x(), p2.y(), p2.z());
+				drawPointLocator(solverManager->brains[sk]->look->lookPoint, 5, true);
+				glEnable(GL_LIGHTING);
+			}
 		}
-		solverManager->draw();
+		//solverManager->draw();
 	}
 
+	// Skinning
 	for (int i = 0; i < escena->rigsArray.size(); ++i) {
 		if (escena->rigsArray[i]->enableDeformation) escena->rigsArray[i]->skin->computeDeformations2(escena->skeletons[i]);
 	}
@@ -190,7 +257,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 9; ++i) {
+		for (int i = 0; i < 3; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());

@@ -408,6 +408,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 "-I.\..\adri" "-I.\..\adri\gui" "-I.\..\adri\DataStructures" "-I.\..\adri\render" "-I.\..\adri\utils" "-I.\..\include" "-I.\..\thirdparty\vcglib" "-I.\..\thirdparty\libQGLViewer-2.4.0" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include\QtWidgets" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include\QtGui" "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\include\QtCore" "-I.\release" "-I." "-I.\..\..\..\..\..\Qt\Qt5.1.1\5.1.1\msvc2012_64_opengl\mkspecs\win32-msvc2012" "-I.\GeneratedFiles"</Command>
     </CustomBuild>
+    <ClInclude Include="Intelligence.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="solvers\Solver.h" />
     <ClInclude Include="solvers\SolverData.h" />

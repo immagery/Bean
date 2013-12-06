@@ -21,6 +21,7 @@ public:
 	virtual void readScene(string fileName, string name, string path);
 
 	SolverManager* solverManager;
+	bool drawLookLocators;
 
 
 protected:

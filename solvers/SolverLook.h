@@ -31,7 +31,7 @@ public:
 
 			//Vector3d lookVector = qrot._transformVector(restLookVector);
 			Vector3d lookVector = qrot._transformVector(secondNode - firstNode);
-			Vector3d desiredVector = data->lookPoint - firstNode;
+			Vector3d desiredVector = lookPoint - firstNode;
 
 			Quaterniond r;	r.setFromTwoVectors(lookVector, desiredVector);
 			Vector3d rotatedVector = r._transformVector(secondNode - firstNode);

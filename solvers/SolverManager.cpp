@@ -9,7 +9,6 @@ SolverManager::SolverManager(void)
 
 	verletEnabled = vector<bool>();
 	solversEnabled = vector<bool>();
-	dividingBaseFactor = 10;
 
 	solverData = new SolverData();
 }

@@ -52,16 +52,28 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->lookY, SIGNAL(valueChanged(int)), this, SLOT(changeLookY(int)));
     connect(ui->lookZ, SIGNAL(valueChanged(int)), this, SLOT(changeLookZ(int)));
 
+	connect(ui->drawLocatorsCB, SIGNAL(toggled(bool)), this, SLOT(changedDrawLocators(bool)));
+	connect(ui->behaviourCombo, SIGNAL(	currentIndexChanged(int)), this, SLOT(changeBehaviour(int)));
+
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
     
 }
 
+void MainWindow::changeBehaviour(int) {
+	int index = ui->behaviourCombo->	currentIndex();
+	for (int i = 0; i < ((BeanViewer*)ui->glCustomWidget)->solverManager->brains.size(); ++i) {
+		((BeanViewer*)ui->glCustomWidget)->solverManager->brains[i]->setState(index);
+	}
+}
+
+void MainWindow::changedDrawLocators(bool) {
+	((BeanViewer*)ui->glCustomWidget)->drawLookLocators = ui->drawLocatorsCB->isChecked();
+}
 
 void MainWindow::changeVerletStiffness(int) {
-	for (int i = 0; i < ui->glCustomWidget->escena->skeletons.size(); ++i) {
-		//((BeanViewer*)ui->glCustomWidget)->solverManager->verlets[i]->stiffness = ui->verletStiffness->value() / 10000.0;
-	}
+	/*for (int i = 0; i < ui->glCustomWidget->escena->skeletons.size(); ++i) {
+	}*/
 }
 
 void MainWindow::changeVerletGravity(int) {
@@ -84,6 +96,11 @@ void MainWindow::loadSolvers() {
 	ui->useVerlet->setCheckable(true);
 	ui->useVerlet->toggle();
 	ui->useSolvers->setCheckable(true);
+
+	for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->solvers.size(); ++i) {
+		QString text = QString::number((i));
+		ui->lookSelector->addItem(text);
+	}
 }
 
 void MainWindow::toggleVerlet(bool) {
@@ -99,34 +116,48 @@ void MainWindow::toggleSolvers(bool) {
 void MainWindow::changeLookX(int) {
 	int increment = ui->lookX->value() - lastLX;
 	lastLX = ui->lookX->value();
+	int index = ui->lookSelector->currentIndex();
 	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(increment/10.0,0,0);
 		}
 	}*/
-	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(increment/10.0, 0, 0);
+	
+	if (index == 0) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.x() += increment/100.0;
+		}
+	} else {
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.x() += increment/100.0;
+	}
+		
+	//((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(increment/10.0, 0, 0);
 }
 
 void MainWindow::changeLookY(int) {
 	int increment = ui->lookY->value() - lastLY;
 	lastLY = ui->lookY->value();
-	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
-		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(0,increment/10.0,0);
+	int index = ui->lookSelector->currentIndex();
+	if (index == 0) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.y() += increment/100.0;
 		}
-	}*/
-	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(0,increment/10.0, 0);
+	} else {
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.y() += increment/100.0;
+	}
 }
 
 void MainWindow::changeLookZ(int) {
 	int increment = ui->lookZ->value() - lastLZ;
 	lastLZ = ui->lookZ->value();
-	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
-		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(0,0,increment/10.0);
+	int index = ui->lookSelector->currentIndex();
+	if (index == 0) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.z() += increment/100.0;
 		}
-	}*/
-	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(0,0,increment/10.0);
+	} else {
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.z() += increment/100.0;
+	}
 }
 
 void MainWindow::changeTransformRotateAmountX(int) {

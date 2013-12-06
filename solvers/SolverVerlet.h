@@ -26,7 +26,7 @@ public:
 		positioningStrengths = vector<double>();
 		distS = 5;	distD = 0.05;	distStiff = 1;
 		posS = 1;	posD = 0.05;	posStiff = 1;
-		colS = 5;	colD = 0.5;		colStiff = 1;
+		colS = 200;	colD = 200;		colStiff = 1;
 	}
 	~SolverVerlet(void) {}
 	vector<pair<int,Vector3d> > SolverVerlet::solveVerlet(double time, vector<SolverVerlet*>& verlets, int skID);
@@ -34,17 +34,17 @@ public:
 	
 	virtual void solve(double time) {}
 
-	void addSkeleton(skeleton* s) {
+	void addSkeleton(skeleton* s, Chain* c) {
 		chainSize = index2 - index1 + 1;
 		int nextSK = restPositions.size();
 		restPositions.push_back(vector<Vector3d>(chainSize));
 		lastPositions.push_back(vector<Vector3d>(chainSize));
 		currentPositions.push_back(vector<Vector3d>(chainSize));
 		idealPositions.push_back(vector<Vector3d>(chainSize));
-		positioningStrengths = vector<double> (chainSize, 1);
+		positioningStrengths = vector<double> (chainSize, 0);
 
 		for (int i = 0; i < chainSize; ++i) {
-			currentPositions[nextSK][i] = lastPositions[nextSK][i] = restPositions[nextSK][i] = s->joints[i]->translation;
+			currentPositions[nextSK][i] = lastPositions[nextSK][i] = restPositions[nextSK][i] = c->positions[i];
 			//positioningStrengths[i] = (1 - 0.03*i);
 		}
 	}
@@ -140,7 +140,7 @@ public:
 						//if (j > 0 && i < currentPositions.size()-1) currentPositions[j] -= (delta2+damp2)*(distStiff*3)*deltaTime;
 					}	// end of neighbours loop
 
-					// POSITIONING CONSTRAINTS
+					// POSITIONING CONSTRAINTS + RIGIDNESS
 					Vector3d idealPoint = idealPositions[ip][i];
 					Vector3d currentPoint = currentPositions[ip][i];
 					Vector3d restDistance (0,0,0);
@@ -150,13 +150,14 @@ public:
 						double diff = currentDist.norm() - restDistance.norm();
 						Vector3d delta1 = currentDist / currentDist.norm() * posS * diff;
 						Vector3d vel1 = (currentPositions[ip][i] - lastPositions[ip][i]);
+						Vector3d rigid = delta1;
 						double v = (currentDist.normalized()).dot(vel1.normalized());
 						if (currentDist.isZero(0.001) || vel1.isZero(0.001)) v = 0;
 						//double damping = ((double)(currentPositions.size()-i)) / (currentPositions.size());			
 						Vector3d damp1 = currentDist / currentDist.norm() * posD * v;
-						Vector3d inc = (delta1+damp1)*(posStiff)*positioningStrengths[i]*deltaTime;
+						Vector3d inc = (delta1+damp1+rigid*positioningStrengths[i])*(posStiff)*deltaTime;
 						currentPositions[ip][i] -= inc;
-					}	
+					}
 
 				}	// end of positions loop
 
@@ -166,7 +167,8 @@ public:
 			for (int i = 0; i < currentPositions[ip].size(); ++i) {
 				Vector3d velocity = (currentPositions[ip][i] - lastPositions[ip][i]);
 				velocity *= velocityDamping;
-				Vector3d acceleration = Vector3d(0,g,0);	
+				Vector3d acceleration = Vector3d(0,g,0);
+				if (i < 10) acceleration = Vector3d(0,0,0);
 				if (velocity.norm() < 0.0005) velocity = Vector3d(0,0,0);
 				Vector3d nextPos = currentPositions[ip][i] + velocity + acceleration * timeSquared * 0.5;
 				lastPositions[ip][i] = currentPositions[ip][i];

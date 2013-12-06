@@ -35,6 +35,8 @@ public slots:
 	virtual void changeTransformTranslateAmountX(int);
     virtual void changeTransformTranslateAmountY(int);
     virtual void changeTransformTranslateAmountZ(int);
+	void changedDrawLocators(bool);
+	void changeBehaviour(int);
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
 };

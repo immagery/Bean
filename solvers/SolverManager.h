@@ -4,6 +4,7 @@
 #include "skeleton.h"
 #include "AdriViewer.h"
 #include "Chain.h"
+#include "Intelligence.h"
 #include <vector>
 #include <map>
 
@@ -15,13 +16,11 @@ public:
 	SolverData* solverData;
 
 	map<int, vector<Solver*> > solvers;
+	map<int, Intelligence*> brains;
 	
 	vector<bool> verletEnabled;
 	vector<bool> solversEnabled;
 	
-
-	double dividingBaseFactor;
-
 	void newFrame (int frame) {
 
 		solverData->time = frame * 1.0 / (solverData->fps);
@@ -35,15 +34,11 @@ public:
 			}
 		}
 
-		/*for (map<int, vector<Solver*> >::iterator it = solvers.begin(); it != solvers.end(); ++it) {
-			vector<Solver*> vsolvers = it->second;
-			int index = firstDirty[it->first];
-			vsolvers[index]->propagateDirtyness();
-			for (int i = 0; i < vsolvers.size(); ++i) vsolvers[i]->time = frame * 1.0 / (solverData->fps);
-		}*/
+		// AI actions
+		for (int i = 0; i < brains.size(); ++i) {
+			brains[i]->think();
+		}
 	}
-
-	//void solve (int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk);
 
 	bool isDirty(int sk) {
 		return solvers[sk][solvers[sk].size()-1]->dirtyFlag;
@@ -56,7 +51,7 @@ public:
 		glDisable(GL_LIGHTING);
 		for (int sk = 0; sk < solvers.size(); ++sk) {
 			Solver* lastSolver = solvers[sk][solvers[sk].size()-1];
-			Chain* chain = lastSolver->outputs[sk];
+			Chain* chain = lastSolver->outputs[0];
 			glColor3f(1,0,0);
 			for (int i = 0; i < chain->positions.size(); ++i) {
 				Vector3d p = chain->positions[i];
@@ -65,7 +60,7 @@ public:
 				gluSphere(quadric,2,8,8);
 				glPopMatrix();
 			}
-			chain = solvers[sk][3]->outputs[0];
+			chain = solvers[sk][1]->outputs[0];
 			glColor3f(0,1,0);
 			for (int i = 0; i < chain->positions.size(); ++i) {
 				Vector3d p = chain->positions[i];
@@ -154,40 +149,12 @@ public:
 
 		}
 
-
+		s->joints[0]->computeWorldPos();
 	}
 
 	void addSkeleton(int id, skeleton* s) { 
-
-		//Chain* c = new Chain();
-		//Chain* ideal = new Chain();
-		//Chain* rest = new Chain();
-		for (int i = 0; i < s->joints.size(); ++i) {
-		//for (int i = 0; i < 15; ++i) {
-			if (i <= s->joints.size() - 6) {
-				//c->positions.push_back(s->joints[i]->getWorldPosition());
-				//ideal->positions.push_back(s->joints[i]->getWorldPosition());
-				//rest->positions.push_back(s->joints[i]->getWorldPosition());
-			} else {
-				/*Vector3d wpos = s->joints[i-1]->getWorldPosition();
-				Vector3d wpos2 = s->joints[i-2]->getWorldPosition();
-				Vector3d increment = wpos - wpos2;
-				increment *= 5;	//	increment += Vector3d(0,10,0);
-				increment = Vector3d(0,0,0);
-				wpos = s->joints[i]->getWorldPosition();
-				c->positions.push_back(wpos + increment);
-				ideal->positions.push_back(wpos + increment);
-				rest->positions.push_back(wpos + increment);*/
-				break;
-			}
-		}
-
-		/*currentChains[id] = c;
-		idealChains[id] = ideal;
-		restChains[id] = rest;*/
 		solvers[id] = vector<Solver*>();
-		verletEnabled.push_back(true);
-		solversEnabled.push_back(true);
+		brains[id] = new Intelligence(id);
 	}
 
 	void addSolver(Solver *s, int sk) {
