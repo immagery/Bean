@@ -37,6 +37,10 @@ public slots:
     virtual void changeTransformTranslateAmountZ(int);
 	void changedDrawLocators(bool);
 	void changeBehaviour(int);
+	void selectSnake(int); 
+	void changeOscAmplitude(int);
+	void changeOscFrequency(int);
+	void changeLookPointRadius(int);
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
 };

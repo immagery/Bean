@@ -40,6 +40,7 @@ void BeanViewer::loadSolvers() {
 	verlet2->fps = 1000.0 / animationPeriod();
 	verlet2->data = solverManager->solverData;
 	verlet2->hasGravity = false;
+	//verlet2->posS = 1;		verlet2->posD = 0.5;		verlet2->posStiff = 0.1;
 
 	solverManager->solverData->fps = 1000.0 / this->animationPeriod();
 
@@ -72,7 +73,8 @@ void BeanViewer::loadSolvers() {
 		// Create solvers to test
 		SolverInit *init = new SolverInit();
 		SolverDir *dir = new SolverDir();
-		SolverSinusoidal *sin = new SolverSinusoidal(8 + rand()%10,2 + rand()%5,rand()%10);	sin->dimension = 0;		sin->longitude = 10;
+		SolverSinusoidal *sin = new SolverSinusoidal(8 + rand()%10,2 + rand()%5,rand()%10);	
+		sin->dimension = 0;		sin->longitude = 10;		sin->multAmp = 1;	sin->multFreq = 1;
 		SolverLook *look = new SolverLook();
 
 		solverManager->addSolver(init, sk);
@@ -83,6 +85,7 @@ void BeanViewer::loadSolvers() {
 		solverManager->addSolver(verlet2, sk);
 
 		solverManager->brains[sk]->look = look;
+		solverManager->brains[sk]->sinus = sin;
 
 		// Init solver
 		init->jt = s->joints[0];

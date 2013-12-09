@@ -486,5 +486,6 @@
     <None Include="solvers\AllSolvers">
       <Filter>Bean</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

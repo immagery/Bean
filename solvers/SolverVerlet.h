@@ -26,7 +26,7 @@ public:
 		positioningStrengths = vector<double>();
 		distS = 5;	distD = 0.05;	distStiff = 1;
 		posS = 1;	posD = 0.05;	posStiff = 1;
-		colS = 200;	colD = 200;		colStiff = 1;
+		colS = 500;	colD = 500;		colStiff = 1;
 	}
 	~SolverVerlet(void) {}
 	vector<pair<int,Vector3d> > SolverVerlet::solveVerlet(double time, vector<SolverVerlet*>& verlets, int skID);
@@ -189,7 +189,7 @@ public:
 						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
 							double distance = (currentPositions[sk][i] - currentPositions[sk2][j]).norm();
 							Vector3d currentDist = (currentPositions[sk][i] - currentPositions[sk2][j]);
-							double restDistance = 50;
+							double restDistance = 40;
 
 							if (distance < restDistance) {
 								double diff = distance - restDistance;

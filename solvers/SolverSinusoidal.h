@@ -4,16 +4,17 @@
 class SolverSinusoidal : public Solver {
 public:
 	// Wave parameters
-	double amplitude, freq, phase, longitude;
+	double _amplitude, _freq, phase, longitude;
 	// Axis of the oxilation
 	int dimension;		// 0=X, 1=Y, 2=Z
 	Vector3d axis;		// relative to vector defined by lastPos - initPos
 	// Wave modulation
 	int thresh1, thresh2;
+	double multAmp, multFreq;
 
 	// Constructors and destructors
-	SolverSinusoidal(void) : Solver() {}
-	SolverSinusoidal(double a, double f, double ph) : Solver(), amplitude(a), freq(f), phase(ph), dimension(0) {}
+	SolverSinusoidal(void) : Solver(), multAmp(1), multFreq(1) {}
+	SolverSinusoidal(double a, double f, double ph) : Solver(), _amplitude(a), _freq(f), phase(ph), dimension(0), multAmp(1), multFreq(1) {}
 	~SolverSinusoidal(void) {}
 
 	// Solving
@@ -28,6 +29,9 @@ public:
 	}
 
 	virtual void solve() {
+		double amplitude = _amplitude * multAmp;
+		double freq = _freq * multFreq;
+
 		for (int i = 0; i < inputs.size(); ++i) {
 			Chain* ichain = inputs[i];
 			for (int j = 0; j < ichain->positions.size(); ++j) outputs[i]->positions[j] = ichain->positions[j];
@@ -38,7 +42,6 @@ public:
 				else if (j < thresh2) mAmp = amplitude * (double)(j - thresh1) / (thresh2 - thresh1);
 				else mAmp = amplitude;
 
-				//mAmp = amplitude;
 				double inc = (mAmp * sin(freq*time - j/longitude));
 				Vector3d increment;
 				if (dimension == 0)			increment = Vector3d(inc,0,0);
