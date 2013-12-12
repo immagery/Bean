@@ -34,13 +34,18 @@ void BeanViewer::loadSolvers() {
 	verlet->fps = 1000.0 / animationPeriod();
 	verlet->data = solverManager->solverData;
 	verlet->posS = 0.5;
+	verlet->hasRigid = false;
+	verlet->lookSolver = false;
 
 
-	verlet2->index1 = 19;	verlet2->index2 = 19;
+	verlet2->index1 = 0 ;	verlet2->index2 = 19;
 	verlet2->fps = 1000.0 / animationPeriod();
 	verlet2->data = solverManager->solverData;
 	verlet2->hasGravity = false;
-	//verlet2->posS = 1;		verlet2->posD = 0.5;		verlet2->posStiff = 0.1;
+	verlet2->distS = 1;		verlet2->distD = 1;		verlet2->distStiff = 1;
+	verlet2->posS = 1;		verlet2->posD = 1;		verlet2->posStiff = 1;
+	verlet2->hasRigid = false;
+	verlet2->lookSolver = true;
 
 	solverManager->solverData->fps = 1000.0 / this->animationPeriod();
 
@@ -53,6 +58,9 @@ void BeanViewer::loadSolvers() {
 
 		int row = sk / snakesPerRow;
 		int col = sk % snakesPerRow;
+
+		row = 0;
+		col = 2;
 
 		double x = (col - 2) * 50;
 		double z = row * -75;
@@ -79,7 +87,7 @@ void BeanViewer::loadSolvers() {
 
 		solverManager->addSolver(init, sk);
 		solverManager->addSolver(dir, sk);
-		solverManager->addSolver(sin, sk);
+		//solverManager->addSolver(sin, sk);
 		solverManager->addSolver(verlet, sk);
 		solverManager->addSolver(look, sk);
 		solverManager->addSolver(verlet2, sk);
@@ -145,7 +153,7 @@ void BeanViewer::loadSolvers() {
 		verlet->positioningStrengths[5] *= 1.03;
 		verlet->positioningStrengths[6] *= 1.01;*/
 		//verlet->positioningStrengths[1] = verlet->positioningStrengths[2] = 1;
-		verlet2->positioningStrengths[0] = 0;
+		//verlet2->positioningStrengths[0] = 0;
 		//verlet2->positioningStrengths[1] = 3;
 
 }
@@ -186,7 +194,7 @@ void BeanViewer::draw() {
 			solverManager->update(sk, escena->skeletons[sk]);
 
 			if (drawLookLocators) {
-				Vector3d p1 = escena->skeletons[sk]->joints[18]->translation;
+				Vector3d p1 = escena->skeletons[sk]->joints[solverManager->brains[sk]->look->outputs[0]->positions.size()-2]->translation;
 				Vector3d p2 = solverManager->brains[sk]->look->lookPoint;
 				glDisable(GL_LIGHTING);
 				glColor3f(0.5, 0.1, 0.1);
@@ -260,7 +268,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 1; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());

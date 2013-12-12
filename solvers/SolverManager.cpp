@@ -18,200 +18,228 @@ SolverManager::~SolverManager(void)
 {
 }
 
+Quaterniond SolverManager::computeTwist (joint* jt, Vector3d nLook) {
+	Vector3d axis(1,0,0);
+	if (nLook.x() <= 0) axis = Vector3d(-1,0,0);
+	double projection = nLook.dot(axis);
 
+	if (abs(projection) > 0.005) {
+		if (nLook.z() < 0) projection = (1 - projection);
 
-/*
-vector<Eigen::Quaternion<double> > SolverManager::computeSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
+		double corrAngle = (M_PI/2) * abs(projection);
+		if (nLook.z() < 0) corrAngle += (M_PI / 2);
 
-	double fps = 1.0/animationPeriod*1000;
-	double currentTime = (double)frame/fps;
+		//Vector3d vectorCorrection (0, sin(corrAngle), -cos(corrAngle));
+		Vector3d vectorCorrection (0, cos(corrAngle), -sin(corrAngle));
+		Vector3d vc1 (0,0,-1);
+		Vector3d vc2 = vectorCorrection;
+		vc1 = vectorCorrection;
+		vc2 = Vector3d (0,1,0);
+	
+		Quaterniond correction;	correction.setFromTwoVectors(vc1, vc2);
+		if (nLook.x() < 0)		correction.setFromTwoVectors(vc2, vc1);
 
-	vector<Eigen::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
-	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = Eigen::Quaternion<double>(1,0,0,0);
-
-	if (sk < solversEnabled.size() && !solversEnabled[sk]) return finalPositions;
-
-	for (int i = 0; i < solvers[sk].size(); ++i) {
-		Solver* s = solvers[sk][i];
-		vector<pair<int, Eigen::Quaternion<double> > > solverPos = s->solve(currentTime);
-		for (int j = 0; j < solverPos.size(); ++j) {
-			int id = solverPos[j].first;
-			Eigen::Quaternion<double> q = solverPos[j].second;
-			finalPositions[id] = finalPositions[id] * q;
-		}
+		return correction;
 	}
 
-	return finalPositions;
-}*/
+	return Quaterniond::Identity();
+}
 
-/*
-vector<Eigen::Quaternion<double> > SolverManager::computePostSolvers(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
+void SolverManager::update (int sk, skeleton* s) {
+	int n = solvers[sk].size();
+	Solver* lastSolver = solvers[sk][solvers[sk].size()-1];
+	Solver* firstSolver = solvers[sk][0];
+	lastSolver->update();
+	Chain* chain = lastSolver->outputs[sk];
 
-	vector<Eigen::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
-	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = Eigen::Quaternion<double>(1,0,0,0);
+	// Move root to initial joint
+	Vector3d translation = chain->positions[0] - s->joints[0]->translation;
+	s->joints[0]->addTranslation(translation.x(), translation.y(), translation.z());
 
-	for (int i = 0; i < postSolvers[sk].size(); ++i) {
-		Solver* s = postSolvers[sk][i];
-		vector<pair<int, Eigen::Quaternion<double> > > solverPos = s->solve(frame/24.0);
-		for (int j = 0; j < solverPos.size(); ++j) {
-			int id = solverPos[j].first;
-			Eigen::Quaternion<double> q = solverPos[j].second;
-			finalPositions[id] = finalPositions[id] * q;
-		}
-	}
+	vector<double> jointTwist (chain->positions.size(), 0);
+	int numTwisted = 15;
+	Quaterniond removedTwist = Quaterniond::Identity();
 
-	return finalPositions;
-}*/
+	// First pass to compute twist. TO OPTIMIZE
+	for (int i = 0; i < chain->positions.size()-1; ++i) {
+		s->joints[0]->computeWorldPos();
+		joint* jt = s->joints[i], * father, * child;
 
-/*
-vector<Eigen::Quaternion<double> > SolverManager::computeVerlet(int frame, int animationPeriod, const vector<skeleton*>& skeletons, int sk) {
+		Vector3d fatherPosition (0,0,0); 
+		Quaterniond fatherRotation = Quaterniond::Identity(); 
+		Quaterniond fatherTwist = Quaterniond::Identity();
 
-	vector<Eigen::Quaternion<double> > finalPositions(skeletons[sk]->joints.size());
-	for (int i = 0; i < finalPositions.size(); ++i) finalPositions[i] = Eigen::Quaternion<double>(1,0,0,0);
+		if(jt->father) {
+			father = jt->father;
+			fatherPosition = father->translation;
+			fatherRotation = father->rotation;
+			fatherTwist = father->twist;
+		} else jt->translation = fatherPosition + fatherRotation._transformVector(jt->pos);
 
-	if (sk >= verletEnabled.size() || !verletEnabled[sk]) return finalPositions;
-	SolverVerlet* verlet = verlets[sk];
+		if(jt->childs.size()>0)
+			child = jt->childs[0];
+		else break;
 
-	// Temp
-	glPointSize(8);
-	glColor3f(0,1,0);
-	glBegin(GL_POINTS);
-	for (int i = 0; i < verlet->currentPositions.size(); ++i)
-		glVertex3d(verlet->currentPositions[i].x(), verlet->currentPositions[i].y(), verlet->currentPositions[i].z());
-	glEnd();
+		//jt->translation = fatherPosition + fatherRotation._transformVector(jt->pos);
+		Quaterniond fatherRotation2 = fatherRotation * jt->qOrient;
+		child->translation = jt->translation + (fatherRotation2 * jt->qrot)._transformVector(child->pos);
 
-	glColor3f(1,0,0);
-	glBegin(GL_LINES);
-	for (int i = 0; i < verlet->currentPositions.size()-1; ++i) {
-		glVertex3d(verlet->currentPositions[i].x(), verlet->currentPositions[i].y(), verlet->currentPositions[i].z());
-		glVertex3d(verlet->currentPositions[i+1].x(), verlet->currentPositions[i+1].y(), verlet->currentPositions[i+1].z());
-	}
-	glEnd();
+		Vector3d u = child->translation - jt->translation;
+		Vector3d v = chain->positions[i+1] - jt->translation;
 
-	// Draw collisions
-	for (int i = 0; i < verlet->currentPositions.size(); ++i) {
-		glColor3f(0,1,0);
-		Eigen::Vector3d position = verlet->currentPositions[i];
-		bool found = false;
-		for (int v = 0; v < skeletons.size(); ++v) {
-			if (v == sk) continue;
-			if (found) break;
-			SolverVerlet* sv = verlets[v];
-			for (int j = 0; j < sv->currentPositions.size(); ++j) {
-				Eigen::Vector3d position2 = sv->currentPositions[j];
-				if ((position - position2).norm() < 50) {
-					glColor3f(1,0,0);
-					found = true;
-					break;
+		Vector3d uprime = fatherRotation2.inverse()._transformVector(u);
+		Vector3d vprime = fatherRotation2.inverse()._transformVector(v);
+		Vector3d w = jt->qrot.inverse()._transformVector(uprime);
+		Quaterniond newqrot;
+		newqrot.setFromTwoVectors(w, vprime);
+
+		//if (uprime.isApprox(vprime, 0.1)) continue;
+
+		jt->qrot = newqrot;
+		jt->rotation = fatherRotation * jt->qOrient * jt->qrot;
+
+		// Twist correction
+		if (i == chain->positions.size()-2) {
+			//Vector3d nLook = solverData->neck._transformVector(s->joints[19]->translation - s->joints[18]->translation).normalized();
+			Vector3d nLook = solverData->neck._transformVector(chain->positions[19] - chain->positions[18]).normalized();
+			Quaterniond twistQuat = computeTwist(jt, nLook);
+			
+			double fullTwist = twistQuat.w();
+			if (twistQuat.isApprox(Quaterniond::Identity(), 0.01)) continue;
+
+			jt->qrot = jt->qrot * twistQuat;
+			s->joints[0]->computeWorldPos();
+			//s->joints[i+1]->qrot = twistQuat * s->joints[i+1]->qrot;
+
+			Quaterniond twistQuat2 = twistQuat;
+			twistQuat = jt->twist;
+			Vector3d axis = jt->twist.vec().normalized();
+			if (twistQuat.isApprox(Quaterniond::Identity(), 0.01)) continue;
+
+			Quaterniond twistAux = jt->twist;
+			Vector3d newV = jt->father->qrot._transformVector(twistAux.vec());
+			twistAux = Quaterniond(twistAux.w(), newV.x(), newV.y(), newV.z());
+			jt->qOrient = twistAux.inverse() * jt->qOrient;
+			//jt->qrot = jt->qrot * jt->twist.inverse();
+
+			removedTwist = twistAux;
+
+			s->joints[0]->computeWorldPos();
+
+			glDisable(GL_LIGHTING);
+			glColor3f(0,1,1);
+			glBegin(GL_LINES);
+			Vector3d v = twistAux.vec();
+			v = jt->father->rotation._transformVector(v);
+			Vector3d p2 = jt->father->translation + v*50*twistAux.w();
+			glVertex3d(jt->father->translation.x(), jt->father->translation.y(), jt->father->translation.z());
+			glVertex3d(p2.x(), p2.y(), p2.z());
+			glEnd();
+			glEnable(GL_LIGHTING);
+
+			for (int i = jointTwist.size()-2; i > jointTwist.size()-2 - numTwisted; --i) jointTwist[i] = 1.0 / numTwisted;
+
+			// Smoothing
+			for (int i = 0; i < 0; ++i) {
+				double sum = 0;
+				for (int j = 1; j < jointTwist.size()-1; ++j) {
+					jointTwist[j] = (jointTwist[j-1] + jointTwist[j+1]) / 2;
+					sum += jointTwist[j];
 				}
+				jointTwist[jointTwist.size()-1] = jointTwist[jointTwist.size()-2] / 2;
+				for (int i = jointTwist.size()-1; i > jointTwist.size()-1 - numTwisted; --i) jointTwist[i] += (1.0 - sum) / numTwisted;
 			}
 		}
 
-		glPushMatrix();
-		glTranslated(position.x(), position.y(), position.z());
-		GLUquadricObj *quadric;
-		quadric = gluNewQuadric();
-		gluQuadricDrawStyle(quadric, GLU_LINE );
-		gluSphere(quadric,25,8,8);
-		glPopMatrix();
+		jt->rotation = fatherRotation * jt->qOrient * jt->qrot;
 	}
+	s->joints[0]->computeWorldPos();
+
+	Quaterniond transformation = Quaterniond::Identity();
 
 
-	vector<Eigen::Vector3d> lastFramePositions = verlets[sk]->currentPositions;
-
-	verlets[sk]->chain[0].first->computeWorldPos();
-	for (int i = 0; i < verlets[sk]->currentPositions.size(); ++i) 
-		verlets[sk]->currentPositions[i] = verlets[sk]->chain[i].first->getWorldPosition();
-
-	//verlets[sk]->currentPositions[0] = verlets[sk]->chain[0].first->getWorldPosition();
-
-
-	// Compute Verlet integration
-	double fps = 1.0/animationPeriod*1000;
-	double currentTime = (double)frame/fps;
-	int numReps = 20;
-	for (int k = 0; k < numReps-1; ++k) {
-		verlets[sk]->solveVerlet(currentTime + ((double)k / numReps)*animationPeriod/1000.0, verlets, sk);
-	}
-	vector<pair<int,Eigen::Vector3d> > positions = verlets[sk]->solveVerlet(currentTime + ((double)(numReps-1) / numReps)*animationPeriod/1000.0, verlets, sk);
-
-	// Check if some position has changed
-	bool positionsChanged = false;
-	for (int i = 0; i < positions.size(); ++i) {
-		Eigen::Vector3d lfp = lastFramePositions[i];
-		Eigen::Vector3d ver = positions[i].second;
-		if ((lastFramePositions[i] - positions[i].second).norm() > 1) {
-			positionsChanged = true;
-		}
-	}
-
-	if (!positionsChanged) {
-		for (int i = 1; i < positions.size(); ++i) {
-			positions[i].second = lastFramePositions[i];
-		}
-	}
+	/*int i = chain->positions.size()-3;
+	transformation = (s->joints[i]->qrot * s->joints[i+1]->qOrient);
 	
-	for (int i = 0; i < positions.size()-1; ++i) {
+	Vector3d v = removedTwist.vec();
+	Vector3d newV = transformation._transformVector(v);
+	removedTwist = Quaterniond(removedTwist.w(), newV.x(), newV.y(), newV.z());
+	s->joints[i]->qOrient = removedTwist * s->joints[i]->qOrient;
+	s->joints[0]->computeWorldPos();
+	return;*/
 
-		int currentID = positions[i].first;
+	for (int i = chain->positions.size()-2; i >= 0; --i) {
+		Quaterniond currentTwist = Quaterniond::Identity().slerp(jointTwist[i], removedTwist);
+		joint* jt = s->joints[i];
 
-		Eigen::Vector3d currentPos = verlets[sk]->chain[i].first->getWorldPosition();
-		Eigen::Vector3d nextPos = verlets[sk]->chain[i+1].first->getWorldPosition();
-		Eigen::Vector3d nextVerlet = positions[i+1].second;
-		
-		glDisable(GL_LIGHTING);
-		glColor3f(1,0,0);
-		glBegin(GL_LINES);
-		glVertex3f(currentPos.x(), currentPos.y(), currentPos.z());
-		glVertex3f(nextPos.x(), nextPos.y(), nextPos.z());
-		glEnd();
-		glColor3f(0,1,0);
-		glBegin(GL_LINES);
-		glVertex3f(currentPos.x(), currentPos.y(), currentPos.z());
-		glVertex3f(nextVerlet.x(), nextVerlet.y(), nextVerlet.z());
-		glEnd();
-		glEnable(GL_LIGHTING);
+		Vector3d v = currentTwist.vec();
+		Vector3d newV = transformation._transformVector(v);
+		currentTwist = Quaterniond(currentTwist.w(), newV.x(), newV.y(), newV.z());
+		jt->qOrient = currentTwist * jt->qOrient;
 
+		if (jt->father != 0) transformation = transformation * (jt->father->qrot * jt->qOrient);
 
+		continue;
 
-		Eigen::Vector3d nextPosE (nextPos.x(), nextPos.y(), nextPos.z());
-		Eigen::Vector3d nextVerletE (nextVerlet.x(), nextVerlet.y(), nextVerlet.z());
-		Eigen::Vector3d currentPosE (currentPos.x(), currentPos.y(), currentPos.z());
+		/*if (jointTwist[i] < 0.05) continue;
+		joint* jt = s->joints[i];
+		joint* father, *child;*/
 
-		Quaternion<double> qq = verlets[sk]->chain[i].first->rotation.inverse();
-		Eigen::Vector3d v1f = qq._transformVector(nextPosE - currentPosE);
-		Eigen::Vector3d v2f = qq._transformVector(nextVerletE - currentPosE);
+		/*Vector3d fatherPosition (0,0,0); 
+		Quaterniond fatherRotation = Quaterniond::Identity(); 
+		Quaterniond fatherTwist = Quaterniond::Identity();
 
-		v1f.normalize();
-		v2f.normalize();
+		if(jt->father) {
+			father = jt->father;
+			fatherPosition = father->translation;
+			fatherRotation = father->rotation;
+		} 
 
-		if (v1f.isApprox(v2f,0.001)) {
-			//if (dumpVectors) printf("Vectors equal\n");
-			continue;
-		}
-		
-		printf("Node %d:\n", i);
-		printf("Current pos: %f %f %f\n", currentPosE.x(), currentPosE.y(), currentPosE.z());
-		printf("Next pos: %f %f %f\n", nextPosE.x(), nextPosE.y(), nextPosE.z());
-		printf("Verlet pos: %f %f %f\n", nextVerletE.x(), nextVerletE.y(), nextVerletE.z());
-		printf("v1: %f %f %f\n", v1f.x(), v1f.y(), v1f.z());
-		printf("v2: %f %f %f\n", v2f.x(), v2f.y(), v2f.z());
+		if(jt->childs.size()>0)
+			child = jt->childs[0];
+		else break;*/
 
+		//Vector3d axis = (child->translation - jt->translation).normalized();
+		//Vector3d axis2 = (fatherRotation * jt->qOrient).inverse()._transformVector(axis);
+		//axis = (fatherRotation * jt->qOrient)._transformVector(axis);
 
-		Eigen::Quaternion<double> q;
-		q.setFromTwoVectors(v1f,v2f);
+		/*Vector3d axis = (jt->translation - father->translation);
+		axis = fatherRotation.inverse()._transformVector(axis).normalized();*/
 
-		bool vectorsTooSimilar = (v1f-v2f).norm() < 0.005;
-		bool aVectorIsZero = (v1f.norm() < 0.0005 || v2f.norm() < 0.0005);
-
-		if (vectorsTooSimilar || aVectorIsZero) {
-			// Do nothing
-		} else {
-			verlets[sk]->chain[i].first->addRotation(q);
-			verlets[sk]->chain[0].first->computeWorldPos();
-		}
+		//jt->father->qrot = Quaterniond(jointTwist[i], axis.x(), axis.y(), axis.z()).normalized() * jt->father->qrot;
+		//jt->qrot = (Quaterniond(jointTwist[i], axis2.x(), axis2.y(), axis2.z()).normalized() * jt->qrot).normalized();
+		//jt->father->rotation = jt->father->father->rotation * jt->father->qOrient * jt->father->qrot;
+		//s->joints[0]->computeWorldPos();
+		//jt->rotation = fatherRotation * jt->qOrient * jt->qrot;
 	}
 
-	skeletons[sk]->joints[0]->dirtyFlag = true;
-	return finalPositions;
-}*/
+	s->joints[0]->computeWorldPos();
+}
+
+		/*if (i == chain->positions.size()-2) {
+			Vector3d nLook = solverData->neck._transformVector(s->joints[19]->translation - s->joints[18]->translation).normalized();
+			Quaterniond twistQuat = computeTwist(jt, nLook);
+			
+			double fullTwist = twistQuat.w();
+			if (twistQuat.isApprox(Quaterniond::Identity(), 0.01)) continue;
+
+			jt->qrot = jt->qrot * twistQuat;
+			s->joints[0]->computeWorldPos();
+
+			Quaterniond twistQuat2 = twistQuat;
+			twistQuat = jt->twist;
+			if (twistQuat.isApprox(Quaterniond::Identity(), 0.01)) continue;
+
+			for (int i = jointTwist.size()-2; i > jointTwist.size()-2 - numTwisted; --i) jointTwist[i] = fullTwist / numTwisted;
+
+			// Smoothing
+			for (int i = 0; i < 0; ++i) {
+				double sum = 0;
+				for (int j = 1; j < jointTwist.size()-1; ++j) {
+					jointTwist[j] = (jointTwist[j-1] + jointTwist[j+1]) / 2;
+					sum += jointTwist[j];
+				}
+				jointTwist[jointTwist.size()-1] = jointTwist[jointTwist.size()-2] / 2;
+				for (int i = jointTwist.size()-1; i > jointTwist.size()-1 - numTwisted; --i) jointTwist[i] += (fullTwist - sum) / numTwisted;
+			}	
+		}*/

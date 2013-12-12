@@ -40,9 +40,11 @@ class Intelligence {
 		freqMultiplier = 1;
 
 		globalLookPoint = Vector3d(0,0,0);
-		globalLookPointRadius = 500;
+		globalLookPointRadius = 700;
 		globalThita = fRand(0, M_PI/6.0);
-		globalPhi = fRand(0, 2*M_PI);
+		globalPhi = fRand(-M_PI/6, M_PI/6);
+		globalPhi = 0;
+		globalThita = 0;
 	}
 
 	void setState(int i) {
@@ -63,13 +65,17 @@ class Intelligence {
 	void updateLookPoint() {
 		// Select a random area using global sphere and random values for thita and phi
 		// Random val = min + random between 0..(max - min)
+		globalPhi = phi = 0;
+		globalThita = thita = 0;
+		lookPointRadius = 0;
+
 		Vector3d p = globalLookPoint;
 		p.x() += globalLookPointRadius * sin(globalThita) * sin(globalPhi);
 		p.y() += globalLookPointRadius * cos(globalThita);
 		p.z() += globalLookPointRadius * sin(globalThita) * cos(globalPhi);
 
-		thita += 0.01;
-		phi += 0.03;
+		//thita += 0.01;
+		//phi += 0.03;
 		if (currentState == IDLE) 
 			//look->lookPoint = lookPoint;
 			look->lookPoint = p;

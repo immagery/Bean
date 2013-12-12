@@ -59,9 +59,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->lookRadius, SIGNAL(valueChanged(int)), this, SLOT(changeLookPointRadius(int)));
 
+	connect(ui->verletRigidness, SIGNAL(toggled(bool)), this, SLOT(toggleVerletRigidness(bool)));
+
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
     
+}
+
+void MainWindow::toggleVerletRigidness(bool) {
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->rigidness = ui->verletRigidness->isChecked();
 }
 
 void MainWindow::changeLookPointRadius(int) {
