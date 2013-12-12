@@ -17,12 +17,23 @@ public:
 	Quaterniond dirRot;
 	Quaterniond neck;
 
+	// Look
+	Vector3d lookPointRadius;
+	double thita, phi;
+
+	// Oscillation
+	double ampMultiplier, freqMultiplier;
+
+	bool rigidness;
+
 	SolverData(void) {
 		time = fps = gravity = 0;
 		lookPoint = Vector3d(0,0,0);
 		baseRotation = Quaterniond::Identity();
 		dirRot = Quaterniond::Identity();
 		baseTranslation = Vector3d(0,0,0);
+		ampMultiplier = freqMultiplier = 1;
+		rigidness = false;
 	}
 	~SolverData(void) {}
 };

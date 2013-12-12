@@ -43,9 +43,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
 	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool)));
 
-	//TODO: se habrá chafado al fusionar la interficie... ya se ve que la interficie cuesta
-	connect(ui->verletStiffness, SIGNAL(valueChanged(int)), this, SLOT(changeVerletStiffness(int)));
-
 	connect(ui->gravitySlider, SIGNAL(valueChanged(int)), this, SLOT(changeVerletGravity(int)));
 
 	connect(ui->lookX, SIGNAL(valueChanged(int)), this, SLOT(changeLookX(int)));
@@ -55,9 +52,74 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->drawLocatorsCB, SIGNAL(toggled(bool)), this, SLOT(changedDrawLocators(bool)));
 	connect(ui->behaviourCombo, SIGNAL(	currentIndexChanged(int)), this, SLOT(changeBehaviour(int)));
 
+	connect(ui->snakeSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSnake(int)));
+
+	connect(ui->oscAmplitude, SIGNAL(valueChanged(int)), this, SLOT(changeOscAmplitude(int)));
+	connect(ui->oscFrequency, SIGNAL(valueChanged(int)), this, SLOT(changeOscAmplitude(int)));
+
+	connect(ui->lookRadius, SIGNAL(valueChanged(int)), this, SLOT(changeLookPointRadius(int)));
+
+	connect(ui->verletRigidness, SIGNAL(toggled(bool)), this, SLOT(toggleVerletRigidness(bool)));
+
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
     
+}
+
+void MainWindow::toggleVerletRigidness(bool) {
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->rigidness = ui->verletRigidness->isChecked();
+}
+
+void MainWindow::changeLookPointRadius(int) {
+	int newRadius = ui->lookRadius->value();
+	int selectedSnake = ui->snakeSelector->currentIndex();
+	if (selectedSnake == 0) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
+			Intelligence* brain = ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i];
+			brain->globalLookPointRadius = newRadius;
+			brain->globalThita = brain->fRand(0, M_PI/6.0);
+			brain->globalPhi = brain->fRand(0, 2.0*M_PI);
+		}
+	} else {
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[selectedSnake-1]->lookPointRadius = newRadius;
+	}
+}
+
+void MainWindow::changeOscAmplitude(int) {
+	int selectedSnake = ui->snakeSelector->currentIndex();
+	double value = ui->oscAmplitude->value() / 10.0;
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->ampMultiplier = value;
+	if (selectedSnake == 0) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i)
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->ampMultiplier = value;
+	}
+	else ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[selectedSnake-1]->ampMultiplier = value;
+}
+
+void MainWindow::changeOscFrequency(int) {
+	int selectedSnake = ui->snakeSelector->currentIndex();
+	double value = ui->oscFrequency->value() / 10.0;
+	if (selectedSnake == 0) {
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->freqMultiplier = value;
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i)
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->freqMultiplier = value;
+	}
+	else ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[selectedSnake-1]->freqMultiplier = value;
+}
+
+void MainWindow::selectSnake(int) {
+	ui->oscAmplitude->blockSignals(true);
+	int selectedSnake = ui->snakeSelector->currentIndex();
+	if (selectedSnake == 0) {
+		ui->oscAmplitude->setValue(((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->ampMultiplier*10);
+		ui->oscFrequency->setValue(((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->freqMultiplier*10);
+		ui->lookRadius->setValue(((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[0]->globalLookPointRadius);
+	} else if (selectedSnake > 0) {
+		ui->oscAmplitude->setValue(((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[selectedSnake-1]->ampMultiplier * 10);
+		ui->oscFrequency->setValue(((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[selectedSnake-1]->freqMultiplier * 10);
+		ui->lookRadius->setValue(((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[selectedSnake-1]->lookPointRadius);
+	}
+	ui->oscAmplitude->blockSignals(false);
 }
 
 void MainWindow::changeBehaviour(int) {
@@ -97,9 +159,12 @@ void MainWindow::loadSolvers() {
 	ui->useVerlet->toggle();
 	ui->useSolvers->setCheckable(true);
 
+	ui->snakeSelector->removeItem(0);
+	ui->snakeSelector->addItem("All");
+
 	for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->solvers.size(); ++i) {
 		QString text = QString::number((i));
-		ui->lookSelector->addItem(text);
+		ui->snakeSelector->addItem(text);
 	}
 }
 
@@ -116,7 +181,7 @@ void MainWindow::toggleSolvers(bool) {
 void MainWindow::changeLookX(int) {
 	int increment = ui->lookX->value() - lastLX;
 	lastLX = ui->lookX->value();
-	int index = ui->lookSelector->currentIndex();
+	int index = ui->snakeSelector->currentIndex();
 	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(increment/10.0,0,0);
@@ -137,7 +202,7 @@ void MainWindow::changeLookX(int) {
 void MainWindow::changeLookY(int) {
 	int increment = ui->lookY->value() - lastLY;
 	lastLY = ui->lookY->value();
-	int index = ui->lookSelector->currentIndex();
+	int index = ui->snakeSelector->currentIndex();
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.y() += increment/100.0;
@@ -150,7 +215,7 @@ void MainWindow::changeLookY(int) {
 void MainWindow::changeLookZ(int) {
 	int increment = ui->lookZ->value() - lastLZ;
 	lastLZ = ui->lookZ->value();
-	int index = ui->lookSelector->currentIndex();
+	int index = ui->snakeSelector->currentIndex();
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.z() += increment/100.0;
