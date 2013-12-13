@@ -22,7 +22,7 @@ public:
 
 public slots:
 	void loadSolvers();
-	void toggleVerlet(bool);
+	void toggleTwistCorrection(bool);
 	void toggleSolvers(bool);
 	void changeVerletStiffness(int);
 	void changeVerletGravity(int);

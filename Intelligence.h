@@ -22,6 +22,7 @@ class Intelligence {
 	double thita, phi;		// thita = -pi/2..pi/2 (altitude), phi = 0..2pi
 	double globalThita, globalPhi;
 	SolverLook* look;
+	Vector3d restUpVector;	bool lookInit;
 
 	// Oscillating stuff
 	double ampMultiplier;
@@ -39,12 +40,14 @@ class Intelligence {
 		ampMultiplier = 1;
 		freqMultiplier = 1;
 
+		lookInit = false;
+
 		globalLookPoint = Vector3d(0,0,0);
 		globalLookPointRadius = 700;
 		globalThita = fRand(0, M_PI/6.0);
 		globalPhi = fRand(-M_PI/6, M_PI/6);
 		globalPhi = 0;
-		globalThita = 0;
+		globalThita = M_PI/12;
 	}
 
 	void setState(int i) {
@@ -67,6 +70,8 @@ class Intelligence {
 		// Random val = min + random between 0..(max - min)
 		globalPhi = phi = 0;
 		globalThita = thita = 0;
+		globalPhi = 0;
+		globalThita = M_PI/12;
 		lookPointRadius = 0;
 
 		Vector3d p = globalLookPoint;

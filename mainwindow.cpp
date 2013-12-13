@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->setupSolvers, SIGNAL(clicked()), this, SLOT(loadSolvers()));
 	connect(ui->useSolvers, SIGNAL(toggled(bool)), this, SLOT(toggleSolvers(bool))); 
-	connect(ui->useVerlet, SIGNAL(toggled(bool)), this, SLOT(toggleVerlet(bool)));
+	connect(ui->twistCorrection, SIGNAL(toggled(bool)), this, SLOT(toggleTwistCorrection(bool)));
 
 	connect(ui->gravitySlider, SIGNAL(valueChanged(int)), this, SLOT(changeVerletGravity(int)));
 
@@ -155,8 +155,7 @@ void MainWindow::setViewer() {
 void MainWindow::loadSolvers() {
     ((BeanViewer*)(ui->glCustomWidget))->loadSolvers();
 	ui->setupSolvers->setEnabled(false);
-	ui->useVerlet->setCheckable(true);
-	ui->useVerlet->toggle();
+	//ui->useVerlet->setCheckable(true);
 	ui->useSolvers->setCheckable(true);
 
 	ui->snakeSelector->removeItem(0);
@@ -168,13 +167,13 @@ void MainWindow::loadSolvers() {
 	}
 }
 
-void MainWindow::toggleVerlet(bool) {
-	bool b = ui->useVerlet->isChecked();
+void MainWindow::toggleTwistCorrection(bool) {
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->twistCorrectionEnabled = ui->twistCorrection->isChecked();
 	//((BeanViewer*)(ui->glCustomWidget))->solverManager->hasVerlet = b;
 }
 
 void MainWindow::toggleSolvers(bool) {
-	bool b = ui->useVerlet->isChecked();
+	//bool b = ui->useVerlet->isChecked();
 	//((BeanViewer*)(ui->glCustomWidget))->solverManager->oscillation = b;
 }
 

@@ -53,6 +53,8 @@ void BeanViewer::loadSolvers() {
 	
 	for (int sk = 0; sk < escena->skeletons.size(); ++sk) {
 
+
+
 		skeleton* s = escena->skeletons[sk];
 		int n = s->joints.size();
 
@@ -78,6 +80,9 @@ void BeanViewer::loadSolvers() {
 		s->joints[0]->computeWorldPos();
 		solverManager->addSkeleton(sk, s);
 
+
+		solverManager->brains[sk]->restUpVector = s->joints[18]->rotation.inverse()._transformVector(Vector3d(0,0,-1));
+
 		// Create solvers to test
 		SolverInit *init = new SolverInit();
 		SolverDir *dir = new SolverDir();
@@ -91,6 +96,8 @@ void BeanViewer::loadSolvers() {
 		solverManager->addSolver(verlet, sk);
 		solverManager->addSolver(look, sk);
 		solverManager->addSolver(verlet2, sk);
+
+		solverManager->myRot = s->joints[18]->rotation;
 
 		solverManager->brains[sk]->look = look;
 		solverManager->brains[sk]->sinus = sin;
@@ -130,32 +137,19 @@ void BeanViewer::loadSolvers() {
 
 	}
 
-		int nodeSize = verlet->currentPositions[0].size();
-		int sn = verlet->positioningStrengths.size();
-		int rigids = sn / 4;
-		Vector3d base = verlet->currentPositions[0][0];
-		double length = (verlet->currentPositions[0][nodeSize-1] - base).norm();
-		double B = 0.25;	double C = 0.85;
-		double vB = 1;		double vC = 0.25;
-		for (int i = 0; i < sn; ++i) {
-			double p = (verlet->currentPositions[0][i] - base).norm() / length;
-			if (p <= B) verlet->positioningStrengths[i] = 1;
-			else if (p <= C) verlet->positioningStrengths[i] = vB + ((p - B)/(C - B))*(vC-vB);
-			else verlet->positioningStrengths[i] = vC;
-		}
-		
-
-		/*verlet->positioningStrengths[0] *= 2;
-		verlet->positioningStrengths[1] *= 1.5;
-		verlet->positioningStrengths[2] *= 1.2;
-		verlet->positioningStrengths[3] *= 1.15;
-		verlet->positioningStrengths[4] *= 1.07;
-		verlet->positioningStrengths[5] *= 1.03;
-		verlet->positioningStrengths[6] *= 1.01;*/
-		//verlet->positioningStrengths[1] = verlet->positioningStrengths[2] = 1;
-		//verlet2->positioningStrengths[0] = 0;
-		//verlet2->positioningStrengths[1] = 3;
-
+	int nodeSize = verlet->currentPositions[0].size();
+	int sn = verlet->positioningStrengths.size();
+	int rigids = sn / 4;
+	Vector3d base = verlet->currentPositions[0][0];
+	double length = (verlet->currentPositions[0][nodeSize-1] - base).norm();
+	double B = 0.25;	double C = 0.85;
+	double vB = 1;		double vC = 0.25;
+	for (int i = 0; i < sn; ++i) {
+		double p = (verlet->currentPositions[0][i] - base).norm() / length;
+		if (p <= B) verlet->positioningStrengths[i] = 1;
+		else if (p <= C) verlet->positioningStrengths[i] = vB + ((p - B)/(C - B))*(vC-vB);
+		else verlet->positioningStrengths[i] = vC;
+	}
 }
 
 void drawPointLocator(Eigen::Vector3d pt, float size, bool spot)
@@ -190,22 +184,28 @@ void BeanViewer::draw() {
 
 	if (escena->skeletons.size() > 0 && aniManager.simulationEnabled) {
 		solverManager->newFrame(frame);
+
 		for (int sk = 0; sk < escena->skeletons.size(); ++sk) {
+			skeleton* s = escena->skeletons[sk];
+
 			solverManager->update(sk, escena->skeletons[sk]);
 
 			if (drawLookLocators) {
 				Vector3d p1 = escena->skeletons[sk]->joints[solverManager->brains[sk]->look->outputs[0]->positions.size()-2]->translation;
 				Vector3d p2 = solverManager->brains[sk]->look->lookPoint;
+				Vector3d p3 = s->joints[18]->translation;
 				glDisable(GL_LIGHTING);
 				glColor3f(0.5, 0.1, 0.1);
 				glBegin(GL_LINES);
 				glVertex3d(p1.x(), p1.y(), p1.z());
 				glVertex3d(p2.x(), p2.y(), p2.z());
+				glVertex3d(p3.x(), p3.y(), p3.z());
+				glVertex3d(p2.x(), p2.y(), p2.z());
 				drawPointLocator(solverManager->brains[sk]->look->lookPoint, 5, true);
 				glEnable(GL_LIGHTING);
 			}
 		}
-		//solverManager->draw();
+		solverManager->draw();
 	}
 
 	// Skinning

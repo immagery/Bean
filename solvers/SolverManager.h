@@ -20,8 +20,11 @@ public:
 	
 	vector<bool> verletEnabled;
 	vector<bool> solversEnabled;
+	bool twistCorrectionEnabled;
 
-	Quaterniond computeTwist (joint* jt, Vector3d nLook);
+	Quaterniond myRot;
+
+	Quaterniond computeTwist (joint* jt, Vector3d nLook, Vector3d restUp);
 	
 	void newFrame (int frame) {
 
@@ -59,10 +62,10 @@ public:
 				Vector3d p = chain->positions[i];
 				glPushMatrix();
 				glTranslated(p.x(), p.y(), p.z());
-				gluSphere(quadric,2,8,8);
+				gluSphere(quadric,7,8,8);
 				glPopMatrix();
 			}
-			chain = solvers[sk][1]->outputs[0];
+			chain = solvers[sk][3]->outputs[0];
 			glColor3f(0,1,0);
 			for (int i = 0; i < chain->positions.size(); ++i) {
 				Vector3d p = chain->positions[i];
