@@ -144,7 +144,7 @@ void SolverVerlet::solve2(double ttime) {
 						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
 							double distance = (currentPositions[sk][i] - currentPositions[sk2][j]).norm();
 							Vector3d currentDist = (currentPositions[sk][i] - currentPositions[sk2][j]);
-							double restDistance = 00;
+							double restDistance = 50;
 
 							if (distance < restDistance) {
 								double diff = distance - restDistance;
@@ -184,7 +184,24 @@ void SolverVerlet::solve3(double ttime) {
 
 				// Move the head to its ideal positions
 				int hi = currentPositions[ip].size()-1;
-				currentPositions[ip][hi] = idealPositions[ip][hi];
+				//currentPositions[ip][hi] = idealPositions[ip][hi];
+
+				Vector3d idealPoint = idealPositions[ip][hi];
+				Vector3d currentPoint = currentPositions[ip][hi];
+				Vector3d restDistance (0,0,0);
+				Vector3d currentDist = currentPositions[ip][hi] - idealPoint;
+
+				if (currentDist.norm() > 0) {
+					double diff = currentDist.norm() - restDistance.norm();
+					Vector3d delta1 = currentDist / currentDist.norm() * posS * diff;
+					Vector3d vel1 = (currentPositions[ip][hi] - lastPositions[ip][hi]);
+					Vector3d rigid = delta1;
+					double v = (currentDist.normalized()).dot(vel1.normalized());
+					if (currentDist.isZero(0.001) || vel1.isZero(0.001)) v = 0;
+					Vector3d damp1 = currentDist / currentDist.norm() * posD * v;
+					Vector3d inc = (delta1+damp1+rigid*positioningStrengths[hi])*(posStiff)*deltaTime;
+					currentPositions[ip][hi] -= inc;
+				}
 
 				for (int i = hi; i >= 0; --i) {
 					if (i == hi) neighbourDistance = 15;
@@ -297,7 +314,7 @@ void SolverVerlet::solve3(double ttime) {
 						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
 							double distance = (currentPositions[sk][i] - currentPositions[sk2][j]).norm();
 							Vector3d currentDist = (currentPositions[sk][i] - currentPositions[sk2][j]);
-							double restDistance = 00;
+							double restDistance = 50;
 
 							if (distance < restDistance) {
 								double diff = distance - restDistance;

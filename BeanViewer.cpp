@@ -33,7 +33,7 @@ void BeanViewer::loadSolvers() {
 	verlet->index1 = 0;	verlet->index2 = 19;
 	verlet->fps = 1000.0 / animationPeriod();
 	verlet->data = solverManager->solverData;
-	verlet->posS = 0.5;
+	//verlet->posS = 0.5;
 	verlet->hasRigid = false;
 	verlet->lookSolver = false;
 
@@ -61,8 +61,8 @@ void BeanViewer::loadSolvers() {
 		int row = sk / snakesPerRow;
 		int col = sk % snakesPerRow;
 
-		row = 0;
-		col = 2;
+		//row = 0;
+		//col = 2;
 
 		double x = (col - 2) * 50;
 		double z = row * -75;
@@ -268,7 +268,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 1; ++i) {
+		for (int i = 0; i < 3; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());
