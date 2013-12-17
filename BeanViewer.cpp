@@ -268,7 +268,9 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 1; ++i) {
+		int snakesCount = 10;
+
+		for (int i = 0; i < snakesCount; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());
