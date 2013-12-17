@@ -33,7 +33,7 @@ public:
 		dirRot = Quaterniond::Identity();
 		baseTranslation = Vector3d(0,0,0);
 		ampMultiplier = freqMultiplier = 1;
-		rigidness = false;
+		rigidness = true;
 	}
 	~SolverData(void) {}
 };

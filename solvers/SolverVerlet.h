@@ -18,6 +18,7 @@ public:
 	double distS, distD, distStiff;		// springs between nodes
 	double posS, posD, posStiff;		// springs between nodes and ideal positions
 	double colS, colD, colStiff;		// dynamic springs to avoid collisions
+	double rigidS, rigidD, rigidStiff;
 	vector<double> positioningStrengths;
 
 	SolverVerlet();
