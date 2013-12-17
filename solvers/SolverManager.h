@@ -17,6 +17,8 @@ public:
 
 	map<int, vector<Solver*> > solvers;
 	map<int, Intelligence*> brains;
+	map<int, double> previousLookAngles;
+	map<int, int> numVueltas;
 	
 	vector<bool> verletEnabled;
 	vector<bool> solversEnabled;
@@ -83,6 +85,8 @@ public:
 	void addSkeleton(int id, skeleton* s) { 
 		solvers[id] = vector<Solver*>();
 		brains[id] = new Intelligence(id);
+		previousLookAngles[id] = 0;
+		numVueltas[id] = 0;
 	}
 
 	void addSolver(Solver *s, int sk) {

@@ -7,7 +7,7 @@ SolverVerlet::SolverVerlet() : Solver() {
 	lastTime = 0;
 	velocityDamping = 0.9;
 	positioningStrengths = vector<double>();
-	distS = 5;	distD = 0.05;	distStiff = 1;
+	distS = 100;	distD = 0.05;	distStiff = 1;
 	posS = 1;	posD = 0.05;	posStiff = 1;
 	colS = 500;	colD = 500;		colStiff = 1;
 }

@@ -61,8 +61,8 @@ void BeanViewer::loadSolvers() {
 		int row = sk / snakesPerRow;
 		int col = sk % snakesPerRow;
 
-		//row = 0;
-		//col = 2;
+		row = 0;
+		col = 2;
 
 		double x = (col - 2) * 50;
 		double z = row * -75;
@@ -205,7 +205,7 @@ void BeanViewer::draw() {
 				glEnable(GL_LIGHTING);
 			}
 		}
-		solverManager->draw();
+		//solverManager->draw();
 	}
 
 	// Skinning
@@ -268,7 +268,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 1; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());

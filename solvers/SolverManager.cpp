@@ -58,6 +58,14 @@ Quaterniond SolverManager::computeTwist (joint* jt, Vector3d nLook, Vector3d res
 	return newqrot;
 }
 
+int intDiv (double n, int d) { return (int) (n / d); }
+
+double mod (double n, int d) {
+	double div = n / d;
+	int intrem = (int)div * d;
+	return n - intrem;
+}
+
 void SolverManager::update (int sk, skeleton* s) {
 	int n = solvers[sk].size();
 	Solver* lastSolver = solvers[sk][solvers[sk].size()-1];
@@ -70,7 +78,8 @@ void SolverManager::update (int sk, skeleton* s) {
 	s->joints[0]->addTranslation(translation.x(), translation.y(), translation.z());
 
 	vector<double> jointTwist (chain->positions.size(), 0);
-	int numTwisted = 5;
+	int numTwisted = 3;
+	int smoothingIterations = 0;
 	Quaterniond removedTwist = Quaterniond::Identity();
 
 
@@ -78,6 +87,7 @@ void SolverManager::update (int sk, skeleton* s) {
 	s->joints[0]->computeWorldPos();
 
 	// First pass to compute twist. TO OPTIMIZE
+	Vector3d pp;
 	for (int i = 0; i < chain->positions.size()-1; ++i) {
 		s->joints[0]->computeWorldPos();
 		joint* jt = s->joints[i], * father, * child;
@@ -97,7 +107,6 @@ void SolverManager::update (int sk, skeleton* s) {
 			child = jt->childs[0];
 		else break;
 
-		//jt->translation = fatherPosition + fatherRotation._transformVector(jt->pos);
 		Quaterniond fatherRotation2 = fatherRotation * jt->qOrient;
 		child->translation = jt->translation + (fatherRotation2 * jt->qrot)._transformVector(child->pos);
 
@@ -122,34 +131,81 @@ void SolverManager::update (int sk, skeleton* s) {
 			// proj(v,n) = v - v.dot(n) * n
 			Vector3d quatAxis = nLook;
 			Vector3d u = jt->rotation._transformVector(jt->rRotation.inverse()._transformVector(Vector3d(0,1,0))).normalized();
+			//if (nLook.x() < 0) u.z() *= -1;
+
+
+
 			Vector3d v (0,1,0);
 			u = (u - u.dot(quatAxis)*quatAxis).normalized();
 			v = (v - v.dot(quatAxis)*quatAxis).normalized();
-			u = jt->rotation.inverse()._transformVector(u);
-			v = jt->rotation.inverse()._transformVector(v);
-			//double w = u.dot(v);
-			//Quaterniond twistCorrecter(w, quatAxis.x(), quatAxis.y(), quatAxis.z());
-			Quaterniond twistCorrecter;	twistCorrecter.setFromTwoVectors(u, v);
-			//twistCorrecter = Quaterniond(twistCorrecter.w(), quatAxis.x(), quatAxis.y(), quatAxis.z());
-			//twistCorrecter.normalize();
-			//if (u.isApprox(v), 0.001) twistCorrecter = Quaterniond::Identity();
+			Vector3d u2 = jt->rotation.inverse()._transformVector(u);
+			Vector3d v2 = jt->rotation.inverse()._transformVector(v);
+
+			Quaterniond twistQuat = Quaterniond::Identity();
+			twistQuat.setFromTwoVectors(u, v);
+
+			if (twistCorrectionEnabled) {
+				double twistAngle = acos(u.dot(v));
+				if (u.isApprox(v,0.001)) twistAngle = 0;
+				double dotProd = u.dot(v);
+				double s = sign(nLook.x());
+				double twistAngleDeg = sign(nLook.x()) * twistAngle * 180 / M_PI;
+				if (sign(nLook.x()) < 0) {
+					twistAngleDeg *= 1;
+				}
+
+				Vector3d u3 = nLook.cross(v);
+				Quaterniond positiveQuarter;	positiveQuarter.setFromTwoVectors(u3,v);
+				Quaterniond negativeQuarter;	negativeQuarter.setFromTwoVectors(v,u3);
+
+				if (previousLookAngles[sk] > 90) {			// CASO POSITIVO
+					if (twistAngleDeg < 0) twistAngleDeg += 360;
+					double increment = twistAngleDeg - mod(previousLookAngles[sk], 360);
+					previousLookAngles[sk] += increment;
+
+					int numQuarters = intDiv(previousLookAngles[sk], 90);
+					Quaterniond extraTurns = Quaterniond::Identity();
+					while (numQuarters > 0) {
+						extraTurns = extraTurns * negativeQuarter;
+						--numQuarters;
+					}
+					Quaterniond remainder;	remainder.setFromTwoVectors (extraTurns._transformVector(u), v);
+					twistQuat = extraTurns * remainder;
+				} else if (previousLookAngles[sk] < -90) {	// CASO NEGATIVO
+					bool bad;
+					bad = true;
+				} else {	// CASO NEUTRAL
+					if (twistAngleDeg < 0) twistAngleDeg += 360;
+					double increment = twistAngleDeg - mod(previousLookAngles[sk], 360);
+					previousLookAngles[sk] += increment;
+					twistQuat.setFromTwoVectors(u,v);
+				}
 
 
-			//Quaterniond twistQuat = computeTwist(jt, nLook, brains[sk]->restUpVector);
-			Quaterniond twistQuat = twistCorrecter;
 
+				Vector3d vvvv = twistQuat.vec();
+				twistQuat.vec() = jt->rotation.inverse()._transformVector(vvvv);
+
+
+
+				glDisable(GL_LIGHTING);
+				glColor3f(1,1,0);
+				glBegin(GL_LINES);																// DRAW CURRENT UP
+				pp = jt->translation + u*100;
+				glVertex3d(jt->translation.x(), jt->translation.y(), jt->translation.z());
+				glVertex3d(pp.x(), pp.y(), pp.z());
+				glEnd();
+				glEnable(GL_LIGHTING);
+
+				//Vector3d remaining (sin(angleAux*M_PI / 180.0), 0, cos(angleAux*M_PI / 180.0));
+				//Quaterniond correction3;	correction3.setFromTwoVectors(Vector3d(0,0,1), remaining);
+				//twistQuat = twistQuat * correction1 * correction2 * correction3;
+			}
+
+			
 			Vector3d currentUp = jt->rotation._transformVector(brains[sk]->restUpVector);
 			currentUp = jt->rotation._transformVector(jt->rRotation.inverse()._transformVector(Vector3d(0,1,0)));
 
-			// Project currentUp to the plane formed by UP, FRONT and save the rotation from 0,1,0 to it
-			Vector3d vProj = currentUp.dot(Vector3d(0,1,0))*Vector3d(0,1,0) + currentUp.dot(Vector3d(0,0,1))*Vector3d(0,0,1);
-			vProj = nLook;
-			vProj.x() = 0;
-			vProj.normalize();
-			Quaterniond savedQuat;	savedQuat.setFromTwoVectors(jt->rotation.inverse()._transformVector(Vector3d(0,1,0)), 
-																jt->rotation.inverse()._transformVector(vProj));
-
-			Vector3d pp;
 			/*glDisable(GL_LIGHTING);
 			glColor3f(1,1,0);
 			glBegin(GL_LINES);																// DRAW CURRENT UP
@@ -173,28 +229,7 @@ void SolverManager::update (int sk, skeleton* s) {
 			glEnd();*/
 
 			jt->qrot = jt->qrot * twistQuat;
-			//jt->qrot = twistQuat;
 			s->joints[0]->computeWorldPos();
-
-			/*glColor3f(0,0.5,1);
-			pp = jt->translation + vProj*100;
-			glBegin(GL_LINES);
-			glVertex3d(jt->translation.x(), jt->translation.y(), jt->translation.z());
-			glVertex3d(pp.x(), pp.y(), pp.z());
-			glEnd();*/
-
-			/*currentUp = jt->rotation._transformVector(brains[sk]->restUpVector);
-
-			glDisable(GL_LIGHTING);
-			glColor3f(0,1,0);
-			glBegin(GL_LINES);
-			pp = jt->translation + currentUp*100;
-			glVertex3d(jt->translation.x(), jt->translation.y(), jt->translation.z());
-			glVertex3d(pp.x(), pp.y(), pp.z());
-			glEnd();*/
-
-			//return;
-			//s->joints[i+1]->qrot = twistQuat * s->joints[i+1]->qrot;
 
 			Quaterniond twistQuat2 = twistQuat;
 			twistQuat = jt->twist;
@@ -214,7 +249,7 @@ void SolverManager::update (int sk, skeleton* s) {
 			for (int i = jointTwist.size()-2; i > jointTwist.size()-2 - numTwisted; --i) jointTwist[i] = 1.0 / numTwisted;
 
 			// Smoothing
-			for (int i = 0; i < 0; ++i) {
+			for (int i = 0; i < smoothingIterations; ++i) {
 				vector<double> averages (jointTwist.size());
 				double sum = 0;
 				for (int j = 0; j < jointTwist.size()-1; ++j) {
@@ -245,18 +280,23 @@ void SolverManager::update (int sk, skeleton* s) {
 	
 	if (!twistCorrectionEnabled) return;
 
-	Quaterniond transformation = Quaterniond::Identity();
-	for (int i = chain->positions.size()-2; i >= 0; --i) {
-		if (jointTwist[i] < 0.05) continue;
-		Quaterniond currentTwist = Quaterniond::Identity().slerp(jointTwist[i], removedTwist);
-		joint* jt = s->joints[i];
 
+
+	for (int j = numTwisted; j >= 0; --j) {
+		int id = chain->positions.size()-2 - j;
+		Quaterniond currentTwist = Quaterniond::Identity().slerp(jointTwist[id], removedTwist);
+		joint* jt = s->joints[id];
+
+		Quaterniond transformation = Quaterniond::Identity();
+		for (int i = chain->positions.size()-2; i > id; --i) {
+			joint* jt2 = s->joints[i];
+			if (jt2->father != 0) transformation =  transformation * jt2->qOrient.inverse() * jt2->father->qrot.inverse();
+		}
+			
 		Vector3d v = currentTwist.vec();
-		Vector3d newV = transformation._transformVector(v);
+		Vector3d newV = transformation.inverse()._transformVector(v);
 		currentTwist = Quaterniond(currentTwist.w(), newV.x(), newV.y(), newV.z());
-		jt->qOrient = currentTwist * jt->qOrient;
-
-		if (jt->father != 0) transformation = transformation * (jt->father->qrot * jt->qOrient);
+		jt->qOrient = jt->qOrient * currentTwist;
 	}
 
 	s->joints[0]->computeWorldPos();
