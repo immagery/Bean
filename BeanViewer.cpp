@@ -61,9 +61,6 @@ void BeanViewer::loadSolvers() {
 		int row = sk / snakesPerRow;
 		int col = sk % snakesPerRow;
 
-		row = 0;
-		col = 2;
-
 		double x = (col - 2) * 50;
 		double z = row * -75;
 

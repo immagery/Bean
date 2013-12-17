@@ -189,10 +189,10 @@ void MainWindow::changeLookX(int) {
 	
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.x() += increment/100.0;
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.x() += increment/10.0;
 		}
 	} else {
-		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.x() += increment/100.0;
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.x() += increment/10.0;
 	}
 		
 	//((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(increment/10.0, 0, 0);
@@ -204,10 +204,10 @@ void MainWindow::changeLookY(int) {
 	int index = ui->snakeSelector->currentIndex();
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.y() += increment/100.0;
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.y() += increment/10.0;
 		}
 	} else {
-		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.y() += increment/100.0;
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.y() += increment/10.0;
 	}
 }
 
@@ -217,10 +217,10 @@ void MainWindow::changeLookZ(int) {
 	int index = ui->snakeSelector->currentIndex();
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.z() += increment/100.0;
+			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.z() += increment/10.0;
 		}
 	} else {
-		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.z() += increment/100.0;
+		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.z() += increment/10.0;
 	}
 }
 

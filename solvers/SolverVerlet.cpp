@@ -10,6 +10,7 @@ SolverVerlet::SolverVerlet() : Solver() {
 	distS = 100;	distD = 0.05;	distStiff = 1;
 	posS = 1;	posD = 0.05;	posStiff = 1;
 	colS = 500;	colD = 500;		colStiff = 1;
+	rigidS = 125;	rigidD = 0.05;	rigidStiff = 1;
 }
 
 SolverVerlet::~SolverVerlet() { }
@@ -88,28 +89,33 @@ void SolverVerlet::solve2(double ttime) {
 					}
 
 					// RIGIDNESS
-					if (i > 1 && hasRigid) {
-						Vector3d currentVector = currentPositions[ip][i] - currentPositions[ip][i-1];
-						Vector3d restVector = currentPositions[ip][i-1] - currentPositions[ip][i-2];
-						double angle = acos(currentVector.dot(restVector) / (currentVector.norm() * restVector.norm()));
+					if (i > 0 && hasRigid) {
+
+
+
+						Vector3d currentVector = (currentPositions[ip][i] - currentPositions[ip][i-1]).normalized();
+						Vector3d restVector;
+						if (i == 1)		restVector = Vector3d(0,1,0);
+						else			restVector = (currentPositions[ip][i-1] - currentPositions[ip][i-2]).normalized();
+						double angle = acos(currentVector.dot(restVector));
 						angle = angle * 180 / M_PI;
 						if (angle > 25) {
 							//Vector3d idealPoint = currentPositions[ip][i-1] + (restPositions[ip][i] - restPositions[ip][i-1]);
-							Vector3d idealPoint = currentPositions[ip][i-1] + restVector;
+							Vector3d idealPoint = currentPositions[ip][i-1] + restVector * (restPositions[ip][i] - restPositions[ip][i-1]).norm();
 							Vector3d currentPoint = currentPositions[ip][i];
 							Vector3d restDistance (0,0,0);
 							Vector3d currentDist = currentPositions[ip][i] - idealPoint;
 
 							if (currentDist.norm() > 0) {			// avoid dividing by 0
 								double diff = currentDist.norm() - restDistance.norm();
-								Vector3d delta1 = currentDist / currentDist.norm() * posS * diff;
+								Vector3d delta1 = currentDist / currentDist.norm() * rigidS * diff;
 								Vector3d vel1 = (currentPositions[ip][i] - lastPositions[ip][i]);
 								Vector3d rigid = delta1;
 								double v = (currentDist.normalized()).dot(vel1.normalized());
 								if (currentDist.isZero(0.001) || vel1.isZero(0.001)) v = 0;
 								//double damping = ((double)(currentPositions.size()-i)) / (currentPositions.size());			
-								Vector3d damp1 = currentDist / currentDist.norm() * posD * v;
-								Vector3d inc = (delta1+damp1+rigid*positioningStrengths[i])*(posStiff)*deltaTime*2;
+								Vector3d damp1 = currentDist / currentDist.norm() * rigidD * v;
+								Vector3d inc = (delta1+damp1+rigid*positioningStrengths[i])*(rigidStiff)*deltaTime; //
 								currentPositions[ip][i] -= inc;
 							}
 						}

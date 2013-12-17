@@ -68,22 +68,17 @@ class Intelligence {
 	void updateLookPoint() {
 		// Select a random area using global sphere and random values for thita and phi
 		// Random val = min + random between 0..(max - min)
-		globalPhi = phi = 0;
-		globalThita = thita = 0;
-		globalPhi = 0;
-		globalThita = M_PI/12;
-		lookPointRadius = 0;
 
 		Vector3d p = globalLookPoint;
 		p.x() += globalLookPointRadius * sin(globalThita) * sin(globalPhi);
 		p.y() += globalLookPointRadius * cos(globalThita);
 		p.z() += globalLookPointRadius * sin(globalThita) * cos(globalPhi);
 
-		//thita += 0.01;
-		//phi += 0.03;
+		thita += 0.01;
+		phi += 0.03;
 		if (currentState == IDLE) 
-			//look->lookPoint = lookPoint;
-			look->lookPoint = p;
+			look->lookPoint = lookPoint;
+			//look->lookPoint = p;
 		else						
 			look->lookPoint = globalLookPoint;
 
