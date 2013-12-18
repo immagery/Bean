@@ -186,21 +186,8 @@ void SolverManager::update (int sk, skeleton* s) {
 					twistQuat.setFromTwoVectors(u,v);
 				}
 
-
-
 				Vector3d vvvv = twistQuat.vec();
 				twistQuat.vec() = jt->rotation.inverse()._transformVector(vvvv);
-
-
-
-				glDisable(GL_LIGHTING);
-				glColor3f(1,1,0);
-				glBegin(GL_LINES);																// DRAW CURRENT UP
-				pp = jt->translation + u*100;
-				glVertex3d(jt->translation.x(), jt->translation.y(), jt->translation.z());
-				glVertex3d(pp.x(), pp.y(), pp.z());
-				glEnd();
-				glEnable(GL_LIGHTING);
 
 				//Vector3d remaining (sin(angleAux*M_PI / 180.0), 0, cos(angleAux*M_PI / 180.0));
 				//Quaterniond correction3;	correction3.setFromTwoVectors(Vector3d(0,0,1), remaining);

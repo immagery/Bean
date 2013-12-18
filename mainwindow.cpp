@@ -61,8 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->verletRigidness, SIGNAL(toggled(bool)), this, SLOT(toggleVerletRigidness(bool)));
 
-	connect(ui->twistPropagationSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistPropagation(bool)));
-	connect(ui->twistSmoothingSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistSmoothing(bool)));
+	connect(ui->twistPropagationSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistPropagation(int)));
+	connect(ui->twistSmoothingSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistSmoothing(int)));
 
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
