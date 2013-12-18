@@ -72,6 +72,7 @@ public:
 	}
 
 	virtual void solve () {
+		clock_t start = clock();
 		baseRotation = data->baseRotation;
 		baseTranslation = data->baseTranslation;
 		for (int i = 0; i < outputs.size(); ++i) {
@@ -89,5 +90,7 @@ public:
 			}
 			chain->positions[chain->positions.size()-1] = baseTranslation + initPositions[chain->positions.size()-1];
 		}
+		clock_t end = clock();
+		//printf("	Elapsed init time: %f\n", timelapse(start,end));
 	}
 };

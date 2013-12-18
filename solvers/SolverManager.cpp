@@ -12,6 +12,9 @@ SolverManager::SolverManager(void)
 	twistCorrectionEnabled = true;
 
 	solverData = new SolverData();
+
+	numTwisted = 3;
+	smoothingIterations = 0;
 }
 
 
@@ -67,22 +70,24 @@ double mod (double n, int d) {
 }
 
 void SolverManager::update (int sk, skeleton* s) {
+	clock_t start1 = clock();
 	int n = solvers[sk].size();
 	Solver* lastSolver = solvers[sk][solvers[sk].size()-1];
 	Solver* firstSolver = solvers[sk][0];
 	lastSolver->update();
 	Chain* chain = lastSolver->outputs[sk];
+	clock_t end1 = clock();
+	//printf("	Elapsed solver time: %f\n", timelapse(start1,end1));
 
 	// Move root to initial joint
 	Vector3d translation = chain->positions[0] - s->joints[0]->translation;
 	s->joints[0]->addTranslation(translation.x(), translation.y(), translation.z());
 
 	vector<double> jointTwist (chain->positions.size(), 0);
-	int numTwisted = 3;
-	int smoothingIterations = 0;
+
 	Quaterniond removedTwist = Quaterniond::Identity();
 
-
+	clock_t start2 = clock();
 	for (int i = 0; i < s->joints.size(); ++i) s->joints[i]->qOrient = s->joints[i]->restOrient;
 	s->joints[0]->computeWorldPos();
 
@@ -300,4 +305,6 @@ void SolverManager::update (int sk, skeleton* s) {
 	}
 
 	s->joints[0]->computeWorldPos();
+	clock_t end2 = clock();
+	//printf("	Elapsed orient time: %f\n", timelapse(start2,end2));
 }

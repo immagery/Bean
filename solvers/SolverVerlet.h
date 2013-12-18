@@ -20,6 +20,7 @@ public:
 	double colS, colD, colStiff;		// dynamic springs to avoid collisions
 	double rigidS, rigidD, rigidStiff;
 	vector<double> positioningStrengths;
+	vector<double> rigidnessStrengths;
 
 	SolverVerlet();
 	~SolverVerlet();
@@ -39,7 +40,7 @@ public:
 		lastPositions.push_back(vector<Vector3d>(chainSize));
 		currentPositions.push_back(vector<Vector3d>(chainSize));
 		idealPositions.push_back(vector<Vector3d>(chainSize));
-		positioningStrengths = vector<double> (chainSize, 0);
+		positioningStrengths = rigidnessStrengths = vector<double> (chainSize, 0);
 
 		for (int i = 0; i < chainSize; ++i) {
 			currentPositions[nextSK][i] = lastPositions[nextSK][i] = restPositions[nextSK][i] = c->positions[i];

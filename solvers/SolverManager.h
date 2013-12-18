@@ -26,6 +26,8 @@ public:
 
 	Quaterniond myRot;
 
+	int numTwisted, smoothingIterations;
+
 	Quaterniond computeTwist (joint* jt, Vector3d nLook, Vector3d restUp);
 	
 	void newFrame (int frame) {

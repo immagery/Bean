@@ -7,6 +7,9 @@
 using namespace std;
 using namespace Eigen;
 
+#define G_THITA M_PI/6
+#define G_PHI 0
+
 class Intelligence {
 	public:
 
@@ -35,7 +38,6 @@ class Intelligence {
 		phi = (double)rand() / RAND_MAX * M_PI;
 		lookPointRadius = rand()%20 + 20;
 		lookPoint = Vector3d(0,0,0);
-		globalLookPoint = Vector3d(0,480, 400);
 		id = sk;
 		ampMultiplier = 1;
 		freqMultiplier = 1;
@@ -46,8 +48,8 @@ class Intelligence {
 		globalLookPointRadius = 700;
 		globalThita = fRand(0, M_PI/6.0);
 		globalPhi = fRand(-M_PI/6, M_PI/6);
-		globalPhi = 0;
-		globalThita = M_PI/12;
+		globalPhi = G_PHI;
+		globalThita = G_THITA;
 	}
 
 	void setState(int i) {
@@ -78,9 +80,8 @@ class Intelligence {
 		phi += 0.03;
 		if (currentState == IDLE) 
 			look->lookPoint = lookPoint;
-			//look->lookPoint = p;
-		else						
-			look->lookPoint = globalLookPoint;
+		else if (currentState == LOOKAT)				
+			look->lookPoint = p;
 
 		look->lookPoint.x() += lookPointRadius * sin(thita) * sin(phi);
 		look->lookPoint.y() += lookPointRadius * cos(thita);
