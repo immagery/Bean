@@ -61,9 +61,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->verletRigidness, SIGNAL(toggled(bool)), this, SLOT(toggleVerletRigidness(bool)));
 
+	connect(ui->twistPropagationSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistPropagation(int)));
+	connect(ui->twistSmoothingSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistSmoothing(int)));
+
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
     
+}
+
+void MainWindow::changeTwistPropagation(int) {
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->numTwisted = ui->twistPropagationSlider->value();
+}
+
+void MainWindow::changeTwistSmoothing(int) {
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->smoothingIterations = ui->twistSmoothingSlider->value();
 }
 
 void MainWindow::toggleVerletRigidness(bool) {
@@ -181,11 +192,6 @@ void MainWindow::changeLookX(int) {
 	int increment = ui->lookX->value() - lastLX;
 	lastLX = ui->lookX->value();
 	int index = ui->snakeSelector->currentIndex();
-	/*for (int sk = 0; sk < ui->glCustomWidget->escena->skeletons.size(); ++sk) {
-		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->idealChains[0]->positions.size(); ++i) {
-			((BeanViewer*)(ui->glCustomWidget))->solverManager->verlets[sk]->lookPoint += Vector3d(increment/10.0,0,0);
-		}
-	}*/
 	
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
@@ -194,8 +200,6 @@ void MainWindow::changeLookX(int) {
 	} else {
 		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[index-1]->lookPoint.x() += increment/10.0;
 	}
-		
-	//((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint += Vector3d(increment/10.0, 0, 0);
 }
 
 void MainWindow::changeLookY(int) {

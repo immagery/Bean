@@ -42,6 +42,8 @@ public slots:
 	void changeOscFrequency(int);
 	void changeLookPointRadius(int);
 	void toggleVerletRigidness(bool);
+	void changeTwistPropagation(int);
+	void changeTwistSmoothing(int);
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
 };

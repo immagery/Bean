@@ -6,11 +6,11 @@ SolverVerlet::SolverVerlet() : Solver() {
 	hasGravity = hasRigid = true;
 	lastTime = 0;
 	velocityDamping = 0.9;
-	positioningStrengths = vector<double>();
-	distS = 100;	distD = 0.05;	distStiff = 1;
+	positioningStrengths = rigidnessStrengths = vector<double>();
+	distS = 10;	distD = 0.05;	distStiff = 1;
 	posS = 1;	posD = 0.05;	posStiff = 1;
 	colS = 500;	colD = 500;		colStiff = 1;
-	rigidS = 125;	rigidD = 0.05;	rigidStiff = 1;
+	rigidS = 5;	rigidD = 0.05;	rigidStiff = 1;
 }
 
 SolverVerlet::~SolverVerlet() { }
@@ -44,6 +44,7 @@ void SolverVerlet::solve2(double ttime) {
 		int relaxSteps = 5;
 		int neighbourDistance = 5;
 
+		clock_t start2 = clock();
 		// Solve all inputs
 		for (int ip = 0; ip < inputs.size(); ++ip) {
 			Chain* c = inputs[ip];
@@ -84,30 +85,29 @@ void SolverVerlet::solve2(double ttime) {
 						double v = (currentDist.normalized()).dot(vel1.normalized());
 						if (currentDist.isZero(0.001) || vel1.isZero(0.001)) v = 0;
 						Vector3d damp1 = currentDist / currentDist.norm() * posD * v;
-						Vector3d inc = (delta1+damp1+rigid*positioningStrengths[i])*(posStiff)*deltaTime;
+						Vector3d inc = (delta1+damp1)*positioningStrengths[i]*(posStiff)*deltaTime;
 						currentPositions[ip][i] -= inc;
 					}
 
 					// RIGIDNESS
 					if (i > 0 && hasRigid) {
-
-
-
 						Vector3d currentVector = (currentPositions[ip][i] - currentPositions[ip][i-1]).normalized();
 						Vector3d restVector;
 						if (i == 1)		restVector = Vector3d(0,1,0);
 						else			restVector = (currentPositions[ip][i-1] - currentPositions[ip][i-2]).normalized();
 						double angle = acos(currentVector.dot(restVector));
 						angle = angle * 180 / M_PI;
-						if (angle > 25) {
+						double threshold = 10;
+						if (angle > threshold) {
 							//Vector3d idealPoint = currentPositions[ip][i-1] + (restPositions[ip][i] - restPositions[ip][i-1]);
-							Vector3d idealPoint = currentPositions[ip][i-1] + restVector * (restPositions[ip][i] - restPositions[ip][i-1]).norm();
+							double restLength = (restPositions[ip][i] - restPositions[ip][i-1]).norm();
+							Vector3d idealPoint = currentPositions[ip][i-1] + restVector * restLength;
 							Vector3d currentPoint = currentPositions[ip][i];
 							Vector3d restDistance (0,0,0);
-							Vector3d currentDist = currentPositions[ip][i] - idealPoint;
+							Vector3d currentDist = currentPositions[ip][i] - idealPoint ;
 
-							if (currentDist.norm() > 0) {			// avoid dividing by 0
-								double diff = currentDist.norm() - restDistance.norm();
+							if (currentDist.norm() - sin(threshold*M_PI / 180)*restLength > 0) {			// avoid dividing by 0
+								double diff = currentDist.norm() - sin(threshold*M_PI / 180)*restLength - restDistance.norm();
 								Vector3d delta1 = currentDist / currentDist.norm() * rigidS * diff;
 								Vector3d vel1 = (currentPositions[ip][i] - lastPositions[ip][i]);
 								Vector3d rigid = delta1;
@@ -138,12 +138,15 @@ void SolverVerlet::solve2(double ttime) {
 			}
 
 		}	// end of input loop
+		clock_t end2 = clock();
+		//printf("	Elapsed solving time: %f\n", timelapse(start2,end2));
 
+		clock_t start = clock();
 
 		// Perform collisions on all of them
 		for (int k = 0; k < relaxSteps; ++k) {
 			for (int sk = 0; sk < inputs.size(); ++sk) {
-				for (int sk2 = 0; sk2 < inputs.size(); ++sk2) {
+				for (int sk2 = sk+1; sk2 < inputs.size(); ++sk2) {
 					if (sk == sk2) continue;
 
 					for (int i = 0; i < currentPositions[sk].size(); ++i) {
@@ -167,7 +170,9 @@ void SolverVerlet::solve2(double ttime) {
 				}	// end of input loops
 			}
 		}		// end of collisions
-		
+
+		clock_t end = clock();
+		//printf("	Elapsed collision time: %f\n", timelapse(start,end));
 
 		for (int ip = 0; ip < inputs.size(); ++ip) {
 			for (int i = 0; i < chainSize; ++i)
@@ -181,18 +186,18 @@ void SolverVerlet::solve3(double ttime) {
 		double timeSquared = deltaTime * deltaTime;
 		lastTime = ttime;
 		int relaxSteps = 5;
-		int neighbourDistance = 8;
+		int neighbourDistance = 5;
 
 		// Solve all inputs
 		for (int ip = 0; ip < inputs.size(); ++ip) {
 			Chain* c = inputs[ip];
 			for (int k = 0; k < relaxSteps; ++k) {
 
-				// Move the head to its ideal positions
+				// Move the head to its ideal position
 				int hi = currentPositions[ip].size()-1;
-				//currentPositions[ip][hi] = idealPositions[ip][hi];
+				currentPositions[ip][hi] = idealPositions[ip][hi];
 
-				Vector3d idealPoint = idealPositions[ip][hi];
+				/*Vector3d idealPoint = idealPositions[ip][hi];
 				Vector3d currentPoint = currentPositions[ip][hi];
 				Vector3d restDistance (0,0,0);
 				Vector3d currentDist = currentPositions[ip][hi] - idealPoint;
@@ -205,14 +210,15 @@ void SolverVerlet::solve3(double ttime) {
 					double v = (currentDist.normalized()).dot(vel1.normalized());
 					if (currentDist.isZero(0.001) || vel1.isZero(0.001)) v = 0;
 					Vector3d damp1 = currentDist / currentDist.norm() * posD * v;
-					Vector3d inc = (delta1+damp1+rigid*positioningStrengths[hi])*(posStiff)*deltaTime;
+					Vector3d inc = (delta1+damp1)*(posStiff)*deltaTime;		// +rigid*positioningStrengths[hi]
 					currentPositions[ip][hi] -= inc;
-				}
+				}*/
 
 				for (int i = hi; i >= 0; --i) {
-					if (i == hi) neighbourDistance = 15;
-					else neighbourDistance = 5;
-					for (int j = i - neighbourDistance; j < i + neighbourDistance; ++j) {
+					//if (i == hi) neighbourDistance = 6;
+					//else neighbourDistance = 3;
+					//for (int j = i - neighbourDistance; j < i + neighbourDistance; ++j) {
+					for (int j = i - neighbourDistance; j < i; ++j) {
 						if (j == i || j <= 0 || j >= hi) continue;
 
 						Vector3d restDistance = (restPositions[ip][i] - restPositions[ip][j]);
@@ -230,20 +236,23 @@ void SolverVerlet::solve3(double ttime) {
 						double damping = 1;
 						if (i == hi) {
 							damping = 1 - (1.0 / (neighbourDistance+1)) * (i - j);
+							damping = 1 - ( (i - j - 1) * (1.0 / neighbourDistance) );
 						}
 						currentPositions[ip][j] += (delta1+damp1)*distStiff*damping*deltaTime;
 					}
-				}
+				//}
+
+					if (i == hi) continue;
 				
 
-				for (int i = 0; i < currentPositions[ip].size()-1; ++i) {
+				//for (int i = 0; i < currentPositions[ip].size()-1; ++i) {
 
 					// NEIGHBOUR CONSTRAINTS
-					for (int j = 0; j < currentPositions[ip].size(); ++j) {
+					/*for (int j = 0; j < currentPositions[ip].size(); ++j) {
 						if (j == i) continue;
 
 						
-					}	// end of neighbours loop
+					}	// end of neighbours loop*/
 
 					// POSITIONING CONSTRAINTS
 					Vector3d idealPoint = idealPositions[ip][i];
@@ -313,11 +322,11 @@ void SolverVerlet::solve3(double ttime) {
 		// Perform collisions on all of them
 		for (int k = 0; k < relaxSteps; ++k) {
 			for (int sk = 0; sk < inputs.size(); ++sk) {
-				for (int sk2 = 0; sk2 < inputs.size(); ++sk2) {
+				for (int sk2 = sk+1; sk2 < inputs.size(); ++sk2) {
 					if (sk == sk2) continue;
 
-					for (int i = 0; i < currentPositions[sk].size(); ++i) {
-						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
+					for (int i = 0; i < currentPositions[sk].size(); i += 2) {
+						for (int j = 0; j < currentPositions[sk2].size(); j += 2) {
 							double distance = (currentPositions[sk][i] - currentPositions[sk2][j]).norm();
 							Vector3d currentDist = (currentPositions[sk][i] - currentPositions[sk2][j]);
 							double restDistance = 50;

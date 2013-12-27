@@ -21,6 +21,7 @@ public:
 	}
 
 	void solve () {
+		clock_t start = clock();
 		for (int i = 0; i < inputs.size(); ++i) {
 			Chain* ichain = inputs[i];
 			for (int j = 0; j < ichain->positions.size(); ++j)
@@ -39,6 +40,8 @@ public:
 
 			outputs[i]->positions[index2] = pointToLook;
 		}
+		clock_t end = clock();
+		//printf("	Elapsed look time: %f\n", timelapse(start,end));
 	}
 };
 

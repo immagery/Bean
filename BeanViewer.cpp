@@ -27,13 +27,12 @@ BeanViewer::BeanViewer(QWidget * parent, const QGLWidget * shareWidget,
 void BeanViewer::loadSolvers() {
 
 	SolverVerlet *verlet = new SolverVerlet();		 // generales, el mismo para todos los esqueletos
-	SolverVerlet *verlet2 = new SolverVerlet();
+	SolverVerlet *verlet2 = new SolverVerlet();		verlet->id = verlet2->id = 4;
 
 	// Verlet1
 	verlet->index1 = 0;	verlet->index2 = 19;
 	verlet->fps = 1000.0 / animationPeriod();
 	verlet->data = solverManager->solverData;
-	//verlet->posS = 0.5;
 	verlet->hasRigid = false;
 	verlet->lookSolver = false;
 
@@ -42,8 +41,8 @@ void BeanViewer::loadSolvers() {
 	verlet2->fps = 1000.0 / animationPeriod();
 	verlet2->data = solverManager->solverData;
 	verlet2->hasGravity = false;
-	verlet2->distS = 1;		verlet2->distD = 1;		verlet2->distStiff = 1;
-	verlet2->posS = 1;		verlet2->posD = 1;		verlet2->posStiff = 1;
+	//verlet2->distS = 10;		verlet2->distD = 1;		verlet2->distStiff = 1;
+	//verlet2->posS = 1;		verlet2->posD = 1;		verlet2->posStiff = 1;
 	verlet2->hasRigid = false;
 	verlet2->lookSolver = true;
 
@@ -81,11 +80,11 @@ void BeanViewer::loadSolvers() {
 		solverManager->brains[sk]->restUpVector = s->joints[18]->rotation.inverse()._transformVector(Vector3d(0,0,-1));
 
 		// Create solvers to test
-		SolverInit *init = new SolverInit();
-		SolverDir *dir = new SolverDir();
-		SolverSinusoidal *sin = new SolverSinusoidal(8 + rand()%10,2 + rand()%5,rand()%10);	
+		SolverInit *init = new SolverInit();		init->id = 0;
+		SolverDir *dir = new SolverDir();			dir->id = 1;
+		SolverSinusoidal *sin = new SolverSinusoidal(8 + rand()%10,2 + rand()%5,rand()%10);		sin->id = 2;
 		sin->dimension = 0;		sin->longitude = 10;		sin->multAmp = 1;	sin->multFreq = 1;
-		SolverLook *look = new SolverLook();
+		SolverLook *look = new SolverLook();		look->id = 3;
 
 		solverManager->addSolver(init, sk);
 		solverManager->addSolver(dir, sk);
@@ -147,6 +146,10 @@ void BeanViewer::loadSolvers() {
 		else if (p <= C) verlet->positioningStrengths[i] = vB + ((p - B)/(C - B))*(vC-vB);
 		else verlet->positioningStrengths[i] = vC;
 	}
+	for (int i = 0; i < sn; ++i) {
+		if (i < 10) verlet->rigidnessStrengths[i] = 1;
+		else		verlet->rigidnessStrengths[i] = 0;
+	}
 }
 
 void drawPointLocator(Eigen::Vector3d pt, float size, bool spot)
@@ -185,7 +188,10 @@ void BeanViewer::draw() {
 		for (int sk = 0; sk < escena->skeletons.size(); ++sk) {
 			skeleton* s = escena->skeletons[sk];
 
-			solverManager->update(sk, escena->skeletons[sk]);
+				clock_t start = clock();
+				solverManager->update(sk, escena->skeletons[sk]);
+				clock_t end = clock();
+				//printf("Elapsed update time: %f\n", timelapse(start,end));
 
 			if (drawLookLocators) {
 				Vector3d p1 = escena->skeletons[sk]->joints[solverManager->brains[sk]->look->outputs[0]->positions.size()-2]->translation;
@@ -206,11 +212,14 @@ void BeanViewer::draw() {
 	}
 
 	// Skinning
+	clock_t start = clock();
 	for (int i = 0; i < escena->rigsArray.size(); ++i) {
 		if (escena->rigsArray[i]->enableDeformation) escena->rigsArray[i]->skin->computeDeformations2(escena->skeletons[i]);
 	}
+	clock_t end = clock();
+	//printf("Elapsed skinning time: %f\n", timelapse(start,end));
 
-	AdriViewer::draw();
+		AdriViewer::draw();
 }
 
 void BeanViewer::readScene(string fileName, string name, string path) {
@@ -265,9 +274,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		int snakesCount = 10;
-
-		for (int i = 0; i < snakesCount; ++i) {
+		for (int i = 0; i < 10; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());
