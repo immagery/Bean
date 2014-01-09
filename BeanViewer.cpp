@@ -59,6 +59,8 @@ void BeanViewer::loadSolvers() {
 
 		int row = sk / snakesPerRow;
 		int col = sk % snakesPerRow;
+		row = 0;
+		col = 2;
 
 		double x = (col - 2) * 50;
 		double z = row * -75;
@@ -90,8 +92,8 @@ void BeanViewer::loadSolvers() {
 		solverManager->addSolver(dir, sk);
 		//solverManager->addSolver(sin, sk);
 		solverManager->addSolver(verlet, sk);
-		solverManager->addSolver(look, sk);
-		solverManager->addSolver(verlet2, sk);
+		//solverManager->addSolver(look, sk);
+		//solverManager->addSolver(verlet2, sk);
 
 		solverManager->myRot = s->joints[18]->rotation;
 
@@ -208,7 +210,7 @@ void BeanViewer::draw() {
 				glEnable(GL_LIGHTING);
 			}
 		}
-		//solverManager->draw();
+		solverManager->draw();
 	}
 
 	// Skinning
@@ -274,7 +276,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 10; ++i) {
+		for (int i = 0; i < 1; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());

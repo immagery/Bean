@@ -22,6 +22,37 @@ SolverManager::~SolverManager(void)
 {
 }
 
+void SolverManager::draw() {
+{
+		GLUquadricObj *quadric;
+		quadric = gluNewQuadric();
+		gluQuadricDrawStyle(quadric, GLU_LINE );
+		glDisable(GL_LIGHTING);
+		for (int sk = 0; sk < solvers.size(); ++sk) {
+			Solver* lastSolver = solvers[sk][solvers[sk].size()-1];
+			Chain* chain = lastSolver->outputs[0];
+			glColor3f(1,0,0);
+			for (int i = 0; i < chain->positions.size(); ++i) {
+				Vector3d p = chain->positions[i];
+				glPushMatrix();
+				glTranslated(p.x(), p.y(), p.z());
+				gluSphere(quadric,7,8,8);
+				glPopMatrix();
+			}
+			chain = solvers[sk][1]->outputs[0];
+			glColor3f(0,1,0);
+			for (int i = 0; i < chain->positions.size(); ++i) {
+				Vector3d p = chain->positions[i];
+				glPushMatrix();
+				glTranslated(p.x(), p.y(), p.z());
+				gluSphere(quadric,2,8,8);
+				glPopMatrix();
+			}
+		}
+		glEnable(GL_LIGHTING);
+	}
+}
+
 Quaterniond SolverManager::computeTwist (joint* jt, Vector3d nLook, Vector3d restUp) {
 
 	Vector3d axis(1,0,0);

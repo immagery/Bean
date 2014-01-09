@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->oscAmplitude, SIGNAL(valueChanged(int)), this, SLOT(changeOscAmplitude(int)));
 	connect(ui->oscFrequency, SIGNAL(valueChanged(int)), this, SLOT(changeOscAmplitude(int)));
+	connect(ui->oscThresh1, SIGNAL(valueChanged(int)), this, SLOT(changeOscThresh1(int)));
 
 	connect(ui->lookRadius, SIGNAL(valueChanged(int)), this, SLOT(changeLookPointRadius(int)));
 
@@ -67,6 +68,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
     
+}
+
+void MainWindow::changeOscThresh1(int) {
+	((SolverVerlet*) (((BeanViewer*)(ui->glCustomWidget))->solverManager->solvers[0][2]))->slider = ui->oscThresh1->value();
+	//numTwisted = ui->twistPropagationSlider->value();
 }
 
 void MainWindow::changeTwistPropagation(int) {

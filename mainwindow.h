@@ -44,6 +44,7 @@ public slots:
 	void toggleVerletRigidness(bool);
 	void changeTwistPropagation(int);
 	void changeTwistSmoothing(int);
+	void changeOscThresh1(int);
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
 };
