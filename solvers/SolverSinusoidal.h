@@ -9,7 +9,7 @@ public:
 	int dimension;		// 0=X, 1=Y, 2=Z
 	Vector3d axis;		// relative to vector defined by lastPos - initPos
 	// Wave modulation
-	int thresh1, thresh2;
+	int thresh1, thresh2, thresh3;
 	double multAmp, multFreq;
 
 	// Constructors and destructors
@@ -41,6 +41,9 @@ public:
 				if (j < thresh1) mAmp = 0;
 				else if (j < thresh2) mAmp = amplitude * (double)(j - thresh1) / (thresh2 - thresh1);
 				else mAmp = amplitude;
+
+				//else if (j < thresh3) mAmp = amplitude;
+				//else if (thresh3 != 0) mAmp = 0;
 
 				double inc = (mAmp * sin(freq*time - j/longitude));
 				Vector3d increment;

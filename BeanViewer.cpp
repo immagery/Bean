@@ -84,13 +84,16 @@ void BeanViewer::loadSolvers() {
 		// Create solvers to test
 		SolverInit *init = new SolverInit();		init->id = 0;
 		SolverDir *dir = new SolverDir();			dir->id = 1;
-		SolverSinusoidal *sin = new SolverSinusoidal(8 + rand()%10,2 + rand()%5,rand()%10);		sin->id = 2;
+		SolverSinusoidal *sin = new SolverSinusoidal(4 + rand()%10,2 + rand()%2,rand()%10);		sin->id = 2;
 		sin->dimension = 0;		sin->longitude = 10;		sin->multAmp = 1;	sin->multFreq = 1;
+		SolverSinusoidal *sin2 = new SolverSinusoidal(8 + rand()%10,2 + rand()%3,rand()%10);		sin2->id = 2;
+		sin2->dimension = 2;		sin->longitude = 10;		sin->multAmp = 1;	sin->multFreq = 1;
 		SolverLook *look = new SolverLook();		look->id = 3;
 
 		solverManager->addSolver(init, sk);
 		solverManager->addSolver(dir, sk);
-		//solverManager->addSolver(sin, sk);
+		solverManager->addSolver(sin, sk);
+		//solverManager->addSolver(sin2,sk);
 		solverManager->addSolver(verlet, sk);
 		//solverManager->addSolver(look, sk);
 		//solverManager->addSolver(verlet2, sk);
@@ -116,9 +119,11 @@ void BeanViewer::loadSolvers() {
 		// Sin solver
 		sin->index1 = 1;		sin->index2 = 19;
 		sin->data = solverManager->solverData;
-		sin->thresh1 = 4;	sin->thresh2 = 10;
+		sin->thresh1 = 10;	sin->thresh2 = 15;	sin->thresh3 = -1;
 
-
+		/*sin2->index1 = 1;	sin2->index2 = 19;
+		sin2->data = solverManager->solverData;
+		sin2->thresh1 = 10;	sin2->thresh2 = 15;	sin2->thresh3 = -1;*/
 
 		// Look solver
 		look->index1 = 18;	look->index2 = 19;

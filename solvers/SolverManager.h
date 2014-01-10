@@ -62,6 +62,7 @@ public:
 		brains[id] = new Intelligence(id);
 		previousLookAngles[id] = 0;
 		numVueltas[id] = 0;
+		solverData->skeletons.push_back(s);
 	}
 
 	void addSolver(Solver *s, int sk) {

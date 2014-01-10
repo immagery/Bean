@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Chain.h"
+#include "skeleton.h"
 #include <Eigen/Core>
 #include <Eigen\Geometry>
 
@@ -26,6 +27,9 @@ public:
 
 	bool rigidness;
 
+	// Skeletons
+	vector<skeleton*> skeletons;
+
 	SolverData(void) {
 		time = fps = gravity = 0;
 		lookPoint = Vector3d(0,0,0);
@@ -34,6 +38,7 @@ public:
 		baseTranslation = Vector3d(0,0,0);
 		ampMultiplier = freqMultiplier = 1;
 		rigidness = true;
+		skeletons = vector<skeleton*>(0);
 	}
 	~SolverData(void) {}
 };

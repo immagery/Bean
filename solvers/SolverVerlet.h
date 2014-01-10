@@ -87,32 +87,5 @@ public:
 		propagateDirtyness();
 	}
 
-
-
-	double springForce (Vector3d p1, Vector3d p2, double springLength, double ks, double stiffness) {
-		Vector3d distance = p1 - p2;
-		if (distance.norm() > 0) {
-			double diff = distance.norm() - springLength;
-			Vector3d delta = distance / distance.norm() * ks;
-			return 0;
-		}
-	}
-
-	void attractingForce (int ip, int i, Vector3d restDistance, double deltaTime) {
-		Vector3d currentPoint = currentPositions[ip][i];
-		Vector3d idealPoint = idealPositions[ip][i];
-		Vector3d currentDist = currentPoint - idealPoint;
-		if (currentDist.norm() > 0) {			// avoid dividing by 0
-			double diff = currentDist.norm() - restDistance.norm();
-			Vector3d delta1 = currentDist / currentDist.norm() * posS * diff;
-			Vector3d vel1 = (currentPositions[ip][i] - lastPositions[ip][i]);
-			Vector3d rigid = delta1;
-			double v = (currentDist.normalized()).dot(vel1.normalized());
-			if (currentDist.isZero(0.001) || vel1.isZero(0.001)) v = 0;
-			Vector3d damp1 = currentDist / currentDist.norm() * posD * v;
-			Vector3d inc = (delta1+damp1+rigid*positioningStrengths[i])*(posStiff)*deltaTime;
-			currentPositions[ip][i] -= inc;
-		}
-	}
 };
 
