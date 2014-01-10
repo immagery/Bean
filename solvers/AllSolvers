@@ -3,3 +3,4 @@
 #include "SolverSinusoidal.h"
 #include "SolverVerlet.h"
 #include "SolverLook.h"
+#include "SolverHead.h"

@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::changeOscThresh1(int) {
-	((SolverVerlet*) (((BeanViewer*)(ui->glCustomWidget))->solverManager->solvers[0][2]))->slider = ui->oscThresh1->value();
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->alpha = ui->oscThresh1->value() / 1000.0;
 	//numTwisted = ui->twistPropagationSlider->value();
 }
 
@@ -199,6 +199,8 @@ void MainWindow::changeLookX(int) {
 	lastLX = ui->lookX->value();
 	int index = ui->snakeSelector->currentIndex();
 	
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint.x() += increment/10.0;
+
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.x() += increment/10.0;
@@ -212,6 +214,9 @@ void MainWindow::changeLookY(int) {
 	int increment = ui->lookY->value() - lastLY;
 	lastLY = ui->lookY->value();
 	int index = ui->snakeSelector->currentIndex();
+
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint.y() += increment/10.0;
+
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.y() += increment/10.0;
@@ -225,6 +230,9 @@ void MainWindow::changeLookZ(int) {
 	int increment = ui->lookZ->value() - lastLZ;
 	lastLZ = ui->lookZ->value();
 	int index = ui->snakeSelector->currentIndex();
+
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->lookPoint.z() += increment/10.0;
+
 	if (index == 0) {
 		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
 			((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i]->globalLookPoint.z() += increment/10.0;

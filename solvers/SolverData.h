@@ -27,6 +27,9 @@ public:
 
 	bool rigidness;
 
+	// Head movement
+	double alpha;
+
 	// Skeletons
 	vector<skeleton*> skeletons;
 

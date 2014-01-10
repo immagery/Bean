@@ -13,6 +13,7 @@ SolverVerlet::SolverVerlet() : Solver() {
 	colS = 500;	colD = 1;		colStiff = 1;
 	rigidS = 20;	rigidD = 0.05;	rigidStiff = 1;
 	slider = 0;
+	nextVerlet = NULL;
 }
 
 SolverVerlet::~SolverVerlet() { }
@@ -69,6 +70,41 @@ void SolverVerlet::addSpringBetweenTwoJoints(int sk1, int sk2, int i1, int i2,
 	}
 }
 
+void SolverVerlet::addSpringBetweenTwoJoints3D(int sk1, int sk2, int i1, int i2, 
+											 double desiredDist, int springType, double deltaTime, int min1, int min2, double multiplier) {
+	double ks, kd, stiff;
+	if (springType == 0) { ks = distS;	kd = distD;		stiff = distStiff; }
+	if (springType == 1) { ks = posS;	kd = posD;		stiff = posStiff; }
+	if (springType == 2) { ks = colS;	kd = colD;		stiff = colStiff; }
+	if (springType == 3) { ks = rigidS;	kd = rigidD;	stiff = rigidStiff; }
+
+	Vector3d currentDist = (currentPositions[sk1][i1] - currentPositions[sk2][i2]);
+	bool applyForce = false;
+	if (springType < 2) applyForce = true;
+	if (springType == 2) applyForce = (currentDist.norm() < desiredDist);
+	if (springType == 3) applyForce = true;
+
+	if (applyForce) {
+		double diff = currentDist.norm() - desiredDist;
+		Vector3d delta1 = currentDist / currentDist.norm() * ks * diff;
+		Vector3d vel1 = (currentPositions[sk1][i1] - lastPositions[sk1][i1]);
+		Vector3d vel2 = (currentPositions[sk2][i2] - lastPositions[sk2][i2]);
+		double v1 = (vel1).dot(currentDist.normalized());
+		double v2 = (vel2).dot(currentDist.normalized());
+		Vector3d damp1 = currentDist / currentDist.norm() * kd * v1;
+		Vector3d damp2 = currentDist / currentDist.norm() * kd * v2;
+		Vector3d force1 = delta1 + damp1;
+		Vector3d force2 = delta1 + damp2;
+
+		
+		if (springType == 3) force1 += force1*multiplier;
+		if (springType == 3) force2 += force2*multiplier;
+
+		if (i1 >= min1) currentPositions[sk1][i1] -= force1*stiff*deltaTime/2;
+		if (i2 >= min2) currentPositions[sk2][i2] += force2*stiff*deltaTime/2;
+	}
+}
+
 void SolverVerlet::addSpringToPoint (int sk1, int i1, double desiredDist, Vector3d p, int springType, double deltaTime, int min1, double multiplier) {
 double ks, kd, stiff;
 	if (springType == 0) { ks = distS;	kd = distD;		stiff = distStiff; }
@@ -112,13 +148,11 @@ void SolverVerlet::solve() {
 	for (int ip = 0; ip < inputs.size(); ++ip) {
 		for (int i = 0; i < chainSize; ++i) {
 			idealPositions[ip][i] = inputs[ip]->positions[i + index1];
-			if (i == chainSize-2) idealPositions[ip][i] += Vector3d(0,slider,0);
 			lastPositions[ip][i] = currentPositions[ip][i];
 		}
 
 		for (int i = 0; i < inputs[ip]->positions.size(); ++i)
 			outputs[ip]->positions[i] = inputs[ip]->positions[i];
-
 	}
 
 	int numReps = 10;
@@ -126,6 +160,13 @@ void SolverVerlet::solve() {
 		double timeInc = ((double) k / numReps) * (1 / fps);
 		if (!lookSolver)	solve2(time + timeInc); 
 		else				solve3(time + timeInc);
+	}
+
+	for (int ip = 0; ip < inputs.size(); ++ip) {
+		for (int i = 0; i < chainSize; ++i) {
+			if (nextVerlet != NULL) nextVerlet->currentPositions[ip][i] = currentPositions[ip][i];
+			if (nextVerlet != NULL) nextVerlet->lastPositions[ip][i] = lastPositions[ip][i];
+		}
 	}
 }
 
@@ -250,30 +291,42 @@ void SolverVerlet::solve3(double ttime) {
 		double timeSquared = deltaTime * deltaTime;
 		lastTime = ttime;
 		int relaxSteps = 5;
-		int neighbourDistance = 5;
-
-		
+		int neighbourDistance = 2;
+		int bodyRigidness = 2;
+		int neckRigidness = 4;
 
 		// Solve all inputs
 		for (int ip = 0; ip < inputs.size(); ++ip) {
 			Chain* c = inputs[ip];
 
-			Vector3d look = idealPositions[ip][idealPositions[ip].size()-1] - idealPositions[ip][idealPositions[ip].size()-2];
-
 			for (int k = 0; k < relaxSteps; ++k) {
+
+				int hi = currentPositions[ip].size()-1;
+				currentPositions[ip][hi] = idealPositions[ip][hi];
+
+				/*for (int j = hi-neckRigidness; j < hi; ++j)
+					addSpringBetweenTwoJoints3D(ip,ip,hi,j,(restPositions[ip][hi] - restPositions[ip][j]).norm(),0,deltaTime,25,0,1);*/
+
+				for (int i = hi-1; i >= 1; --i) {
+					for (int j = i-bodyRigidness; j <= i+bodyRigidness; ++j) {
+						if (i != j && j >= 0) {
+							double desiredDist1 = (restPositions[ip][i] - restPositions[ip][j]).norm();
+							addSpringBetweenTwoJoints3D(ip,ip,i,j,desiredDist1,0,deltaTime,1,1,1);
+						}
+					}
+					/*double desiredDist1 = (restPositions[ip][i+1] - restPositions[ip][i]).norm();
+					double desiredDist2 = (restPositions[ip][i] - restPositions[ip][i-1]).norm();
+					addSpringBetweenTwoJoints3D(ip,ip,i+1,i,desiredDist1,0,deltaTime,1,1,1);
+					addSpringBetweenTwoJoints3D(ip,ip,i,i-1,desiredDist2,0,deltaTime,1,1,1);*/
+				}
 
 				for (int i = 0; i < currentPositions[ip].size(); ++i) {
 
-					/*if (i == currentPositions[ip].size()-2) {
-						//posS = 30;
-						//positioningStrengths[i] = 1;
-					} else posS = 1;*/
 
-					// Positioning constraints
-					addSpringToPoint(ip,i,0,idealPositions[ip][i],1,deltaTime,0,positioningStrengths[i]);
+					//addSpringToPoint(ip,i,0,idealPositions[ip][i],1,deltaTime,0,positioningStrengths[i]);
 
 					// Rigidness
-					if (i > 15 && i < currentPositions[ip].size()-2) {
+					/*if (i > 15 && i < currentPositions[ip].size()-2) {
 						Vector3d currentVector = (currentPositions[ip][i] - currentPositions[ip][i+1]).normalized();
 						Vector3d restVector = (currentPositions[ip][i+1] - currentPositions[ip][i+2]).normalized();
 						double angle = acos(currentVector.dot(restVector));
@@ -283,28 +336,54 @@ void SolverVerlet::solve3(double ttime) {
 							double restLength = (restPositions[ip][i] - restPositions[ip][i+1]).norm();
 							addSpringToPoint(ip,i,0,currentPositions[ip][i+1] + restVector * restLength,0,deltaTime,0,1);
 						}
-					}
+					}*/
 
 					// Neighbour constraints	
-					for (int j = i - neighbourDistance; j < i; ++j)
-						if (j >= 0 && i < currentPositions[ip].size()-1) addSpringBetweenTwoJoints(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 1, 1, 1);
+					/*if (i < currentPositions[ip].size()-1) {
+						if (i >= currentPositions[ip].size()-2) neighbourDistance = 5;
+						else neighbourDistance = 2;
+						for (int j = i - neighbourDistance; j < i; ++j) {
+							if (j >= 0 && i < currentPositions[ip].size()-1) addSpringBetweenTwoJoints(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 1, 2, 1);
+							else if (j >= 0) addSpringBetweenTwoJoints(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 25, 2, 1);
+						}
+					}*/
+
+					/*if (i < currentPositions[ip].size()-2) {
+						for (int j = i-1; j <= i+1; ++j) {
+							if (i != j) addSpringBetweenTwoJoints3D(ip,ip,i,j,(restPositions[ip][i] - restPositions[ip][j]).norm(),0,deltaTime,1,1,1);
+						}
+					}*/
+
+					/*neighbourDistance = 1;
+					for (int j = i - neighbourDistance; j < i; ++j) {
+						if (j >= 0 && i > 10) addSpringBetweenTwoJoints3D(ip,ip,i,i-1,(restPositions[ip][i] - restPositions[ip][j]).norm(),0,deltaTime,i+1,1,1);
+						else if (j >= 0) addSpringBetweenTwoJoints3D(ip,ip,i,i-1,(restPositions[ip][i] - restPositions[ip][j]).norm(),0,deltaTime,1,1,1);
+					}*/
+					
+					// Neighbour constraints 2	
+					/*neighbourDistance = 1;
+					for (int j = i - neighbourDistance; j < i; ++j) {
+						if (j >= 0 && i < currentPositions[ip].size()-1) addSpringBetweenTwoJoints3D(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 1, 2, 1);
+						else if (j >= 0) addSpringBetweenTwoJoints3D(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 25, 2, 5);
+					}*/
 
 					// Collisions
-					for (int sk2 = 0; sk2 < currentPositions.size(); ++sk2) {
+					/*for (int sk2 = 0; sk2 < currentPositions.size(); ++sk2) {
 						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
 							if (ip == sk2 && abs(i-j) > neighbourDistance && i < 15) {
 								float radius = 15;
 								addSpringBetweenTwoJoints(ip,sk2,i,j,radius*2,2,deltaTime,1,1,1);
 							}
 						}
-					}
+					}*/
 
 					// Collision with "ground"
-					if (i > 0 && currentPositions[ip][i].y() < 0) {
+					/*if (i > 0 && currentPositions[ip][i].y() < 0) {
 						Vector3d p = currentPositions[ip][i];
 						p.y() = 0;
 						addSpringToPoint(ip,i,0,p,0,deltaTime,1,1);
-					}
+					}*/
+
 				}	// end of positions loop
 			}	// end of relaxing loop
 
@@ -313,9 +392,10 @@ void SolverVerlet::solve3(double ttime) {
 				Vector3d velocity = (currentPositions[ip][i] - lastPositions[ip][i]);
 				velocity *= velocityDamping;
 				Vector3d acceleration = Vector3d(0,g,0);
-				if (i < 2) acceleration = Vector3d(0,0,0);
+				acceleration = Vector3d(0,0,0);
 				//if (i == 0) velocity = Vector3d(0,0,0);
 				if (velocity.norm() < 0.0005) velocity = Vector3d(0,0,0);
+				velocity = Vector3d(0,0,0);
 				Vector3d nextPos = currentPositions[ip][i] + velocity + acceleration * timeSquared * 0.5;
 				lastPositions[ip][i] = currentPositions[ip][i];
 				currentPositions[ip][i] = nextPos;

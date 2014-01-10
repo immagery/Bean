@@ -362,6 +362,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="solvers\SolverHead.cpp" />
     <ClCompile Include="solvers\SolverManager.cpp" />
     <ClCompile Include="solvers\SolverVerlet.cpp" />
   </ItemGroup>
@@ -413,6 +414,7 @@
     <ClInclude Include="solvers\Solver.h" />
     <ClInclude Include="solvers\SolverData.h" />
     <ClInclude Include="solvers\SolverDir.h" />
+    <ClInclude Include="solvers\SolverHead.h" />
     <ClInclude Include="solvers\SolverInit.h" />
     <ClInclude Include="solvers\SolverLook.h" />
     <ClInclude Include="solvers\SolverManager.h" />

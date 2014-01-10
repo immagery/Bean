@@ -35,24 +35,22 @@ void BeanViewer::loadSolvers() {
 	verlet->data = solverManager->solverData;
 	verlet->hasRigid = false;
 	verlet->lookSolver = false;
+	verlet->nextVerlet = verlet2;
 
 
 	verlet2->index1 = 0 ;	verlet2->index2 = 19;
 	verlet2->fps = 1000.0 / animationPeriod();
 	verlet2->data = solverManager->solverData;
 	verlet2->hasGravity = false;
-	//verlet2->distS = 10;		verlet2->distD = 1;		verlet2->distStiff = 1;
-	//verlet2->posS = 1;		verlet2->posD = 1;		verlet2->posStiff = 1;
 	verlet2->hasRigid = false;
 	verlet2->lookSolver = true;
+	verlet2->nextVerlet = NULL;
 
 	solverManager->solverData->fps = 1000.0 / this->animationPeriod();
 
 	int snakesPerRow = 5;
 	
 	for (int sk = 0; sk < escena->skeletons.size(); ++sk) {
-
-
 
 		skeleton* s = escena->skeletons[sk];
 		int n = s->joints.size();
@@ -89,14 +87,16 @@ void BeanViewer::loadSolvers() {
 		SolverSinusoidal *sin2 = new SolverSinusoidal(8 + rand()%10,2 + rand()%3,rand()%10);		sin2->id = 2;
 		sin2->dimension = 2;		sin->longitude = 10;		sin->multAmp = 1;	sin->multFreq = 1;
 		SolverLook *look = new SolverLook();		look->id = 3;
+		SolverHead *head = new SolverHead();		head->id = 4;
 
 		solverManager->addSolver(init, sk);
 		solverManager->addSolver(dir, sk);
-		solverManager->addSolver(sin, sk);
+		//solverManager->addSolver(sin, sk);
 		//solverManager->addSolver(sin2,sk);
 		solverManager->addSolver(verlet, sk);
-		//solverManager->addSolver(look, sk);
-		//solverManager->addSolver(verlet2, sk);
+		solverManager->addSolver(look, sk);
+		solverManager->addSolver(head,sk);
+		solverManager->addSolver(verlet2, sk);
 
 		solverManager->myRot = s->joints[18]->rotation;
 
@@ -137,6 +137,9 @@ void BeanViewer::loadSolvers() {
 		solverManager->brains[sk]->lookPoint = s->joints[0]->translation;
 		solverManager->brains[sk]->lookPoint += Vector3d(0, 480, 400);
 
+		// Head solver
+		head->data = solverManager->solverData;
+		head->index1 = 18;	head->index2 = 19;
 
 	}
 
@@ -156,6 +159,11 @@ void BeanViewer::loadSolvers() {
 	for (int i = 0; i < sn; ++i) {
 		if (i < 10) verlet->rigidnessStrengths[i] = 1;
 		else		verlet->rigidnessStrengths[i] = 0;
+	}
+
+	for (int i = 0; i < verlet2->currentPositions[0].size(); ++i) {
+		verlet2->positioningStrengths[i] = 0;
+		if (i == verlet2->currentPositions[0].size()-1) verlet2->positioningStrengths[i] = 1;
 	}
 }
 

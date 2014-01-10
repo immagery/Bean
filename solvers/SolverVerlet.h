@@ -23,10 +23,13 @@ public:
 	vector<double> positioningStrengths;
 	vector<double> rigidnessStrengths;
 
+	SolverVerlet* nextVerlet;		// points to next verlet in order to send current and last positions
+
 	SolverVerlet();
 	~SolverVerlet();
 	virtual void solve();
 	void addSpringBetweenTwoJoints(int sk1, int sk2, int i1, int i2, double desiredDist, int springType, double deltaTime, int min1, int min2, double multiplier);
+	void addSpringBetweenTwoJoints3D(int sk1, int sk2, int i1, int i2, double desiredDist, int springType, double deltaTime, int min1, int min2, double multiplier);
 	void addSpringToPoint (int sk1, int i1, double desiredDist, Vector3d p, int springType, double deltaTime, int min1, double multiplier);
 	void solve2(double ttime);
 	void solve3(double ttime);
