@@ -156,10 +156,15 @@ void SolverVerlet::solve() {
 	}
 
 	int numReps = 10;
+	ccc = 0;
 	for (int k = 0; k < numReps-1; ++k) {
 		double timeInc = ((double) k / numReps) * (1 / fps);
 		if (!lookSolver)	solve2(time + timeInc); 
 		else				solve3(time + timeInc);
+
+		if (k == numReps-3) ccc=1;
+		else ccc = 0;
+
 	}
 
 	for (int ip = 0; ip < inputs.size(); ++ip) {
@@ -304,89 +309,76 @@ void SolverVerlet::solve3(double ttime) {
 				int hi = currentPositions[ip].size()-1;
 				currentPositions[ip][hi] = idealPositions[ip][hi];
 
-				/*for (int j = hi-neckRigidness; j < hi; ++j)
-					addSpringBetweenTwoJoints3D(ip,ip,hi,j,(restPositions[ip][hi] - restPositions[ip][j]).norm(),0,deltaTime,25,0,1);*/
+				/*double desiredDist1 = (restPositions[ip][i+1] - restPositions[ip][i]).norm();
+				double desiredDist2 = (restPositions[ip][i] - restPositions[ip][i-1]).norm();
+				addSpringBetweenTwoJoints3D(ip,ip,i+1,i,desiredDist1,0,deltaTime,1,1,1);
+				addSpringBetweenTwoJoints3D(ip,ip,i,i-1,desiredDist2,0,deltaTime,1,1,1);*/
 
-				for (int i = hi-1; i >= 1; --i) {
+				// Rigidness for the "rope behaviour"
+				for (int i = 1; i < hi; ++i) {
 					for (int j = i-bodyRigidness; j <= i+bodyRigidness; ++j) {
-						if (i != j && j >= 0) {
+						if (i != j && j >= 0 && j <= hi) {
+							int minJ = 2;
+							if (j == hi) minJ = 30;
 							double desiredDist1 = (restPositions[ip][i] - restPositions[ip][j]).norm();
-							addSpringBetweenTwoJoints3D(ip,ip,i,j,desiredDist1,0,deltaTime,1,1,1);
+							addSpringBetweenTwoJoints3D(ip,ip,i,j,desiredDist1,0,deltaTime,2,minJ,1);
 						}
 					}
-					/*double desiredDist1 = (restPositions[ip][i+1] - restPositions[ip][i]).norm();
-					double desiredDist2 = (restPositions[ip][i] - restPositions[ip][i-1]).norm();
-					addSpringBetweenTwoJoints3D(ip,ip,i+1,i,desiredDist1,0,deltaTime,1,1,1);
-					addSpringBetweenTwoJoints3D(ip,ip,i,i-1,desiredDist2,0,deltaTime,1,1,1);*/
 				}
 
-				for (int i = 0; i < currentPositions[ip].size(); ++i) {
+				// Serpenteo
+				for (int i = 1; i < hi; ++i) {
+					double minDist = -1;
+					int minIndex = 0;
+					int minIndex2 = 0;
+					double minDist2 = -1;
+					Vector3d p = currentPositions[ip][i];
 
 
-					//addSpringToPoint(ip,i,0,idealPositions[ip][i],1,deltaTime,0,positioningStrengths[i]);
-
-					// Rigidness
-					/*if (i > 15 && i < currentPositions[ip].size()-2) {
-						Vector3d currentVector = (currentPositions[ip][i] - currentPositions[ip][i+1]).normalized();
-						Vector3d restVector = (currentPositions[ip][i+1] - currentPositions[ip][i+2]).normalized();
-						double angle = acos(currentVector.dot(restVector));
-						angle = angle * 180 / M_PI;
-						double threshold = 5;
-						if (angle > threshold) {
-							double restLength = (restPositions[ip][i] - restPositions[ip][i+1]).norm();
-							addSpringToPoint(ip,i,0,currentPositions[ip][i+1] + restVector * restLength,0,deltaTime,0,1);
+					for (int j = 0; j < idealPositions[ip].size()-1; ++j) {
+						 
+						double dd = (p - idealPositions[ip][j]).norm();
+						if (dd < minDist2 || minDist2 == -1) {
+							minDist2 = dd;
+							minIndex2 = j;
 						}
-					}*/
+					}
 
-					// Neighbour constraints	
-					/*if (i < currentPositions[ip].size()-1) {
-						if (i >= currentPositions[ip].size()-2) neighbourDistance = 5;
-						else neighbourDistance = 2;
-						for (int j = i - neighbourDistance; j < i; ++j) {
-							if (j >= 0 && i < currentPositions[ip].size()-1) addSpringBetweenTwoJoints(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 1, 2, 1);
-							else if (j >= 0) addSpringBetweenTwoJoints(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 25, 2, 1);
-						}
-					}*/
+					Vector3d a = idealPositions[ip][minIndex2];
+					Vector3d b = idealPositions[ip][minIndex2+1];
+					//if (minIndex2 > 0 && (p-b).norm() > (p-idealPositions[ip][minIndex2-1]).norm()) b = idealPositions[ip][minIndex2-1];
+					Vector3d n = (b - a).normalized();
+					Vector3d projection = ((a-p) - ((a-p).dot(n))*n);
+					Vector3d pf = p + projection;
+					//pf = idealPositions[ip][minIndex2];
 
-					/*if (i < currentPositions[ip].size()-2) {
-						for (int j = i-1; j <= i+1; ++j) {
-							if (i != j) addSpringBetweenTwoJoints3D(ip,ip,i,j,(restPositions[ip][i] - restPositions[ip][j]).norm(),0,deltaTime,1,1,1);
-						}
-					}*/
+					if (k == relaxSteps-1 && ccc == 1) {
+						GLUquadricObj *quadric;
+						quadric = gluNewQuadric();
+						gluQuadricDrawStyle(quadric, GLU_LINE );
+						glDisable(GL_LIGHTING);
+						glColor3f(1,1,0);
+						glPushMatrix();
+						glTranslated(pf.x(), pf.y(), pf.z());
+						gluSphere(quadric,7,8,8);
+						glPopMatrix();
 
-					/*neighbourDistance = 1;
-					for (int j = i - neighbourDistance; j < i; ++j) {
-						if (j >= 0 && i > 10) addSpringBetweenTwoJoints3D(ip,ip,i,i-1,(restPositions[ip][i] - restPositions[ip][j]).norm(),0,deltaTime,i+1,1,1);
-						else if (j >= 0) addSpringBetweenTwoJoints3D(ip,ip,i,i-1,(restPositions[ip][i] - restPositions[ip][j]).norm(),0,deltaTime,1,1,1);
-					}*/
+						glBegin(GL_LINES);
+						glVertex3f(p.x(), p.y(), p.z());
+						glVertex3f(pf.x(), pf.y(), pf.z());
+						glEnd();
+						glEnable(GL_LIGHTING);
+					}
+
 					
-					// Neighbour constraints 2	
-					/*neighbourDistance = 1;
-					for (int j = i - neighbourDistance; j < i; ++j) {
-						if (j >= 0 && i < currentPositions[ip].size()-1) addSpringBetweenTwoJoints3D(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 1, 2, 1);
-						else if (j >= 0) addSpringBetweenTwoJoints3D(ip, ip, i, j, (restPositions[ip][i] - restPositions[ip][j]).norm(), 0, deltaTime, 25, 2, 5);
-					}*/
 
-					// Collisions
-					/*for (int sk2 = 0; sk2 < currentPositions.size(); ++sk2) {
-						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
-							if (ip == sk2 && abs(i-j) > neighbourDistance && i < 15) {
-								float radius = 15;
-								addSpringBetweenTwoJoints(ip,sk2,i,j,radius*2,2,deltaTime,1,1,1);
-							}
-						}
-					}*/
+					//1-positioningStrengths[i]
+					addSpringToPoint(ip,i,0,pf, 0, deltaTime, 1, 1);
+				}
 
-					// Collision with "ground"
-					/*if (i > 0 && currentPositions[ip][i].y() < 0) {
-						Vector3d p = currentPositions[ip][i];
-						p.y() = 0;
-						addSpringToPoint(ip,i,0,p,0,deltaTime,1,1);
-					}*/
-
-				}	// end of positions loop
 			}	// end of relaxing loop
 
+			ccc = 1;
 			// Update points
 			for (int i = 0; i < currentPositions[ip].size(); ++i) {
 				Vector3d velocity = (currentPositions[ip][i] - lastPositions[ip][i]);
@@ -402,37 +394,6 @@ void SolverVerlet::solve3(double ttime) {
 			}
 
 		}	// end of input loop
-
-		glDisable(GL_LIGHTING);
-		/*// Perform collisions on all of them
-		for (int k = 0; k < relaxSteps; ++k) {
-
-			for (int sk = 0; sk < inputs.size(); ++sk) {
-				for (int sk2 = sk+1; sk2 < inputs.size(); ++sk2) {
-					for (int i = 0; i < currentPositions[sk].size(); i += 1) {
-						for (int j = 0; j < currentPositions[sk2].size(); j += 1) {
-							double distance = (currentPositions[sk][i] - currentPositions[sk2][j]).norm();
-							Vector3d currentDist = (currentPositions[sk][i] - currentPositions[sk2][j]);
-							double restDistance = 50;
-
-							if (distance < restDistance) {
-								double diff = distance - restDistance;
-								Vector3d delta1 = currentDist / currentDist.norm() * colS * diff;
-								Vector3d delta2 = delta1;
-								Vector3d vel1 = (currentPositions[sk][i] - lastPositions[sk][i]);
-								Vector3d vel2 = (currentPositions[sk2][j] - lastPositions[sk2][j]);
-								Vector3d damp1 = currentDist / currentDist.norm() * colD * (vel1).dot(currentDist.normalized());
-								Vector3d damp2 = currentDist / currentDist.norm() * colD * (vel2).dot(currentDist.normalized());
-								if (i > 0) currentPositions[sk][i] -= (delta1+damp1)*colStiff*deltaTime/2;
-								if (j > 0) currentPositions[sk2][j] += (delta2+damp2)*colStiff*deltaTime/2;
-							}
-						}	// end of neighbours
-					}	// end of positions
-				}	// end of input loops
-			}	// end of relax steps
-		}	// end of collisions*/
-
-		glEnable(GL_LIGHTING);
 
 		for (int ip = 0; ip < inputs.size(); ++ip) {
 			for (int i = 0; i < chainSize; ++i)

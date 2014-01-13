@@ -8,7 +8,7 @@ public:
 	double alpha;		// 0 = head, 1 = lookPoint
 
 	// Constructors and destructors
-	SolverHead(void) : Solver() {}
+	SolverHead(void) : Solver() { alpha = 0;	lookPoint = Vector3d(0,0,0); }
 	~SolverHead(void) {}
 
 	void solve(SolverData* data);

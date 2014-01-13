@@ -14,6 +14,8 @@ public:
 	bool hasRigid;
 	bool lookSolver;		// para hacer casos especiales
 
+	int ccc;
+
 	// Spring parameters: Strength, Damping, Stiffness
 	double distS, distD, distStiff;		// springs between nodes
 	double posS, posD, posStiff;		// springs between nodes and ideal positions

@@ -42,6 +42,7 @@ public:
 		ampMultiplier = freqMultiplier = 1;
 		rigidness = true;
 		skeletons = vector<skeleton*>(0);
+		alpha = 0;
 	}
 	~SolverData(void) {}
 };

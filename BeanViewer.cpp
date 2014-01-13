@@ -138,6 +138,7 @@ void BeanViewer::loadSolvers() {
 		solverManager->brains[sk]->lookPoint += Vector3d(0, 480, 400);
 
 		// Head solver
+		head->lookPoint = Vector3d(0,480,480);
 		head->data = solverManager->solverData;
 		head->index1 = 18;	head->index2 = 19;
 
@@ -162,8 +163,9 @@ void BeanViewer::loadSolvers() {
 	}
 
 	for (int i = 0; i < verlet2->currentPositions[0].size(); ++i) {
-		verlet2->positioningStrengths[i] = 0;
-		if (i == verlet2->currentPositions[0].size()-1) verlet2->positioningStrengths[i] = 1;
+		verlet2->positioningStrengths[i] = 1 - verlet->positioningStrengths[i];
+		//verlet2->positioningStrengths[i] = 0;
+		//if (i == verlet2->currentPositions[0].size()-1) verlet2->positioningStrengths[i] = 1;
 	}
 }
 
