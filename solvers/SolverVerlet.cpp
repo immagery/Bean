@@ -346,7 +346,7 @@ void SolverVerlet::solve3(double ttime) {
 
 					Vector3d a = idealPositions[ip][minIndex2];
 					Vector3d b = idealPositions[ip][minIndex2+1];
-					//if (minIndex2 > 0 && (p-b).norm() > (p-idealPositions[ip][minIndex2-1]).norm()) b = idealPositions[ip][minIndex2-1];
+					if (minIndex2 > 0 && (p-b).norm() > (p-idealPositions[ip][minIndex2-1]).norm()) b = idealPositions[ip][minIndex2-1];
 					Vector3d n = (b - a).normalized();
 					Vector3d projection = ((a-p) - ((a-p).dot(n))*n);
 					Vector3d pf = p + projection;
@@ -373,7 +373,7 @@ void SolverVerlet::solve3(double ttime) {
 					
 
 					//1-positioningStrengths[i]
-					addSpringToPoint(ip,i,0,pf, 0, deltaTime, 1, 1);
+					addSpringToPoint(ip,i,0,pf, 0, deltaTime, 1, positioningStrengths[i]*1.5);
 				}
 
 			}	// end of relaxing loop
