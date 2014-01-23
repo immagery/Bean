@@ -36,18 +36,18 @@ void SolverManager::draw() {
 				Vector3d p = chain->positions[i];
 				glPushMatrix();
 				glTranslated(p.x(), p.y(), p.z());
-				gluSphere(quadric,7,8,8);
+				gluSphere(quadric,3,8,8);
 				glPopMatrix();
 			}
-			chain = solvers[sk][4]->outputs[0];
+			/*chain = solvers[sk][4]->outputs[0];
 			glColor3f(0,1,0);
 			for (int i = 0; i < chain->positions.size(); ++i) {
 				Vector3d p = chain->positions[i];
 				glPushMatrix();
 				glTranslated(p.x(), p.y(), p.z());
-				gluSphere(quadric,2,8,8);
+				gluSphere(quadric,3,8,8);
 				glPopMatrix();
-			}
+			}*/
 		}
 		glEnable(GL_LIGHTING);
 	}

@@ -44,7 +44,7 @@ void BeanViewer::loadSolvers() {
 	verlet2->hasGravity = false;
 	verlet2->hasRigid = false;
 	verlet2->lookSolver = true;
-	verlet2->nextVerlet = NULL;
+	verlet2->nextVerlet = verlet;
 
 	solverManager->solverData->fps = 1000.0 / this->animationPeriod();
 
@@ -163,7 +163,7 @@ void BeanViewer::loadSolvers() {
 	}
 
 	for (int i = 0; i < verlet2->currentPositions[0].size(); ++i) {
-		verlet2->positioningStrengths[i] = 1 - verlet->positioningStrengths[i];
+		verlet2->positioningStrengths[i] = (double)i / verlet2->currentPositions[0].size();
 		//verlet2->positioningStrengths[i] = 0;
 		//if (i == verlet2->currentPositions[0].size()-1) verlet2->positioningStrengths[i] = 1;
 	}
@@ -300,6 +300,21 @@ void BeanViewer::readScene(string fileName, string name, string path) {
 			Modelo* m = ((Modelo*)escena->models.back());
 			m->sPath = newPath.toStdString(); // importante para futuras referencias
 			BuildSurfaceGraphs(m);
+
+			m->shading->colors.resize(m->vn());
+			for (int i = 0; i < m->vn(); ++i) {
+				m->shading->colors[i].resize(3);
+				Vector3d p = m->nodes[i]->position;
+				if (((int)(p.z()) / 20) % 2 == 0) {
+					m->shading->colors[i][0] = 0.5;
+					m->shading->colors[i][1] = 0.9;
+					m->shading->colors[i][2] = 0.5;
+				} else {
+					m->shading->colors[i][0] = 0.2;
+					m->shading->colors[i][1] = 0.6;
+					m->shading->colors[i][2] = 0.2;
+				}
+			}
 
 			// Leer esqueleto
 			if(!sSkeletonFile.isEmpty())

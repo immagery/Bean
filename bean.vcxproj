@@ -363,6 +363,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="solvers\SolverHead.cpp" />
+    <ClCompile Include="solvers\SolverInit.cpp" />
     <ClCompile Include="solvers\SolverManager.cpp" />
     <ClCompile Include="solvers\SolverVerlet.cpp" />
   </ItemGroup>

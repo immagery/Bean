@@ -19,6 +19,8 @@ public:
 
 	int lastX, lastY, lastZ;
 	int lastLX, lastLY, lastLZ;
+	int lastOsc;
+	int lastHeadX, lastHeadY, lastHeadZ;
 
 public slots:
 	void loadSolvers();
@@ -45,6 +47,11 @@ public slots:
 	void changeTwistPropagation(int);
 	void changeTwistSmoothing(int);
 	void changeOscThresh1(int);
+	void changeSpringParameters(int);
+	void buildAttackCurve();
+	void changeHeadPosition(int);
+	void toggleMove();
+	void scaleCurve();
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
 };

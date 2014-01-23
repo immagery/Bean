@@ -65,14 +65,87 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->twistPropagationSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistPropagation(int)));
 	connect(ui->twistSmoothingSlider, SIGNAL(valueChanged(int)), this, SLOT(changeTwistSmoothing(int)));
 
+	connect(ui->ksSlider, SIGNAL(valueChanged(int)), this, SLOT(changeSpringParameters(int)));
+	connect(ui->kdSlider, SIGNAL(valueChanged(int)), this, SLOT(changeSpringParameters(int)));
+	connect(ui->stiffSlider, SIGNAL(valueChanged(int)), this, SLOT(changeSpringParameters(int)));
+
+	connect(ui->buildAttackCurve, SIGNAL(clicked()), this, SLOT(buildAttackCurve()));
+
+	connect(ui->headX, SIGNAL(valueChanged(int)), this, SLOT(changeHeadPosition(int)));
+	connect(ui->headY, SIGNAL(valueChanged(int)), this, SLOT(changeHeadPosition(int)));
+	connect(ui->headZ, SIGNAL(valueChanged(int)), this, SLOT(changeHeadPosition(int)));
+
+	connect(ui->moveButton, SIGNAL(clicked()), this, SLOT(toggleMove()));
+	connect(ui->scaleButton, SIGNAL(clicked()), this, SLOT(scaleCurve()));
+
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
+	lastOsc = 0;
     
 }
 
+void MainWindow::scaleCurve() {
+	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	verlet->scaleCurve();
+}
+
+void MainWindow::changeHeadPosition(int) {
+	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	manager->solverData->headOffset = Vector3d(ui->headX->value(), ui->headY->value(), ui->headZ->value());
+}
+
+void MainWindow::toggleMove() {
+	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	verlet->buildAttackCurves();
+	SolverHead* h = (SolverHead*) (manager->solvers[0][manager->solvers[0].size()-2]);
+	h->moving = !(h->moving);
+}
+
+void MainWindow::buildAttackCurve() {
+	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	verlet->buildAttackCurves();
+	ui->buildAttackCurve->setEnabled(false);
+}
+
+void MainWindow::changeSpringParameters(int) {
+	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	double ui1 = ui->ksSlider->value();
+	double ui2 = ui->kdSlider->value() / 100.0;
+	double ui3 = ui->stiffSlider->value() / 100.0;
+	verlet->distS = ui->ksSlider->value();
+	verlet->distD = ui->kdSlider->value() / 100.0;
+	verlet->distStiff = ui->stiffSlider->value() / 100.0;
+}
+
 void MainWindow::changeOscThresh1(int) {
-	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->alpha = ui->oscThresh1->value() / 1000.0;
+	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	int inc = ui->oscThresh1->value() - lastOsc;
+	if (inc < 0) {
+		verlet->disableAttack();
+		ui->buildAttackCurve->setEnabled(true);
+	}
+	lastOsc = ui->oscThresh1->value();
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->alpha = ui->oscThresh1->value() / 10000.0;
 	//numTwisted = ui->twistPropagationSlider->value();
+	/*
+	int lastPos2 = verlet->currentPositions[0].size()-1;
+	SolverHead* head = (SolverHead*) (manager->solvers[0][manager->solvers[0].size()-2]);
+	Vector3d look = (verlet->currentPositions[0][lastPos2] - verlet->currentPositions[0][lastPos2-1]).normalized();
+	head->outputs[0]->positions[head->outputs[0]->positions.size()-1] += inc * look;
+	return;*/
+
+	//int lastPos = verlet->curves[0].size()-1;
+	//int lastPos2 = verlet->currentPositions[0].size()-1;
+	//Vector3d look = (verlet->curves[0][lastPos] - verlet->curves[0][lastPos-1]).normalized();
+	//Vector3d look = (verlet->currentPositions[0][verlet->currentPositions[0].size()-1] - verlet->currentPositions[0][verlet->currentPositions[0].size()-2]).normalized();
+	//Vector3d look = (verlet->currentPositions[0][lastPos2] - verlet->currentPositions[0][lastPos2-1]).normalized();
+	//verlet->currentPositions[0][verlet->currentPositions[0].size()-1] += ui->oscThresh1->value() * look;
+	//verlet->idealPositions[0][lastPos] += inc * look;
 }
 
 void MainWindow::changeTwistPropagation(int) {
@@ -307,6 +380,14 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 {
     int current = 0;
     bool checked = false;
+
+	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	SolverVerlet* verlet;
+	if (manager->solvers[0].size() > 0) {
+		verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	}
+	double totalTension = 0;
+
     switch(event->key())
     {
     case Qt::Key_Up:
@@ -402,10 +483,8 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
         ui->infoData->setText("Blend shading mode");
         break;
     case Qt::Key_9:
-        //ShadingModeChange(3);
-        //ui->shadingModeSelection->setCurrentIndex(3);
-        //ui->infoData->setText("Lines shading mode");
-		//((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors = !((BeanViewer*) ui->glCustomWidget)->solverManager->dumpVectors;
+		verlet->printStuff = true;
+
         break;
 	case Qt::Key_C:
 		

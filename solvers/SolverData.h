@@ -29,6 +29,7 @@ public:
 
 	// Head movement
 	double alpha;
+	Vector3d headOffset;
 
 	// Skeletons
 	vector<skeleton*> skeletons;
@@ -43,6 +44,7 @@ public:
 		rigidness = true;
 		skeletons = vector<skeleton*>(0);
 		alpha = 0;
+		headOffset = Vector3d(0,0,0);
 	}
 	~SolverData(void) {}
 };

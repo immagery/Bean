@@ -7,8 +7,13 @@ public:
 	Vector3d lookPoint;
 	double alpha;		// 0 = head, 1 = lookPoint
 
+	bool moving;
+	double radius;
+	int f;
+	int maxF;
+
 	// Constructors and destructors
-	SolverHead(void) : Solver() { alpha = 0;	lookPoint = Vector3d(0,0,0); }
+	SolverHead(void);
 	~SolverHead(void) {}
 
 	void solve(SolverData* data);

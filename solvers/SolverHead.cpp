@@ -1,5 +1,8 @@
 #include "SolverHead.h"
 
+SolverHead::SolverHead()  : Solver() { alpha = 0;	f = maxF = 0;	moving = false;		radius = 450;	lookPoint = Vector3d(0,0,0); }
+
+
 void SolverHead::solve(SolverData* data) {
 	time = data->time;
 	lookPoint = data->lookPoint;
@@ -24,9 +27,23 @@ void SolverHead::solve() {
 
 		Vector3d secondNode = outputs[i]->positions[index2];
 
-		Vector3d lookDirection = lookPoint - secondNode;
-		Vector3d pointToMove = secondNode + alpha * lookDirection;
+		Vector3d lookDirection = (lookPoint - secondNode).normalized();
 
-		outputs[i]->positions[index2] = pointToMove;
+		if (moving) {
+			++f;
+			 if ((outputs[i]->positions[index2] + f*lookDirection*0.8 - outputs[i]->positions[0]).norm() < radius)  maxF = f;
+			 else lookDirection = Vector3d(-1,-0.2,0);
+		}
+		else if (!moving) f = max(f-1,0);
+
+		outputs[i]->positions[index2] += maxF*lookDirection*0.8;
+		if ((outputs[i]->positions[index2] + (maxF+1)*lookDirection*0.8 - outputs[i]->positions[0]).norm() < radius)
+			outputs[i]->positions[index2].x() += sin(f/100.0)*50;
+		else 
+			outputs[i]->positions[index2].z() += sin(f/100.0)*50;
+		//Vector3d pointToMove = secondNode + alpha * lookDirection;
+
+		//outputs[i]->positions[index2] = pointToMove;
+		outputs[i]->positions[index2] += data->headOffset;
 	}
 }

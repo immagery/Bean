@@ -223,6 +223,9 @@
     <ClCompile Include="solvers\SolverHead.cpp">
       <Filter>Bean</Filter>
     </ClCompile>
+    <ClCompile Include="solvers\SolverInit.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\adri\gui\AdriViewer.h">

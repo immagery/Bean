@@ -36,7 +36,7 @@ public:
 	}
 
 	void setPositions(skeleton* s) {
-		chainSize = index2 - index1 + 1 + 1;		// adding one more one to account for the last "median" node
+		chainSize = (index2 - index1 + 1) + 1;		// adding one more one to account for the last "median" node
 		for (int i = index1; i <= index2; ++i) {
 			initPositions.push_back(s->joints[i]->pos);
 			initQORIENTS.push_back(s->joints[i]->qOrient);
