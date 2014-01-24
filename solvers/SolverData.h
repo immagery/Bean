@@ -41,7 +41,7 @@ public:
 		ampMultiplier = freqMultiplier = 1;
 		rigidness = true;
 		skeletons = vector<skeleton*>(0);
-		alpha = 0.0;
+		alpha = 0.1;
 		radius = 300;
 		desiredPos = Vector3d(0,480,0);
 	}
