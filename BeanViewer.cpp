@@ -63,11 +63,17 @@ void BeanViewer::loadSolvers() {
 		double x = (col - 2) * 50;
 		double z = row * -75;
 
-		Vector3d translation = Vector3d(x,0,z) - s->joints[0]->getWorldPosition();
+		Vector3d translation;
+		if (sk == 0) translation = Vector3d(0,0,-50) - s->joints[0]->getWorldPosition();
+		if (sk == 1) translation = Vector3d(0,0,0) - s->joints[0]->getWorldPosition();
+		if (sk == 2) translation = Vector3d(0,0,50) - s->joints[0]->getWorldPosition();
+		if (sk == 3) translation = Vector3d(20,0,-25) - s->joints[0]->getWorldPosition();
+		if (sk == 4) translation = Vector3d(20,0,25) - s->joints[0]->getWorldPosition();
+
 		s->joints[0]->addTranslation(translation.x(), translation.y(), translation.z());
 		s->joints[0]->addRotation(0,0,90);
-		s->joints[0]->addRotation ((2 - col) * 10, 0, 0);
-		s->joints[0]->addRotation (0, 0, row*10);
+		//s->joints[0]->addRotation ((2 - col) * 10, 0, 0);
+		//s->joints[0]->addRotation (0, 0, row*10);
 
 		//if (sk % 3 == 0) s->joints[0]->addRotation(10,0,0);
 		//if (sk % 3 == 2) s->joints[0]->addRotation(-10,0,0);
@@ -81,6 +87,7 @@ void BeanViewer::loadSolvers() {
 
 		// Create solvers to test
 		SolverInit *init = new SolverInit();		init->id = 0;
+		SolverPos *pos = new SolverPos();
 		SolverDir *dir = new SolverDir();			dir->id = 1;
 		SolverSinusoidal *sin = new SolverSinusoidal(4 + rand()%10,2 + rand()%2,rand()%10);		sin->id = 2;
 		sin->dimension = 0;		sin->longitude = 10;		sin->multAmp = 1;	sin->multFreq = 1;
@@ -90,13 +97,14 @@ void BeanViewer::loadSolvers() {
 		SolverHead *head = new SolverHead();		head->id = 4;
 
 		solverManager->addSolver(init, sk);
-		solverManager->addSolver(dir, sk);
+		solverManager->addSolver(pos,sk);
 		//solverManager->addSolver(sin, sk);
 		//solverManager->addSolver(sin2,sk);
 		solverManager->addSolver(verlet, sk);
-		solverManager->addSolver(look, sk);
 		solverManager->addSolver(head,sk);
+		solverManager->addSolver(look, sk);
 		solverManager->addSolver(verlet2, sk);
+
 
 		solverManager->myRot = s->joints[18]->rotation;
 
@@ -104,21 +112,26 @@ void BeanViewer::loadSolvers() {
 		solverManager->brains[sk]->sinus = sin;
 
 		// Init solver
-		init->jt = s->joints[0];
 		init->index1 = 0;	init->index2 = 18;
 		init->setPositions(s);
-		init->data = solverManager->solverData;
-		init->initialTranslation = s->joints[0]->translation;
+		init->inputs[0] = (verlet2->outputs[sk]);
+		init->initialize();
+
+		
 
 		verlet->addSkeleton(s, init->initialChain());
 		verlet2->addSkeleton(s, init->initialChain());
 
+		pos->index1 = 0;
+		pos->index2 = 19;
+		pos->restTrans = s->joints[0]->translation;
+
 		// Dir solver
-		dir->data = solverManager->solverData;
+		//dir->data = solverManager->solverData;
 
 		// Sin solver
 		sin->index1 = 1;		sin->index2 = 19;
-		sin->data = solverManager->solverData;
+		//sin->data = solverManager->solverData;
 		sin->thresh1 = 10;	sin->thresh2 = 15;	sin->thresh3 = -1;
 
 		/*sin2->index1 = 1;	sin2->index2 = 19;
@@ -131,15 +144,16 @@ void BeanViewer::loadSolvers() {
 		Vector3d v2 = s->joints[4]->translation - s->joints[3]->translation;
 		look->qrot.setFromTwoVectors(s->joints[19]->translation - s->joints[18]->translation, v2).inverse();
 		look->restLookVector = s->joints[18]->rotation.inverse()._transformVector(v2);
-		look->data = solverManager->solverData;
+		//look->data = solverManager->solverData;
+		look->restDistance = (init->initialChain()->positions[19] - init->initialChain()->positions[18]).norm();
 		solverManager->solverData->neck = look->qrot;
-		solverManager->solverData->lookPoint = Vector3d(0,480,400);
+		solverManager->solverData->lookPoint = Vector3d(0,800,0);
 		solverManager->brains[sk]->lookPoint = s->joints[0]->translation;
 		solverManager->brains[sk]->lookPoint += Vector3d(0, 480, 400);
 
 		// Head solver
-		head->lookPoint = Vector3d(0,480,480);
-		head->data = solverManager->solverData;
+		head->desiredPos = Vector3d(0,480,480);
+		//head->data = solverManager->solverData;
 		head->index1 = 18;	head->index2 = 19;
 
 	}
@@ -211,21 +225,40 @@ void BeanViewer::draw() {
 				//printf("Elapsed update time: %f\n", timelapse(start,end));
 
 			if (drawLookLocators) {
+				
 				Vector3d p1 = escena->skeletons[sk]->joints[solverManager->brains[sk]->look->outputs[0]->positions.size()-2]->translation;
 				Vector3d p2 = solverManager->brains[sk]->look->lookPoint;
 				Vector3d p3 = s->joints[18]->translation;
+				Vector3d p4 = escena->skeletons[sk]->joints[solverManager->brains[sk]->look->outputs[0]->positions.size()-2]->translation;
+				Vector3d p5 = escena->skeletons[sk]->joints[solverManager->brains[sk]->look->outputs[0]->positions.size()-1]->translation;
+				Vector3d look = (p5 - p4).normalized();
+				Vector3d pf = p4 + look*100;
 				glDisable(GL_LIGHTING);
 				glColor3f(0.5, 0.1, 0.1);
 				glBegin(GL_LINES);
 				glVertex3d(p1.x(), p1.y(), p1.z());
 				glVertex3d(p2.x(), p2.y(), p2.z());
-				glVertex3d(p3.x(), p3.y(), p3.z());
-				glVertex3d(p2.x(), p2.y(), p2.z());
+				//glVertex3d(p3.x(), p3.y(), p3.z());
+				//glVertex3d(p2.x(), p2.y(), p2.z());
+				//glVertex3d(p4.x(), p4.y(), p4.z());
+				//glVertex3d(pf.x(), pf.y(), pf.z());
 				drawPointLocator(solverManager->brains[sk]->look->lookPoint, 5, true);
 				glEnable(GL_LIGHTING);
 			}
 		}
-		solverManager->draw();
+		//solverManager->draw();
+		glDisable(GL_LIGHTING);
+		glColor3f(1,1,1);
+		Vector3d p1 = escena->skeletons[0]->joints[0]->translation;	p1.x() -= 200;	p1.z() += 200;
+		Vector3d p2 = p1;	p2.x() += 400;
+		Vector3d p3 = p2;	p3.z() -= 400;
+		Vector3d p4 = p3;	p4.x() -= 400;
+		glBegin(GL_QUADS);
+		glVertex3d(p1.x(), p1.y(), p1.z());
+		glVertex3d(p2.x(), p2.y(), p2.z());
+		glVertex3d(p3.x(), p3.y(), p3.z());
+		glVertex3d(p4.x(), p4.y(), p4.z());
+		glEnd();
 	}
 
 	// Skinning
@@ -291,7 +324,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 1; ++i) {
+		for (int i = 0; i < 3; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());

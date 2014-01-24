@@ -83,7 +83,7 @@ public:
 		}
 
 		solvers[sk].push_back(s);
-		
+		s->data = solverData;
 	}
 
 	SolverManager(void);

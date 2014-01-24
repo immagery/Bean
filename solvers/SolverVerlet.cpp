@@ -54,14 +54,14 @@ void SolverVerlet::buildAttackCurves() {
 
 void SolverVerlet::scaleCurve() {
 	for (int ip = 0; ip < inputs.size(); ++ip) {
-		Vector3d axis = attackCurves[ip][0] - attackCurves[ip][attackCurves[ip].size()-1];
+		Vector3d axis = idealPositions[ip][0] - idealPositions[ip][idealPositions[ip].size()-1];
 		Quaterniond q;	q.setFromTwoVectors(axis.normalized(),Vector3d(1,0,0));
-		for (int i = 1; i < attackCurves[ip].size(); ++i) {
-			Vector3d v = attackCurves[ip][i] - attackCurves[ip][attackCurves[ip].size()-1];
+		for (int i = 5; i < idealPositions[ip].size(); ++i) {
+			Vector3d v = idealPositions[ip][i] - idealPositions[ip][idealPositions[ip].size()-1];
 			v = q._transformVector(v);
 			v.x() *= 1.01;
 
-			attackCurves[ip][i] = attackCurves[ip][attackCurves[ip].size()-1] + q.inverse()._transformVector(v);
+			idealPositions[ip][i] = idealPositions[ip][idealPositions[ip].size()-1] + q.inverse()._transformVector(v);
 		}
 	}
 }
@@ -232,6 +232,7 @@ void SolverVerlet::solve() {
 
 	int numReps = 10;
 	ccc = 0;
+	
 	for (int k = 0; k < numReps-1; ++k) {
 		double timeInc = ((double) k / numReps) * (1 / fps);
 		if (!lookSolver)	solve2(time + timeInc); 
@@ -324,7 +325,7 @@ void SolverVerlet::solve2(double ttime) {
 						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
 							if (ip == sk2 && abs(i-j) > neighbourDistance && i < 15) {
 								float radius = 12;
-								addSpringBetweenTwoJoints(ip,sk2,i,j,radius*2,2,deltaTime,1,1,1);
+								addSpringBetweenTwoJoints(ip,sk2,i,j,radius*2,2,deltaTime,2,2,1);
 							}
 						}
 					}
@@ -374,24 +375,11 @@ void SolverVerlet::solve3(double ttime) {
 		int neighbourDistance = 2;
 		int bodyRigidness = 2;
 		int neckRigidness = 4;
+		if (moveFlag) scaleCurve();
 
 		// Solve all inputs
 		for (int ip = 0; ip < inputs.size(); ++ip) {
 			Chain* c = inputs[ip];
-
-			/*double restL = (idealPositions[ip][idealPositions[ip].size()-2] - idealPositions[ip][0]).norm();
-			double maxL = (restPositions[ip][restPositions[ip].size()-2] - restPositions[ip][0]).norm();
-			double currentL = 0;
-			for (int i = 0; i < currentPositions[ip].size()-1; i += 8) {
-				currentL = (currentPositions[ip][i] - currentPositions[ip][i+1]).norm();
-			}
-			currentL = (currentPositions[ip][currentPositions[ip].size()-2] - currentPositions[ip][0]).norm();
-			if (maxL == restL) restL = 0;
-			double f = (currentL - restL) / (maxL - restL);
-
-			if (printStuff) printf("%f\n", f);*/
-				
-
 
 			if (updateFlag) {
 				int headIndex = currentPositions[ip].size()-1;
@@ -408,66 +396,85 @@ void SolverVerlet::solve3(double ttime) {
 				int n1 = n/3;
 				int n2 = n-3;
 
+				// Degradado pesos proyecciones
 				for (int ii = 0; ii < positioningStrengths.size(); ++ii) {
-					if (ii >= n2) positioningStrengths[ii] = 1;
+					if (ii >= headIndex - 5)
+						positioningStrengths[ii] = 0;
+					else positioningStrengths[ii] = (double)(ii) / 20;
+					/*if (ii >= n2) positioningStrengths[ii] = 1;
 					else if (ii < n1) positioningStrengths[ii] = 0;
-					else positioningStrengths[ii] = (double)(ii - n1) / (n2 - n1);
-
-					//if (ii == 1) positioningStrengths[ii] = 1;
-					//positioningStrengths[ii] *= positioningStrengths[ii];
-					/*double dist = (currentPositions[ip][headIndex] - currentPositions[ip][ii]).norm();
-					if (dist < minDist) positioningStrengths[ii] = 1;
-					else if (dist > maxDist) positioningStrengths[ii] = 0;
-					else positioningStrengths[ii] = 1 - (dist - minDist) / (maxDist - minDist);*/
+					else positioningStrengths[ii] = (double)(ii - n1) / (n2 - n1);*/
 				}
-
-				/*if (f >= 0 && f <= 1 && curves[ip].size() < idealPositions[ip].size()*2) {
-					double maxDist = f * maxL / 2.0;
-					int n = f * positioningStrengths.size();
-					for (int ii = 0; ii < positioningStrengths.size(); ++ii) {
-
-						if ((currentPositions[ip][ii] - restPositions[ip][0]).norm() < maxDist) positioningStrengths[ii] = 0;
-						else positioningStrengths[ii] = ((currentPositions[ip][ii] - restPositions[ip][0]).norm() - maxDist) / (maxL - maxDist);
-
-					}
-				} else {
-					printf("f: %f\n", f);
-					for (int ii = 0; ii < positioningStrengths.size(); ++ii) {
-						positioningStrengths[ii] = (ii < positioningStrengths.size()-7)?0:1;
-					}
-				}*/
 			}
 
 			int mi;
 			for (int k = 0; k < relaxSteps; ++k) {
 
 				int hi = currentPositions[ip].size()-1;
-				//if (!attackFlag)currentPositions[ip][hi] = idealPositions[ip][hi];
-				//else currentPositions[ip][hi] = curves[ip][curves[ip].size()-1];
-				currentPositions[ip][hi] = curves[ip][curves[ip].size()-1];
 				currentPositions[ip][hi] = idealPositions[ip][hi];
+				currentPositions[ip][hi-1] = idealPositions[ip][hi-1];
 				currentPositions[ip][0] = idealPositions[ip][0];
 				currentPositions[ip][1] = idealPositions[ip][1];
 
 				// Rigidness for the "rope behaviour"
-				for (int i = 0; i <= hi; ++i) {
+
+				// Add springs
+				for (int i = hi-2; i >= hi-5; --i) {
+					double dist = (restPositions[ip][hi] - restPositions[ip][i]).norm();
+					Vector3d desiredPoint = idealPositions[ip][hi] + (idealPositions[ip][hi-1] - idealPositions[ip][hi]).normalized() * dist;
+					
+					addSpringToPoint (ip, i, 1, desiredPoint, 0, deltaTime, 0, 0.5);
+				}
+
+				for (int i = hi; i >= 0; --i) {
+					int step = (i >= hi-1)? neckRigidness : bodyRigidness;
+					//if (i == hi) step = 10;
+					for (int j = i - step; j <= i+step; ++j) {
+						if (j < 0 || j > hi || j == i) continue;
+						int minI = 2, minJ = 2;
+						double mult = 1;
+						if (i >= hi-neckRigidness+1) {
+							minI = 30;
+							//if (i == hi) mult = 1.3 - (0.1 * abs(hi - j));
+						}
+						if (i == hi) mult = 4;
+						if (j >= hi-1) minJ = 30;
+						double desiredDist1 = (restPositions[ip][i] - restPositions[ip][j]).norm();
+						addSpringBetweenTwoJoints(ip,ip,i,j,desiredDist1,0,deltaTime,minI,minJ,mult);			
+					}
+				}
+
+				/*for (int i = 0; i < hi; ++i) {
+					int step = (i == hi)? neckRigidness : bodyRigidness;
+					for (int j = i - step; j <= i + step; ++j) {
+						int minI = 1, minJ = 1;
+						if (i != j && j >= 0 && j <= hi) {
+							if (i >= hi-2) minI = 30;
+							if (j >= hi-2) minJ = 30;
+							double desiredDist1 = (restPositions[ip][i] - restPositions[ip][j]).norm();
+							addSpringBetweenTwoJoints(ip,ip,i,j,desiredDist1,0,deltaTime,minI,minJ,1);
+						}
+					}
+				}*/
+
+				/*for (int i = 0; i <= hi; ++i) {
 					int step = bodyRigidness;
 					if (i >= currentPositions[ip].size()-2) step = neckRigidness;
 					for (int j = i-step; j <= i+step; ++j) {
-						if (i == currentPositions[ip].size()-1 && j == i-1) continue;
-						if (i != j && j >= 0 && j < hi) {
+						if (i >= currentPositions[ip].size()-2 && j >= currentPositions[ip].size()-2) continue;
+
+						if (i != j && j >= 0 && j <= hi) {
 							double mult = 1;
 							int minJ = 1;
 							int minI = 1;
-							if (i == hi) {
-								minI = 30;
-								mult = 1;
-							}
+							if (i >= hi-1) minI = 30;
+							if (j >= hi-1) minJ = 30;
 							double desiredDist1 = (restPositions[ip][i] - restPositions[ip][j]).norm();
 							addSpringBetweenTwoJoints(ip,ip,i,j,desiredDist1,0,deltaTime,minI,minJ,mult);
 						}
+
 					}
-				}
+				}*/
 
 				// Serpenteo
 				for (int i = 0; i < hi; ++i) {
@@ -519,7 +526,7 @@ void SolverVerlet::solve3(double ttime) {
 					//if (minIndex >= idealPositions[ip].size()-3) desvinculado = min(desvinculado,i);
 
 					if (k == relaxSteps-1 && ccc == 1 && i == 0) {
-						GLUquadricObj *quadric;
+						/*GLUquadricObj *quadric;
 						quadric = gluNewQuadric();
 						gluQuadricDrawStyle(quadric, GLU_LINE );
 						glDisable(GL_LIGHTING);
@@ -532,24 +539,12 @@ void SolverVerlet::solve3(double ttime) {
 							gluSphere(quadric,radius,8,8);
 							glPopMatrix();
 						}
-						glEnable(GL_LIGHTING);
+						glEnable(GL_LIGHTING);*/
 					}
 
 					if (k == relaxSteps-1 && ccc == 1 && i < desvinculado && positioningStrengths[i] > 0) {
 
-						/*if (printStuff) {
-							double totalTension = 0;
-							for (int kk = 1; kk < idealPositions[ip].size(); ++kk) {
-								double tension = (currentPositions[ip][kk] - currentPositions[ip][kk-1]).norm() - 
-												(idealPositions[ip][kk] - idealPositions[ip][kk-1]).norm();
-								printf("%f ", tension);
-								totalTension += tension;
-							}
-							printf("\nTotal: %f\n", totalTension);
-							printStuff = false;
-						}*/
-
-						GLUquadricObj *quadric;
+						/*GLUquadricObj *quadric;
 						quadric = gluNewQuadric();
 						gluQuadricDrawStyle(quadric, GLU_LINE );
 						glDisable(GL_LIGHTING);
@@ -559,20 +554,26 @@ void SolverVerlet::solve3(double ttime) {
 						double radius = 8;
 						gluSphere(quadric,radius*positioningStrengths[i],8,8);
 						glPopMatrix();
-						
 
-
-						/*glBegin(GL_LINES);
-						glVertex3f(p.x(), p.y(), p.z());
-						glVertex3f(proj.x(), proj.y(), proj.z());
-						glEnd();*/
-						glEnable(GL_LIGHTING);
+						glEnable(GL_LIGHTING);*/
 					}
 
 
 
 					//if (i < desvinculado) positioningStrengths[i]*2
-					addSpringToPoint(ip,i,0,proj, 0, deltaTime, 1, positioningStrengths[i]);
+					addSpringToPoint(ip,i,0,proj, 1, deltaTime, 2, positioningStrengths[i]);
+				}
+
+				// Collisions
+				for (int i = 0; i < hi; ++i) {
+					for (int sk2 = 0; sk2 < currentPositions.size(); ++sk2) {
+						for (int j = 0; j < currentPositions[sk2].size(); ++j) {
+							if (ip == sk2 && abs(i-j) > neighbourDistance && i < 15) {
+								float radius = 12;
+								addSpringBetweenTwoJoints(ip,sk2,i,j,radius*2,2,deltaTime,2,2,1);
+							}
+						}
+					}
 				}
 
 				updateFlag = false;

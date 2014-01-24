@@ -18,7 +18,9 @@ public:
 	Quaterniond dirRot;
 	Quaterniond neck;
 
-	// Look
+	// Head & look
+	double alpha, radius;
+	Vector3d desiredPos;
 	Vector3d lookPointRadius;
 	double thita, phi;
 
@@ -26,10 +28,6 @@ public:
 	double ampMultiplier, freqMultiplier;
 
 	bool rigidness;
-
-	// Head movement
-	double alpha;
-	Vector3d headOffset;
 
 	// Skeletons
 	vector<skeleton*> skeletons;
@@ -43,8 +41,9 @@ public:
 		ampMultiplier = freqMultiplier = 1;
 		rigidness = true;
 		skeletons = vector<skeleton*>(0);
-		alpha = 0;
-		headOffset = Vector3d(0,0,0);
+		alpha = 0.0;
+		radius = 300;
+		desiredPos = Vector3d(0,480,0);
 	}
 	~SolverData(void) {}
 };

@@ -4,3 +4,4 @@
 #include "SolverVerlet.h"
 #include "SolverLook.h"
 #include "SolverHead.h"
+#include "SolverPos.h"

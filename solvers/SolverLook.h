@@ -14,6 +14,7 @@ public:
 	int index1, index2;
 	Quaterniond qrot;
 	Vector3d restLookVector, lookPoint;
+	double restDistance;
 
 	void solve(SolverData* data) {
 		lookPoint = data->lookPoint;
@@ -27,8 +28,8 @@ public:
 			for (int j = 0; j < ichain->positions.size(); ++j)
 				outputs[i]->positions[j] = ichain->positions[j];
 
-			Vector3d firstNode = outputs[i]->positions[index1];
-			Vector3d secondNode = outputs[i]->positions[index2];
+			Vector3d firstNode = inputs[i]->positions[index1];
+			Vector3d secondNode = inputs[i]->positions[index2];
 
 			//Vector3d lookVector = qrot._transformVector(restLookVector);
 			Vector3d lookVector = qrot._transformVector(secondNode - firstNode);
@@ -36,7 +37,7 @@ public:
 
 			Quaterniond r;	r.setFromTwoVectors(lookVector, desiredVector);
 			Vector3d rotatedVector = r._transformVector(secondNode - firstNode);
-			Vector3d pointToLook = firstNode + rotatedVector;
+			Vector3d pointToLook = firstNode + rotatedVector.normalized()*restDistance;
 
 			outputs[i]->positions[index2] = pointToLook;
 		}

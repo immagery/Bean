@@ -365,6 +365,7 @@
     <ClCompile Include="solvers\SolverHead.cpp" />
     <ClCompile Include="solvers\SolverInit.cpp" />
     <ClCompile Include="solvers\SolverManager.cpp" />
+    <ClCompile Include="solvers\SolverPos.cpp" />
     <ClCompile Include="solvers\SolverVerlet.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -419,6 +420,7 @@
     <ClInclude Include="solvers\SolverInit.h" />
     <ClInclude Include="solvers\SolverLook.h" />
     <ClInclude Include="solvers\SolverManager.h" />
+    <ClInclude Include="solvers\SolverPos.h" />
     <ClInclude Include="solvers\SolverSinusoidal.h" />
     <ClInclude Include="solvers\SolverVerlet.h" />
     <CustomBuild Include="..\adri\gui\AdriViewer.h">

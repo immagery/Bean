@@ -20,6 +20,7 @@ public:
 	int ccc;
 	bool printStuff;
 	bool updateFlag;
+	bool moveFlag;
 
 	// Attack curve
 	vector<vector<Vector3d> > attackCurves;

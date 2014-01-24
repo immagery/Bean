@@ -92,7 +92,7 @@ void MainWindow::scaleCurve() {
 
 void MainWindow::changeHeadPosition(int) {
 	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
-	manager->solverData->headOffset = Vector3d(ui->headX->value(), ui->headY->value(), ui->headZ->value());
+	manager->solverData->desiredPos = Vector3d(ui->headX->value(), ui->headY->value(), ui->headZ->value());
 }
 
 void MainWindow::toggleMove() {
@@ -106,8 +106,9 @@ void MainWindow::toggleMove() {
 void MainWindow::buildAttackCurve() {
 	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
 	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
-	verlet->buildAttackCurves();
-	ui->buildAttackCurve->setEnabled(false);
+	//verlet->buildAttackCurves();
+	//ui->buildAttackCurve->setEnabled(false);
+	verlet->moveFlag = !verlet->moveFlag;
 }
 
 void MainWindow::changeSpringParameters(int) {
@@ -122,15 +123,15 @@ void MainWindow::changeSpringParameters(int) {
 }
 
 void MainWindow::changeOscThresh1(int) {
-	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
+	/*SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
 	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
 	int inc = ui->oscThresh1->value() - lastOsc;
 	if (inc < 0) {
 		verlet->disableAttack();
 		ui->buildAttackCurve->setEnabled(true);
 	}
-	lastOsc = ui->oscThresh1->value();
-	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->alpha = ui->oscThresh1->value() / 10000.0;
+	lastOsc = ui->oscThresh1->value();*/
+	((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->alpha = ui->oscThresh1->value() / 1000.0;
 	//numTwisted = ui->twistPropagationSlider->value();
 	/*
 	int lastPos2 = verlet->currentPositions[0].size()-1;
@@ -347,8 +348,9 @@ void MainWindow::changeTransformRotateAmountZ(int) {
 
 void MainWindow::changeTransformTranslateAmountX(int) 
 {
-
-        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.x() = ui->translationAmountX->value();
+	int incX = ui->translationAmountX->value() - lastTx;
+	lastTx = ui->translationAmountX->value() ;
+        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.x() += incX;
     QString msg = QString::number(ui->translationAmountX->value());
 	ui->translationEditX->setText(msg);
 
@@ -356,16 +358,18 @@ void MainWindow::changeTransformTranslateAmountX(int)
 
 void MainWindow::changeTransformTranslateAmountY(int) 
 {
-
-        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.y() = ui->translationAmountY->value();
+	int incY = ui->translationAmountY->value() - lastTy;
+	lastTy = ui->translationAmountY->value() ;
+        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.y() += incY;
 
     QString msg = QString::number(ui->translationAmountY->value());
     ui->translationEditY->setText(msg);
 }
 
 void MainWindow::changeTransformTranslateAmountZ(int) {
-  
-        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.z() = ui->translationAmountZ->value();
+  	int incZ = ui->translationAmountZ->value() - lastTz;
+	lastTz = ui->translationAmountZ->value() ;
+        ((BeanViewer*)(ui->glCustomWidget))->solverManager->solverData->baseTranslation.z() += incZ;
 
     QString msg = QString::number(ui->translationAmountZ->value());
     ui->translationEditZ->setText(msg);

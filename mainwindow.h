@@ -19,6 +19,7 @@ public:
 
 	int lastX, lastY, lastZ;
 	int lastLX, lastLY, lastLZ;
+	int lastTx, lastTy, lastTz;
 	int lastOsc;
 	int lastHeadX, lastHeadY, lastHeadZ;
 
