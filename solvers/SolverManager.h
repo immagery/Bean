@@ -57,7 +57,8 @@ public:
 
 	void update (int sk, skeleton* s);
 
-	void addSkeleton(int id, skeleton* s) { 
+	void addSkeleton(int id, skeleton* s) 
+	{ 
 		solvers[id] = vector<Solver*>();
 		brains[id] = new Intelligence(id);
 		previousLookAngles[id] = 0;

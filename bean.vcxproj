@@ -325,6 +325,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Intelligence.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="..\adri\gui\manipulatedFrameSetConstraint.cpp" />
     <ClCompile Include="..\adri\render\modeloRender.cpp" />

@@ -70,6 +70,12 @@ void BeanViewer::loadSolvers() {
 		if (sk == 3) translation = Vector3d(20,0,-25) - s->joints[0]->getWorldPosition();
 		if (sk == 4) translation = Vector3d(20,0,25) - s->joints[0]->getWorldPosition();
 
+		if (sk == 5) translation = Vector3d(-20,0,-75) - s->joints[0]->getWorldPosition();
+		if (sk == 6) translation = Vector3d(-20,0,+75) - s->joints[0]->getWorldPosition();
+		if (sk == 7) translation = Vector3d(0,0,100) - s->joints[0]->getWorldPosition();
+		if (sk == 8) translation = Vector3d(-20,0,-25) - s->joints[0]->getWorldPosition();
+		if (sk == 9) translation = Vector3d(-20,0,25) - s->joints[0]->getWorldPosition();
+
 		s->joints[0]->addTranslation(translation.x(), translation.y(), translation.z());
 		s->joints[0]->addRotation(0,0,90);
 		//s->joints[0]->addRotation ((2 - col) * 10, 0, 0);
@@ -110,14 +116,13 @@ void BeanViewer::loadSolvers() {
 
 		solverManager->brains[sk]->look = look;
 		solverManager->brains[sk]->sinus = sin;
+		solverManager->brains[sk]->headPosition = head;
 
 		// Init solver
 		init->index1 = 0;	init->index2 = 18;
 		init->setPositions(s);
 		init->inputs[0] = (verlet2->outputs[sk]);
 		init->initialize();
-
-		
 
 		verlet->addSkeleton(s, init->initialChain());
 		verlet2->addSkeleton(s, init->initialChain());
@@ -149,7 +154,7 @@ void BeanViewer::loadSolvers() {
 		solverManager->solverData->neck = look->qrot;
 		solverManager->solverData->lookPoint = Vector3d(0,800,0);
 		solverManager->brains[sk]->lookPoint = s->joints[0]->translation;
-		solverManager->brains[sk]->lookPoint += Vector3d(0, 480, 400);
+		solverManager->brains[sk]->lookPoint += Vector3d(0, 480, 0);
 
 		// Head solver
 		head->desiredPos = Vector3d(0,480,480);
@@ -324,7 +329,7 @@ void BeanViewer::readScene(string fileName, string name, string path) {
         if(!sPath.isEmpty())
             newPath = newPath+"/"+sPath +"/";
 
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 5; ++i) {
 
 			// Leer modelo
 			readModel( (newPath+sModelFile).toStdString(), sSceneName.toStdString(), newPath.toStdString());

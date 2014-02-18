@@ -6,6 +6,13 @@ SolverHead::SolverHead()  : Solver() {
 	moving = true; 
 	lastPosition = Vector3d(0,0,0);
 	lastTime = 0;
+
+	Lmax = 350;
+	Lmax_sub = Lmax - 30;
+	dir = Vector3d(0,1,0);
+
+	seed = fRand(3.0, 10.0);
+	desplFromDesiredPos = Vector3d(0,0,0);
 }
 
 
@@ -37,14 +44,33 @@ void SolverHead::solve() {
 			//continue;
 
 			desiredPos = inputs[ip]->positions[0] + desiredPos;
-			desiredPos.x() += 40*sin(data->time);
-			desiredPos.x() += 10*cos(data->time);
+			//desiredPos.x() += 5*sin(data->time)*fRand(-1,1);
+			//desiredPos.y() += 5*cos(data->time)*fRand(-1,1);
+			printf("time: %f\n",data->time);
+			dir.y() = (sin(data->time-50)*sin(data->time*seed*0.1)*seed*seed);//(sin((data->time)/50*(2*M_PI)*100*seed)-0.5)*0,1;
+			dir.x() = (cos(data->time-10)*cos(data->time*seed*0.1)*seed*seed);//(cos((data->time)/50*2*M_PI*seed*200)-0,5)*0,1;
+
+			Vector3d newPoint = desiredPos;
+			desplFromDesiredPos = dir;
+
+			if((desiredPos+desplFromDesiredPos).y() > Lmax && desplFromDesiredPos.y() > 0) 
+				desplFromDesiredPos.y() = desplFromDesiredPos.y() * (1-((desiredPos+desplFromDesiredPos).y()-Lmax_sub)/(Lmax-Lmax_sub));
+
+			if((desiredPos+desplFromDesiredPos).y() > Lmax && desplFromDesiredPos.y() > 0) 
+				desplFromDesiredPos.y() = desplFromDesiredPos.y() * (1-((desiredPos+desplFromDesiredPos).y()-Lmax_sub)/(Lmax-Lmax_sub));
+
+
+			desiredPos = desiredPos+desplFromDesiredPos;
 
 			glPointSize(15);
 			glDisable(GL_LIGHTING);
+			glColor3f(0,0,1);
 			glBegin(GL_POINTS);
 			glVertex3d(desiredPos.x(), desiredPos.y(), desiredPos.z());
+			glColor3f(0,1,0);
+			glVertex3d(newPoint.x(), newPoint.y(), newPoint.z());
 			glEnd();
+			glColor3f(1,1,1);
 			glEnable(GL_LIGHTING);
 
 			// MiniVerlet simulation

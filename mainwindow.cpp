@@ -165,11 +165,13 @@ void MainWindow::changeLookPointRadius(int) {
 	int newRadius = ui->lookRadius->value();
 	int selectedSnake = ui->snakeSelector->currentIndex();
 	if (selectedSnake == 0) {
-		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) {
+		for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains.size(); ++i) 
+		{
 			Intelligence* brain = ((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[i];
+			
 			brain->globalLookPointRadius = newRadius;
-			brain->globalThita = brain->fRand(0, M_PI/6.0);
-			brain->globalPhi = brain->fRand(0, 2.0*M_PI);
+			brain->globalThita = fRand(0, M_PI/6.0);
+			brain->globalPhi = fRand(0, 2.0*M_PI);
 		}
 	} else {
 		((BeanViewer*)(ui->glCustomWidget))->solverManager->brains[selectedSnake-1]->lookPointRadius = newRadius;
@@ -216,7 +218,7 @@ void MainWindow::selectSnake(int) {
 void MainWindow::changeBehaviour(int) {
 	int index = ui->behaviourCombo->	currentIndex();
 	for (int i = 0; i < ((BeanViewer*)ui->glCustomWidget)->solverManager->brains.size(); ++i) {
-		((BeanViewer*)ui->glCustomWidget)->solverManager->brains[i]->setState(index);
+		((BeanViewer*)ui->glCustomWidget)->solverManager->brains[i]->setState((Intelligence::States)index);
 	}
 }
 

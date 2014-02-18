@@ -14,7 +14,7 @@ class Intelligence {
 	public:
 
 	// Define all states
-	enum States {IDLE, LOOKAT, EXCITED, ANGRY};
+	enum States {IDLE = 0, LOOKAT, EXCITED, ANGRY, NONE};
 	States currentState;
 
 	int id;	// useful to give different behaviours
@@ -32,66 +32,18 @@ class Intelligence {
 	double freqMultiplier;
 	SolverSinusoidal* sinus;
 
-	Intelligence(int sk) {
-		currentState = IDLE;
-		thita = (double)rand() / RAND_MAX * 2 * M_PI;
-		phi = (double)rand() / RAND_MAX * M_PI;
-		lookPointRadius = rand()%20 + 20;
-		lookPoint = Vector3d(0,0,0);
-		id = sk;
-		ampMultiplier = 1;
-		freqMultiplier = 1;
+	//Position Stuff
+	SolverHead* headPosition;
+	Vector3d headMovDirection;
+	
+	Intelligence(int sk);
+	void setState(States st);
+	void think();
+	void updateLookPoint();
+	void updateOscillationParameters();
+	void updateHeadPosition();
 
-		lookInit = false;
 
-		globalLookPoint = Vector3d(0,0,0);
-		globalLookPointRadius = 700;
-		globalThita = fRand(0, M_PI/6.0);
-		globalPhi = fRand(-M_PI/6, M_PI/6);
-		globalPhi = G_PHI;
-		globalThita = G_THITA;
-	}
-
-	void setState(int i) {
-		if (i == 0) currentState = IDLE;
-		if (i == 1) currentState = LOOKAT;
-	}
-
-	void think() {
-		updateLookPoint();
-		updateOscillationParameters();
-	}
-
-	double fRand(double fMin, double fMax) {
-		double f = (double)rand() / RAND_MAX;
-		return fMin + f * (fMax - fMin);
-	}
-
-	void updateLookPoint() {
-		// Select a random area using global sphere and random values for thita and phi
-		// Random val = min + random between 0..(max - min)
-
-		Vector3d p = globalLookPoint;
-		p.x() += globalLookPointRadius * sin(globalThita) * sin(globalPhi);
-		p.y() += globalLookPointRadius * cos(globalThita);
-		p.z() += globalLookPointRadius * sin(globalThita) * cos(globalPhi);
-
-		thita += 0.01;
-		phi += 0.03;
-		if (currentState == IDLE) 
-			look->lookPoint = lookPoint;
-		else if (currentState == LOOKAT)				
-			look->lookPoint = p;
-
-		look->lookPoint.x() += lookPointRadius * sin(thita) * sin(phi);
-		look->lookPoint.y() += lookPointRadius * cos(thita);
-		look->lookPoint.z() += lookPointRadius * sin(thita) * cos(phi);
-	}
-
-	void updateOscillationParameters() {
-		sinus->multAmp = ampMultiplier;
-		sinus->multFreq = freqMultiplier;
-	}
 };
 
 #endif
