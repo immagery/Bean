@@ -4,6 +4,8 @@
 #include <Eigen/Core>
 #include "solvers/AllSolvers"
 
+#include <DataStructures/axis.h>
+
 using namespace std;
 using namespace Eigen;
 
@@ -12,6 +14,9 @@ using namespace Eigen;
 
 class Intelligence {
 	public:
+
+	Intelligence(int sk);
+	~Intelligence(){}
 
 	// Define all states
 	enum States {IDLE = 0, LOOKAT, EXCITED, ANGRY, NONE};
@@ -36,13 +41,17 @@ class Intelligence {
 	SolverHead* headPosition;
 	Vector3d headMovDirection;
 	
-	Intelligence(int sk);
 	void setState(States st);
 	void think();
 	void updateLookPoint();
 	void updateOscillationParameters();
 	void updateHeadPosition();
 
+
+	//reference axis to of the solver.
+	axis baseAxis;
+	axis headAxis;
+	axis realWorldAxis;
 
 };
 

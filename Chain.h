@@ -11,11 +11,17 @@ using namespace Eigen;
 class Chain {
 public:
 
-	Chain() { 
-		positions = vector<Eigen::Vector3d>(0); 
-		normalVectors = vector<Vector3d>(0);
+	Chain() 
+	{ 
+		positions.clear();
+		normalVectors.clear();
 	}
 
+	Chain(int initSize) 
+	{ 
+		positions.resize(initSize);
+		normalVectors.clear();
+	}
 
 	vector<Vector3d> positions;
 	vector<Vector3d> normalVectors;

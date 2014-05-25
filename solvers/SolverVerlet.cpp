@@ -2,7 +2,7 @@
 #include "AdriViewer.h"
 
 // Constructor and destructor
-SolverVerlet::SolverVerlet() : Solver() {
+SolverVerlet::SolverVerlet(int _id) : Solver(_id) {
 	g = -700;
 	hasGravity = hasRigid = true;
 	lastTime = 0;
@@ -205,13 +205,19 @@ double ks, kd, stiff;
 
 void SolverVerlet::solve() {
 
-	if (attackFlag) {
-		for (int ip = 0; ip < inputs.size(); ++ip) {
+	if (attackFlag) 
+	{
+		for (int ip = 0; ip < inputs.size(); ++ip) 
+		{
 			curves[ip] = attackCurves[ip];
 			curves[ip][curves[ip].size()-1] = idealPositions[ip][idealPositions[ip].size()-1];
 		}
-	} else {
-		for (int ip = 0; ip < inputs.size(); ++ip) curves[ip] = idealPositions[ip];
+
+	} 
+	else 
+	{
+		for (int ip = 0; ip < inputs.size(); ++ip) 
+			curves[ip] = idealPositions[ip];
 	}
 
 	updateFlag = true;
@@ -219,9 +225,11 @@ void SolverVerlet::solve() {
 	else g = 0;
 	hasRigid = data->rigidness;
 
-	for (int ip = 0; ip < inputs.size(); ++ip) {
+	for (int ip = 0; ip < inputs.size(); ++ip) 
+	{
 
-		for (int i = 0; i < chainSize; ++i) {
+		for (int i = 0; i < chainSize; ++i) 
+		{
 			idealPositions[ip][i] = inputs[ip]->positions[i + index1];
 			lastPositions[ip][i] = currentPositions[ip][i];
 		}
@@ -233,13 +241,19 @@ void SolverVerlet::solve() {
 	int numReps = 10;
 	ccc = 0;
 	
-	for (int k = 0; k < numReps-1; ++k) {
+	for (int k = 0; k < numReps-1; ++k) 
+	{
 		double timeInc = ((double) k / numReps) * (1 / fps);
-		if (!lookSolver)	solve2(time + timeInc); 
-		else				solve3(time + timeInc);
+		
+		if (!lookSolver)	
+			solve2(time + timeInc); 
+		else				
+			solve3(time + timeInc);
 
-		if (k == numReps-3) ccc=1;
-		else ccc = 0;
+		if (k == numReps-3) 
+			ccc=1;
+		else 
+			ccc = 0;
 
 	}
 
@@ -601,3 +615,72 @@ void SolverVerlet::solve3(double ttime) {
 				outputs[ip]->positions[i + index1] = currentPositions[ip][i];
 		}
 	}
+
+
+void SolverVerlet::addSkeleton(skeleton* s, Chain* c)
+{
+	chainSize = index2 - index1;
+	int nextSK = restPositions.size();
+
+	restPositions.push_back(vector<Vector3d>(chainSize));
+	lastPositions.push_back(vector<Vector3d>(chainSize));
+	currentPositions.push_back(vector<Vector3d>(chainSize));
+	idealPositions.push_back(vector<Vector3d>(chainSize));
+	curves.push_back(vector<Vector3d>(chainSize));
+	attackCurves.push_back(vector<Vector3d>(chainSize));
+		
+	positioningStrengths = rigidnessStrengths = vector<double> (chainSize, 0);
+	lastMinIndexes = vector<int> (chainSize, 0);
+
+	for (int i = 0; i < chainSize; ++i) 
+	{
+		currentPositions[nextSK][i] = lastPositions[nextSK][i] = restPositions[nextSK][i] = c->positions[i];
+		lastMinIndexes[i] = i;
+	}
+}
+
+void SolverVerlet::setPositions(skeleton* s)
+{
+	chainSize = index2 - index1;
+
+	restPositions.resize(inputs.size());
+	lastPositions.resize(inputs.size());
+	currentPositions.resize(inputs.size());
+	idealPositions.resize(inputs.size());
+	curves.resize(inputs.size());
+	attackCurves.resize(inputs.size());
+
+	positioningStrengths = vector<double> (chainSize, 1);
+
+	for (int ip = 0; ip < inputs.size(); ++ip) 
+	{
+		restPositions[ip].resize(chainSize);
+		lastPositions[ip].resize(chainSize);
+		currentPositions[ip].resize(chainSize);
+		idealPositions[ip].resize(chainSize);
+
+		for (int i = 0; i < chainSize; ++i) 
+		{
+			currentPositions[0][i] = lastPositions[0][i] = restPositions[0][i] = s->joints[i]->translation;
+			positioningStrengths[i] = (1 - 0.03*i);
+		}
+	}
+}
+
+void SolverVerlet::solve(SolverData* data) 
+{
+	if (hasGravity) 
+		g = data->gravity;
+	else 
+		g = 0;
+		
+	time = data->time;
+	fps = data->fps;
+	solve();
+}
+
+void SolverVerlet::updateDirtyness() 
+{
+	dirtyFlag = true;
+	propagateDirtyness();
+}

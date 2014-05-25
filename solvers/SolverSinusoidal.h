@@ -13,8 +13,8 @@ public:
 	double multAmp, multFreq;
 
 	// Constructors and destructors
-	SolverSinusoidal(void) : Solver(), multAmp(1), multFreq(1) {}
-	SolverSinusoidal(double a, double f, double ph) : Solver(), _amplitude(a), _freq(f), phase(ph), dimension(0), multAmp(1), multFreq(1) {}
+	SolverSinusoidal(int _id) : Solver(_id), multAmp(1), multFreq(1) {}
+	SolverSinusoidal(double a, double f, double ph, int _id) : Solver(_id), _amplitude(a), _freq(f), phase(ph), dimension(0), multAmp(1), multFreq(1) {}
 	~SolverSinusoidal(void) {}
 
 	// Solving

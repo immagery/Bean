@@ -3,7 +3,6 @@
 #include <utils/utilGL.h>
 #include <DataStructures/Geometry.h> 
 
-
 Particles::Particles(void)
 {
 	lastTime = 0;

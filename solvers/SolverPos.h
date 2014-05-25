@@ -12,7 +12,8 @@ public:
 	Quaterniond baseRotation;
 	Vector3d restTrans;
 
-	SolverPos(void) : Solver() { 
+	SolverPos(int _id) : Solver(_id) 
+	{ 
 		baseTranslation = Vector3d(0,0,0);
 		baseRotation = Quaterniond::Identity();
 	}

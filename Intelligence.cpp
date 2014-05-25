@@ -28,6 +28,9 @@ Intelligence::Intelligence(int sk)
 
 	// Head position solver
 	headMovDirection = Vector3d(0,0,0);
+
+	headPosition = NULL;
+	look = NULL;
 }
 
 void Intelligence::setState(States st) {
@@ -37,7 +40,7 @@ void Intelligence::setState(States st) {
 
 void Intelligence::think() 
 {
-	printf("Thinking!\n");
+	//printf("Thinking!\n");
 
 	// towards the target
 	updateHeadPosition();
@@ -52,6 +55,8 @@ void Intelligence::think()
 void Intelligence::updateLookPoint() {
 	// Select a random area using global sphere and random values for thita and phi
 	// Random val = min + random between 0..(max - min)
+
+	if(!look) return;
 
 	Vector3d p = globalLookPoint;
 	p.x() += globalLookPointRadius * sin(globalThita) * sin(globalPhi);
@@ -71,7 +76,10 @@ void Intelligence::updateLookPoint() {
 	look->lookPoint.z() += lookPointRadius * sin(thita) * cos(phi);
 }
 
-void Intelligence::updateOscillationParameters() {
+void Intelligence::updateOscillationParameters() 
+{
+	if(!sinus) return;
+
 	sinus->multAmp = ampMultiplier;
 	sinus->multFreq = freqMultiplier;
 }
@@ -88,7 +96,9 @@ void Intelligence::updateHeadPosition()
 	// 1. If something interests, the head will be going to there, when reaches the max value: goes back a little and to some 
 	// direction and tries again.
 	
-	printf("Updating position\n");
+	if(!headPosition) return;
+
+	printf("[Intelligence.cpp] Update head position \n");
 
 	headMovDirection = Vector3d(fRand(-1, 1), fRand(-1, 1), fRand(-1, 1));
 

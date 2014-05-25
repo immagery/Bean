@@ -232,6 +232,42 @@
     <ClCompile Include="Intelligence.cpp">
       <Filter>Bean</Filter>
     </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\axis.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\ParticlePool.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\Particle.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\PConstraint.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\pConstraintDistance.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\pConstraintAngle.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\PPreConstraint.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\PPreConstraintVertebrae.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="snake.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="snakeVertebra.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="..\adri\DataStructures\pConstraintAtachment.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
+    <ClCompile Include="snakeBrain.cpp">
+      <Filter>Bean</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\adri\gui\AdriViewer.h">
@@ -374,9 +410,6 @@
     <ClInclude Include="solvers\SolverVerlet.h">
       <Filter>Bean</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="Particles.h">
       <Filter>Bean</Filter>
     </ClInclude>
@@ -411,6 +444,45 @@
       <Filter>Bean</Filter>
     </ClInclude>
     <ClInclude Include="solvers\SolverPos.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\axis.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\ParticlePool.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\Particle.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\PConstraint.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\PConstraintDistance.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\PConstraintAngle.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\PPreConstraint.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\PPreConstraintVertebrae.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="snake.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="snakeVertebra.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="..\adri\DataStructures\PConstraintAtachment.h">
+      <Filter>Bean</Filter>
+    </ClInclude>
+    <ClInclude Include="snakeBrain.h">
       <Filter>Bean</Filter>
     </ClInclude>
   </ItemGroup>

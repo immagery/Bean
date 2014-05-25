@@ -78,15 +78,37 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->moveButton, SIGNAL(clicked()), this, SLOT(toggleMove()));
 	connect(ui->scaleButton, SIGNAL(clicked()), this, SLOT(scaleCurve()));
 
+    connect(ui->timeStepSlider, SIGNAL(valueChanged(int)), this, SLOT(simParamUpdate(int)));
+    connect(ui->iterationsSlider, SIGNAL(valueChanged(int)), this, SLOT(simParamUpdate(int)));
+
 	lastX = lastY = lastZ = 0;
 	lastLX = lastLY = lastLZ = 0;
 	lastOsc = 0;
+
+	ui->glCustomWidget->initViewer();
     
 }
 
-void MainWindow::scaleCurve() {
+void MainWindow::simParamUpdate(int value)
+{
+	//TODEBUG
+	assert(false);
+    int iter = ui->iterationsSlider->value();
+
+    if(iter == 0) iter = 1;
+    //((BeanViewer*)(ui->glCustomWidget))->particles.numIterations = iter;
+    
+    float timeStep = ((double)ui->timeStepSlider->value())/1000.0;
+    if(timeStep == 0) timeStep = 0.0001;
+
+    printf("TimeStep: %f and iterations: %d\n", timeStep, iter);
+}
+
+
+void MainWindow::scaleCurve() 
+{
 	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
-	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solversChainRef[0][manager->solversChainRef[0].size()-1]);
 	verlet->scaleCurve();
 }
 
@@ -97,23 +119,25 @@ void MainWindow::changeHeadPosition(int) {
 
 void MainWindow::toggleMove() {
 	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
-	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solversChainRef[0][manager->solversChainRef[0].size()-1]);
 	verlet->buildAttackCurves();
-	SolverHead* h = (SolverHead*) (manager->solvers[0][manager->solvers[0].size()-2]);
+	SolverHead* h = (SolverHead*) (manager->solversChainRef[0][manager->solversChainRef[0].size()-2]);
 	h->moving = !(h->moving);
 }
 
-void MainWindow::buildAttackCurve() {
+void MainWindow::buildAttackCurve() 
+{
 	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
-	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solversChainRef[0][manager->solversChainRef[0].size()-1]);
 	//verlet->buildAttackCurves();
 	//ui->buildAttackCurve->setEnabled(false);
 	verlet->moveFlag = !verlet->moveFlag;
 }
 
-void MainWindow::changeSpringParameters(int) {
+void MainWindow::changeSpringParameters(int) 
+{
 	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
-	SolverVerlet* verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	SolverVerlet* verlet = (SolverVerlet*) (manager->solversChainRef[0][manager->solversChainRef[0].size()-1]);
 	double ui1 = ui->ksSlider->value();
 	double ui2 = ui->kdSlider->value() / 100.0;
 	double ui3 = ui->stiffSlider->value() / 100.0;
@@ -254,7 +278,7 @@ void MainWindow::loadSolvers() {
 	ui->snakeSelector->removeItem(0);
 	ui->snakeSelector->addItem("All");
 
-	for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->solvers.size(); ++i) {
+	for (int i = 0; i < ((BeanViewer*)(ui->glCustomWidget))->solverManager->solversChainRef.size(); ++i) {
 		QString text = QString::number((i));
 		ui->snakeSelector->addItem(text);
 	}
@@ -389,8 +413,8 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 
 	SolverManager* manager = ((BeanViewer*)(ui->glCustomWidget))->solverManager;
 	SolverVerlet* verlet;
-	if (manager->solvers[0].size() > 0) {
-		verlet = (SolverVerlet*) (manager->solvers[0][manager->solvers[0].size()-1]);
+	if (manager->solversChainRef[0].size() > 0) {
+		verlet = (SolverVerlet*) (manager->solversChainRef[0][manager->solversChainRef[0].size()-1]);
 	}
 	double totalTension = 0;
 

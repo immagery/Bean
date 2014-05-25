@@ -6,7 +6,8 @@
 
 class SolverDir : public Solver {
 public:
-	SolverDir(void) : Solver() {
+	SolverDir(int _id) : Solver(_id) 
+	{
 		qrot = Quaterniond::Identity();
 	}
 	~SolverDir(void) {}

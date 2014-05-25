@@ -9,14 +9,18 @@ using namespace std;
 
 class Solver : public node{
 public:
-	Solver(void) {
+	Solver(int _id) 
+	{
 		inputs = vector<Chain*>();
 		outputs = vector<Chain*>();	
 		fathers = vector<Solver*>();	
 		children = vector<Solver*>();	
 		dirtyFlag = true;
+		id = _id;
 	}
-	Solver(SolverData* sd) {
+
+	Solver(SolverData* sd) 
+	{
 		inputs = vector<Chain*>();
 		outputs = vector<Chain*>();	
 		fathers = vector<Solver*>();	
@@ -25,9 +29,19 @@ public:
 		data = sd;
 	}
 
-	~Solver(void) {}
+	~Solver(void) 
+	{
+		// We only remove the pointers,
+		// The data will be cleaned in other places.
+		inputs.clear();
+		outputs.clear();
+		fathers.clear();
+		children.clear();
+		data = NULL;
+	}
 
-	void printName() {
+	void printName() 
+	{
 		if (id == 0) printf("Init: ");
 		if (id == 1) printf("Dir: ");
 		if (id == 2) printf("Sin: ");
@@ -51,29 +65,34 @@ public:
 
 	virtual void updateDirtyness() {}
 
-	virtual bool propagateDirtyness() {
+	virtual bool propagateDirtyness() 
+	{
 		dirtyFlag = true;
-		for (int i = 0; i < children.size(); ++i) children[i]->propagateDirtyness();
+
+		// Propagate the dirty flag to all the children
+		for (int i = 0; i < children.size(); ++i) 
+			children[i]->propagateDirtyness();
+
 		return true;
 	}
 
-	virtual bool update() {
-		//printName();
-		//printf("updating...\n");
+	virtual bool update() 
+	{
 		if (dirtyFlag == false) return true;
-		//printf(" Updating parents...\n");
-		clock_t start1 = clock();
-		for (int i = 0; i < fathers.size(); ++i) fathers[i]->update();		// update all parents
-		clock_t end1 = clock();
-		clock_t start2 = clock();
-		solve();															// solving process
-		clock_t end2 = clock();
-		//printName();
-		//printf("Elapsed father update time: %f\n", timelapse(start1,end1));
-		//printName();
-		//printf("Elapsed self solve time: %f\n", timelapse(start2,end2));
-		dirtyFlag = false;													// not dirty anymore
-		return true;														// much clean
+
+		// Test if all the fathers are clean
+		bool fathersUpdated = true;
+		for (int i = 0; i < fathers.size(); ++i) 
+			fathersUpdated &= fathers[i]->update();								// update all parents
+
+		// If all the fathers are clean this node can be solved
+		if(fathersUpdated)
+		{
+			solve();															// solving process
+			dirtyFlag = false;													// not dirty anymore
+			return true;
+		}
+		else return false;														// much clean
     }
 };
 

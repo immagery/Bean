@@ -12,6 +12,8 @@ class SolverData {
 public:
 	// Time data
 	double time, fps, gravity;
+
+	// References of position
 	Vector3d lookPoint;
 	Vector3d baseTranslation;
 	Quaterniond baseRotation;

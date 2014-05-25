@@ -1,7 +1,7 @@
 #include "SolverHead.h"
 #include "AdriViewer.h"
 
-SolverHead::SolverHead()  : Solver() { 
+SolverHead::SolverHead(int _id)  : Solver(id) { 
 	alpha = 1;	
 	moving = true; 
 	lastPosition = Vector3d(0,0,0);

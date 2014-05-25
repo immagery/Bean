@@ -53,6 +53,9 @@ public slots:
 	void changeHeadPosition(int);
 	void toggleMove();
 	void scaleCurve();
+
+
+    void simParamUpdate(int value);
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
 };

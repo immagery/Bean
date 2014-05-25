@@ -4,7 +4,8 @@
 class SolverLook : public Solver {
 public:
 
-	SolverLook(void) { 
+	SolverLook(int _id) : Solver(_id)
+	{ 
 		index1 = index2 = -1; 
 		qrot = Quaterniond::Identity();
 		restLookVector = lookPoint = Vector3d(0,0,0);
