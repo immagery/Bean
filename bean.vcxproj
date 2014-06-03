@@ -281,6 +281,7 @@
     <ClCompile Include="..\adri\gui\AdriViewer.cpp" />
     <ClCompile Include="..\adri\DataStructures\Animation.cpp" />
     <ClCompile Include="..\adri\DataStructures\AnimationManager.cpp" />
+    <ClCompile Include="..\adri\utils\utilGL.cpp" />
     <ClCompile Include="BeanViewer.cpp" />
     <ClCompile Include="..\adri\DataStructures\Cage.cpp" />
     <ClCompile Include="..\adri\DataStructures\DataStructures.cpp" />

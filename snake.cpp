@@ -26,7 +26,23 @@ void snake::changeOrientation(Vector3d or)
 	if(or.norm() > 0) 
 		q.setFromTwoVectors(dir, or.normalized());
 	
-	brain.headAxis.rot = q;	
+	brain.baseAxis.rot = q;	
+
+	Vector3d posX = brain.baseVertebra->x->position - brain.baseVertebra->center->position; 
+	Vector3d posY = brain.baseVertebra->y->position - brain.baseVertebra->center->position; 
+	Vector3d posZ1 = brain.baseVertebra->zr->position - brain.baseVertebra->center->position; 
+	Vector3d posZ2 = brain.baseVertebra->zl->position - brain.baseVertebra->center->position; 
+
+	posX = brain.baseAxis.rot._transformVector(posX);
+	posY = brain.baseAxis.rot._transformVector(posY);
+	posZ1 = brain.baseAxis.rot._transformVector(posZ1);
+	posZ2 = brain.baseAxis.rot._transformVector(posZ2);
+
+	brain.baseVertebra->x->position = brain.baseVertebra->center->position + posX;
+	brain.baseVertebra->y->position = brain.baseVertebra->center->position + posY;
+	brain.baseVertebra->zr->position = brain.baseVertebra->center->position + posZ1;
+	brain.baseVertebra->zl->position = brain.baseVertebra->center->position + posZ2;
+
 }
 
 void snake::initFromSkeleton(Modelo* m, skeleton* skt)
@@ -39,7 +55,7 @@ void snake::initFromSkeleton(Modelo* m, skeleton* skt)
 	
 	// Cogemos algunas referencias a saco.
 	skt->root->computeWorldPos();
-	int numBones = 23;
+	int numBones = 22;
 
 	Vector3d upDirection(0,1,0);
 	Vector3d headDirection = (skt->joints[22]->worldPosition-skt->joints[21]->worldPosition).normalized();
@@ -66,20 +82,44 @@ void snake::initFromSkeleton(Modelo* m, skeleton* skt)
 		Vector3d pt04 = pt00 + Vector3d(  0,  0,-35);
 		*/
 
-		int jointId = numBones-i-1;
+		int jointIdx = numBones-i-1;
 
-		Vector3d pt00 = skt->joints[jointId]->worldPosition;
-		Vector3d pt01 = pt00 + Vector3d(1,  0,  0) * bodyHeight;
-		Vector3d pt02 = pt00 + Vector3d(  0, 1,  0)* bodyHeight/0.5;
-		Vector3d pt03 = pt00 + Vector3d(  0,  0, 1) * ribWidth;
-		Vector3d pt04 = pt00 + Vector3d(  0,  0,-1) * ribWidth;
+		Vector3d pt00, pt01, pt02, pt03, pt04;
+
+		int jointId = skt->joints[jointIdx]->nodeId;
+
+		if(i == 0)
+		{
+			joint* jt = skt->joints[jointIdx+1];
+
+			pt00 = skt->joints[jointIdx+1]->worldPosition;
+			pt01 = pt00 + Vector3d(1,  0,  0) * bodyHeight;
+			pt02 = pt00 + Vector3d(  0, 1,  0)* bodyHeight;
+			pt03 = pt00 + Vector3d(  0,  0, 1) * ribWidth;
+			pt04 = pt00 + Vector3d(  0,  0,-1) * ribWidth;
+
+			// Fabricamos una vertebra falsa que nos creara la tendencia del resto.
+			vertebras.resize(vertebras.size()+1);
+			vertebras.back().initAsHead(pt00, pt01, pt02, pt03, pt04, particles);
+		}
+
+		pt00 = skt->joints[jointIdx]->worldPosition;
+		pt01 = pt00 + Vector3d(1,  0,  0) * bodyHeight;
+		pt02 = pt00 + Vector3d(  0, 1,  0)* bodyHeight;
+		pt03 = pt00 + Vector3d(  0,  0, 1) * ribWidth;
+		pt04 = pt00 + Vector3d(  0,  0,-1) * ribWidth;
 
 		vertebras.resize(vertebras.size()+1);
+		//if(i == 0 || i == numBones-1)
+		//	vertebras.back().initAsHead(pt00, pt01, pt02, pt03, pt04, particles);
+		//else
 		vertebras.back().init(pt00, pt01, pt02, pt03, pt04, particles);
 
 		joint2Vert[jointId] = vertebras.size()-1;
 
+		if(i > 0)skt->joints[jointIdx]->childs.clear();
 		
+		/*
 		// Rellenamos con las vertebras que sean necesarias.
 		if(i < numBones - 1)
 		{
@@ -106,6 +146,7 @@ void snake::initFromSkeleton(Modelo* m, skeleton* skt)
 
 			printf("Num of subdivisions: %d\n", numElements); 
 		}
+		*/
 	}
 
 
@@ -119,7 +160,6 @@ void snake::initFromSkeleton(Modelo* m, skeleton* skt)
 
 	particles.worldPos = base->center->position - Vector3d(0,bodyHeight,0);
 	particles.worldY = (base->y->position - base->center->position).normalized();
-	particles.worldPos -= particles.worldY*bodyHeight;
 
 	for(int i = 0; i < numBones; i++)
 	{
@@ -127,6 +167,7 @@ void snake::initFromSkeleton(Modelo* m, skeleton* skt)
 
 		// Restricciones globales de cada vertebra
 		particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.y, base->center, base->y, 0));
+
 
 		// Restricciones en
 		if( i < vertebras.size()-1)
@@ -137,6 +178,31 @@ void snake::initFromSkeleton(Modelo* m, skeleton* skt)
 
 			// Alineacion de eje x,y entre vertebras consecutivas
 			particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v2.center, v2.x, 0));
+			//particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v2.center, v2.x, 0));
+			//particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v2.center, v2.x, 0));
+
+			if(i == 0)
+			{
+				/*
+				if(i+1 < vertebras.size()-1)
+				{
+					particles.modelConstraints.push_back(new pConstraintDistance(v1.zl, v2.zl));
+					particles.modelConstraints.push_back(new pConstraintDistance(v1.zr, v2.zr));
+					particles.modelConstraints.push_back(new pConstraintDistance(v1.zl, v2.zl));
+					particles.modelConstraints.push_back(new pConstraintDistance(v1.zr, v2.zr));
+					particles.modelConstraints.push_back(new pConstraintDistance(v1.zl, v2.zl));
+					particles.modelConstraints.push_back(new pConstraintDistance(v1.zr, v2.zr));
+				}
+				*/
+
+				// Alineacion de direccion x en vertebras consecutivas para dar rigidez
+				particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v1.center, v2.center, 180));
+				particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v1.center, v2.center, 180));
+				//particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v1.center, v2.center, 180));
+				//particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v1.center, v2.center, 180));
+				//particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v1.center, v2.center, 180));
+				
+			}
 			
 			if(i+2 < vertebras.size()-1)
 			{
@@ -146,8 +212,8 @@ void snake::initFromSkeleton(Modelo* m, skeleton* skt)
 			}
 			particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.y, v2.center, v2.y, 0));
 
-			
-			particles.modelConstraints.push_back(new pConstraintDistance(v1.y, v2.y));
+			// Conexion superior... creo que no es una buen idea
+			//particles.modelConstraints.push_back(new pConstraintDistance(v1.y, v2.y));
 
 			// Alineacion de direccion x en vertebras consecutivas para dar rigidez
 			particles.modelConstraints.push_back(new pConstraintAngle(v1.center, v1.x, v1.center, v2.center, 180));
@@ -285,8 +351,8 @@ void snake::buildSkeleton()
 	Vector3d lastPosition;
 	Vector3d lastIncrement;
 
-	Quaterniond rotComplete = Quaterniond::Identity();
-	Vector3d translationComplete = Vector3d(0,0,0);
+	//Quaterniond rotComplete = Quaterniond::Identity();
+	//Vector3d translationComplete = Vector3d(0,0,0);
 
 	map<int, int>::iterator it = joint2Vert.begin();
 	map<int, int>::iterator it2 = joint2Vert.begin();
@@ -296,7 +362,7 @@ void snake::buildSkeleton()
 		it2 = it;
 		it2++;
 
-		joint* jt = m_skt->joints[it->first];
+		joint* jt = m_skt->jointRef[it->first];
 
 		int vertId = it->second;
 
@@ -308,10 +374,11 @@ void snake::buildSkeleton()
 		Vector3d xRef;
 		// Taking the axis as a reference... maybe is not the best solution, 
 		// because is not allways well aligned
-		if( vertId == 0 || vertId == vertebras.size()-1 )//it == joint2Vert.begin() || it2 == joint2Vert.end())
+		if( true)//vertId <= 1 || vertId == vertebras.size()-1 )//it == joint2Vert.begin() || it2 == joint2Vert.end())
 			xRef = vert.x->position - vert.center->position;
 		else
 		{
+			
 			map<int, int>::iterator it3 = it;
 			it3--;
 			//snakeVertebra& vert2 = vertebras[it2->second];
@@ -323,7 +390,10 @@ void snake::buildSkeleton()
 			Vector3d xRef1 =  (vert3.center->position - vert.center->position).normalized();
 
 			xRef = -(xRef0 + xRef1)/2;
+			
 		}
+
+		xRef = xRef - xRef.dot(particles.worldY)*particles.worldY;
 		
 		Vector3d yRef = vert.y->position - vert.center->position;
 
@@ -334,15 +404,27 @@ void snake::buildSkeleton()
 		q1.setFromTwoVectors(x, xRef);
 			
 		y = q1._transformVector(y);
+
+		Vector3d z = xRef.cross(yRef);
+		yRef = z.cross(xRef);
+
 		Quaterniond q2 = Quaterniond::Identity();
-		q2.setFromTwoVectors(y, yRef);
+		//q2.setFromTwoVectors(y, yRef);
 
-		m_skt->joints[it->first]->qrot = rotComplete.inverse()*q1*q2;
-		m_skt->joints[it->first]->pos = rotComplete.inverse()._transformVector(vert.center->position-translationComplete);	
-		translationComplete = vert.center->position;
+		//m_skt->jointRef[it->first]->qrot = rotComplete.inverse()*q1*q2;
+		//m_skt->jointRef[it->first]->pos = rotComplete.inverse()._transformVector(vert.center->position-translationComplete);	
+		m_skt->jointRef[it->first]->qrot = q1*q2;
+		m_skt->jointRef[it->first]->pos = vert.center->position;
 
-		rotComplete = q1*q2;
+		//translationComplete = vert.center->position;
+
+		//rotComplete = q1*q2;
 	} 
 
-	m_skt->root->computeWorldPos();
+	map<int, int>::iterator itJoints = joint2Vert.begin();
+	for(; itJoints != joint2Vert.end(); itJoints++)
+	{
+		int jointId = itJoints->first;
+		m_skt->jointRef[jointId]->computeWorldPos();
+	}
 }

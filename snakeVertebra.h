@@ -18,6 +18,10 @@ public:
 	void init(Vector3d pt00, Vector3d pt01, Vector3d pt02,
 			  Vector3d pt03, Vector3d pt04, ParticlePool& particles);
 
+	void initAsHead(Vector3d pt00, Vector3d pt01, Vector3d pt02,
+			        Vector3d pt03, Vector3d pt04, ParticlePool& particles);
+			  
+
 	void setAsHead();
 
     // Basic atributes.

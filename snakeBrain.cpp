@@ -75,14 +75,16 @@ void snakeBrain::think(float timeStep)
 
 	timer += timeStep;
 
-	while((objective-baseVertebra->center->position).norm() > snakeLength/2 || fabs((objective - headAxis.pos).norm()) < 1)
+	float lengthAdjusted = snakeLength/3*2;
+	while((objective-baseVertebra->center->position).norm() > lengthAdjusted || fabs((objective - headAxis.pos).norm()) < 0.1)
 	{
-		float lengthAdjusted = snakeLength/2;
 		float lengthMin = lengthAdjusted - MARGIN_DISTANCE;
-		float x = ((double)rand())/RAND_MAX*lengthMin-lengthMin;
+		float x = ((double)rand())/RAND_MAX*lengthMin;
 		float y = sqrt(lengthMin*lengthMin-x*x);
+		
+		objective = Vector3d(y, 0, x);
 
-		objective = Vector3d(y, 0, x) + baseVertebra->center->position;
+		objective = baseAxis.rot._transformVector(objective)  + baseVertebra->center->position;
 
 		printf("Nuevo Objetivo\n");
 	}
@@ -137,7 +139,7 @@ void snakeBrain::think(float timeStep)
 	Vector3d anteriorPos = headAxis.pos;
 
 	headAxis.pos += positionMovement;
-	Vector3d headPosition = headAxis.pos + oscilationMovement;
+	Vector3d headPosition = headAxis.pos;// + oscilationMovement;
 
 	if(((headPosition-baseVertebra->center->position).norm() - snakeLength ) > - MARGIN_DISTANCE)
 	{
@@ -151,19 +153,29 @@ void snakeBrain::think(float timeStep)
 
 	if(headVertebra)
 	{
-		headVertebra->center->position = headPosition;
+		Vector3d xDir = headVertebra->x->position - headVertebra->center->position ;
 
-		Vector3d xDir(pointDistanceX, 0, 0);
+		headVertebra->center->position = headPosition;
 		Vector3d yDir(0, pointDistanceY, 0);
 
 		Quaterniond q2 = Quaterniond::Identity();
-		q2.setFromTwoVectors(Vector3d(1,0,0), reposition.normalized());
+		q2.setFromTwoVectors(xDir.normalized(), reposition.normalized()); 
+
+		float angle = acos(xDir.normalized().dot(reposition.normalized()))/2/M_PI*360;
+
+		float stepAngle = 5;
+
+		float fraction = angle/stepAngle;
+		if(fraction > 0 && angle > stepAngle)
+			fraction = 1/fraction;
+		else
+			fraction = 1.0;
 
 		Quaterniond q3 = Quaterniond::Identity();
-		q3 = q3.slerp(0.1,q2);
+		q3 = q3.slerp(fraction,q2);
 
-		//headAxis.rot = q2;
-		
+		//xDir = headAxis.rot._transformVector(xDir);
+
 		/*
 		xDir = headAxis.rot._transformVector(xDir);
 
@@ -175,8 +187,11 @@ void snakeBrain::think(float timeStep)
 
 		xDir = q3._transformVector(xDir);
 		*/
-		xDir = (headAxis.rot)._transformVector(xDir);
-		yDir = (headAxis.rot)._transformVector(yDir);
+
+		xDir = (q3)._transformVector(xDir);
+
+		headAxis.rot *= q3;
+		//yDir = (headAxis.rot)._transformVector(yDir);
 
 		headVertebra->x->position =  xDir + headPosition;
 		headVertebra->y->position =  yDir + headPosition;

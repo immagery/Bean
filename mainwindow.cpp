@@ -516,9 +516,13 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 		verlet->printStuff = true;
 
         break;
-	case Qt::Key_C:
-		
+	case Qt::Key_B:
+		if(((BeanViewer*)ui->glCustomWidget)->paintSnakesSimulation)
+			((BeanViewer*)ui->glCustomWidget)->paintSnakesSimulation = false;
+		else
+			((BeanViewer*)ui->glCustomWidget)->paintSnakesSimulation = true;
     default:
+
         break;
     }
 }

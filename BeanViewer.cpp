@@ -33,9 +33,11 @@ BeanViewer::BeanViewer(QWidget * parent, const QGLWidget * shareWidget,
 	float snakeLength = 45;
 	float snakeWidth = 8;
 	float headHeight = 3;
-	int rows = 1;
-	int cols = 1; 
+	int rows = 6;
+	int cols = 6; 
 	int numSnakes = rows*cols;
+
+	paintSnakesSimulation = false;
 
 	// Read several snakes from disk
 	initSceneToTestWithSnakes(numSnakes);
@@ -63,13 +65,14 @@ BeanViewer::BeanViewer(QWidget * parent, const QGLWidget * shareWidget,
 
 			serpientes.back()->moveToPosition(position);
 
-			//Vector3d or(((double)rand())/RAND_MAX*2-1, 0, ((double)rand())/RAND_MAX*2-1);
-
-			Vector3d or(1, 0, 1);
-
+			Vector3d or(((double)rand())/RAND_MAX*2-1, 0, ((double)rand())/RAND_MAX*2-1);
+			or.normalize();
+			if(or.norm() == 0) or = Vector3d(1,0,0);
 			serpientes.back()->changeOrientation(or);
 		}
 	}
+
+
 
 	//initParticleScene();
 	startAnimation();
@@ -334,7 +337,7 @@ void BeanViewer::loadSolvers() {
 		//if (i == verlet2->currentPositions[0].size()-1) verlet2->positioningStrengths[i] = 1;
 	}
 }
-
+/*
 void drawPointLocator(Eigen::Vector3d pt, float size, bool spot)
 {
     glDisable(GL_LIGHTING);
@@ -362,6 +365,7 @@ void drawPointLocator(Eigen::Vector3d pt, float size, bool spot)
     glEnd();
     glEnable(GL_LIGHTING);
 }
+*/
 
 void BeanViewer::animate()
  {
@@ -449,8 +453,11 @@ void BeanViewer::draw()
 	*/
 
 	glDisable(GL_LIGHTING);
-	for(int id = 0; id< serpientes.size(); id++)
-		serpientes[id]->drawFunc();
+	if(paintSnakesSimulation)
+	{
+		for(int id = 0; id< serpientes.size(); id++)
+			serpientes[id]->drawFunc();
+	}
 	
 
 	// Base plane for references.

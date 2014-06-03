@@ -34,6 +34,7 @@ public:
     void initParticleScene();
     void initSceneToTestWithSnakes(int numOfSnakes = 1);
 
+	bool paintSnakesSimulation;
 	vector<snake*> serpientes;
 
 	bool printTime;
