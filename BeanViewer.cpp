@@ -33,8 +33,8 @@ BeanViewer::BeanViewer(QWidget * parent, const QGLWidget * shareWidget,
 	float snakeLength = 45;
 	float snakeWidth = 8;
 	float headHeight = 3;
-	int rows = 6;
-	int cols = 6; 
+	int rows = 1;
+	int cols = 1; 
 	int numSnakes = rows*cols;
 
 	paintSnakesSimulation = false;
@@ -129,9 +129,9 @@ void BeanViewer::initViewer()
 	setBackgroundColor(QColor(Qt::darkGray));
 
 	setSceneCenter(qglviewer::Vec(0,0,0));
-	setSceneRadius(800);
+	setSceneRadius(1200);
 
-	qglviewer::Vec min(-300,-20,-300); qglviewer::Vec max(300,100,300);
+	qglviewer::Vec min(-400,-400,-400); qglviewer::Vec max(400,400,400);
 	setSceneBoundingBox(min, max);
 	showEntireScene();
 	updateGL();
